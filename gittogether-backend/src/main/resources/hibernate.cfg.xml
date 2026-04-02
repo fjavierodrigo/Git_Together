@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.url">jdbc:mysql://52.0.164.75:3306/git_together_bbdd</property>
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property> 
+        
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        
+        <property name="connection.username">gittogether</property>
+        <property name="connection.password">gittogether123</property>
+        
+        <!-- DB schema will be updated if needed -->
+        <!-- Para crear una base de datos cambios los valores de none, false,false a create, true, true-->
+        <!-- Para realizar consultas a una base de datos cambios los valores de create, true, true a none, false, false-->
+        <property name="hbm2ddl.auto">update</property>
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property> 
+        
+        
+        <mapping class="gittogether.tfg.vo.Categoria"></mapping>
+        <mapping class="gittogether.tfg.vo.Likes"></mapping>
+        <mapping class="gittogether.tfg.vo.Mensaje"></mapping>
+        <mapping class="gittogether.tfg.vo.MensajePrivado"></mapping>
+        <mapping class="gittogether.tfg.vo.Reporte"></mapping>
+        <mapping class="gittogether.tfg.vo.Tema"></mapping>
+        <mapping class="gittogether.tfg.vo.Usuario"></mapping>
+        <mapping class="gittogether.tfg.vo.UsuarioBaneado"></mapping>
+        
+    </session-factory>
+</hibernate-configuration>
