@@ -12,25 +12,26 @@ import { Router } from '@angular/router';
   styleUrl: './login.css'
 })
 export class Login {
-  loginData = { nombre: '', password: '' };
-  errorMessage = '';
+  loginData = { nombre: '', password: '' }; // Modelo vinculado al formulario
+  errorMessage = ''; // Variable para mostrar errores en el HTML
 
-  // Metemos el router al constructor
   constructor(private apiUsuario: Usuario, private router: Router) { } 
 
+  // Se ejecuta al enviar el formulario
   onLogin(event: Event) {
     event.preventDefault();
     
     this.apiUsuario.login(this.loginData).subscribe({
       next: (res) => {
         console.log("Login exitoso", res);
-        // Guardamos al usuario para usar su ID o Nombre en el foro 
+        // Guardamos información adicional del usuario (opcional)
         localStorage.setItem('usuarioLogueado', JSON.stringify(res));
         
-        // Redirigimos a /foro
+        // Navegamos hacia la página principal del foro
         this.router.navigate(['/foro']);
       },
       error: (err) => {
+        // Manejamos el error si las credenciales son inválidas
         this.errorMessage = "Datos incorrectos";
       }
     });
