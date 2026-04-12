@@ -1,7 +1,7 @@
 <div class="foro-container">
-    
-     <app-navbar></app-navbar>
-    
+
+    <app-navbar></app-navbar>
+
     <div class="foro-layout">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -16,8 +16,13 @@
 
                 <ng-container *ngIf="!cargando">
                     <li class="category-item" *ngFor="let cat of categorias">
-                        <a href="javascript:void(0)" class="category-link">
+                        <!-- Enlace de Categoría: Gestiona la navegación y el filtrado al hacer click -->
+                        <a href="javascript:void(0)" class="category-link"
+                            [class.active]="categoriaActiva?.identificador === cat.identificador"
+                            (click)="seleccionarCategoria(cat)">
+                            <!-- Icono Visual: Representación gráfica de la categoría -->
                             <span class="cat-icon">📁</span>
+                            <!-- Nombre de Categoría: Texto descriptivo recuperado del backend -->
                             <span class="cat-name">{{ cat.nombre }}</span>
                         </a>
                     </li>
@@ -30,25 +35,28 @@
                 <h2>Descubre debates</h2>
                 <div class="search-bar">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
                     </svg>
-                    <input type="text" [(ngModel)]="searchQuery" placeholder="Buscar temas, errores, o discusiones...">
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Buscar temas">
                 </div>
             </div>
 
             <section class="temas-list">
                 <ng-container *ngIf="cargando">
-                     <div class="tema-card skeleton-card" *ngFor="let s of skeletonArray">
-                         <div class="sk-info">
-                             <div class="skeleton-text sk-title"></div>
-                             <div class="skeleton-text sk-meta"></div>
-                         </div>
-                         <div class="sk-stats">
-                             <div class="skeleton-text sk-stat"></div>
-                             <div class="skeleton-text sk-stat"></div>
-                         </div>
-                     </div>
+                    <div class="tema-card skeleton-card" *ngFor="let s of skeletonArray">
+                        <div class="sk-info">
+                            <div class="skeleton-text sk-title"></div>
+                            <div class="skeleton-text sk-meta"></div>
+                        </div>
+                        <div class="sk-stats">
+                            <div class="skeleton-text sk-stat"></div>
+                            <div class="skeleton-text sk-stat"></div>
+                        </div>
+                    </div>
                 </ng-container>
 
                 <ng-container *ngIf="!cargando && temasFiltrados.length > 0">
@@ -57,19 +65,28 @@
                             <h4 class="tema-title">{{ tema.titulo }}</h4>
                             <div class="tema-meta">
                                 <span class="tema-author-wrapper">
-                                    <img [src]="tema.usuario?.avatar || 'https://ui-avatars.com/api/?name=Author&background=2C323D&color=fff'" alt="" class="small-avatar">
+                                    <img [src]="tema.usuario?.avatar || 'https://ui-avatars.com/api/?name=Author&background=2C323D&color=fff'"
+                                        alt="" class="small-avatar">
                                     <span class="tema-author">{{ tema.usuario?.nombre || 'Usuario' }}</span>
                                 </span>
-                                <span class="tema-date">• {{ tema.fechaCreacion ? (tema.fechaCreacion | date:'mediumDate') : 'Reciente' }}</span>
+                                <span class="tema-date">• {{ tema.fechaCreacion ? (tema.fechaCreacion |
+                                    date:'mediumDate') : 'Reciente' }}</span>
                             </div>
                         </div>
                         <div class="tema-stats">
                             <div class="stat-badge">
-                                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
                                 <span>{{ tema.visitas || 0 }}</span>
                             </div>
                             <div class="stat-badge">
-                                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
                                 <span>{{ tema.contadorMensajes || 0 }}</span>
                             </div>
                         </div>

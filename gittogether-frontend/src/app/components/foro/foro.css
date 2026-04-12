@@ -143,10 +143,22 @@
     transition: var(--transition);
 }
 
-.category-link:hover {
+.category-link:hover,
+.category-link.active {
+    /* Efecto de Resalte: Cambiamos el color de fondo y el texto al pasar el ratón o estar seleccionada */
     background-color: var(--bg-hover);
     color: var(--accent-color);
+    /* Desplazamiento Suave: Pequeña animación lateral para indicar interactividad */
     transform: translateX(4px);
+}
+
+.category-link.active {
+    /* Estilo de Selección: Fondo con resplandor suave para la categoría pulsada */
+    background-color: var(--accent-glow);
+    /* Borde Indicador: Línea lateral que resalta la opción elegida */
+    border-left: 3px solid var(--accent-color);
+    /* Ajuste de Bordes: Modificamos el redondeo para encajar con el borde lateral */
+    border-radius: 0 8px 8px 0;
 }
 
 .cat-icon {
