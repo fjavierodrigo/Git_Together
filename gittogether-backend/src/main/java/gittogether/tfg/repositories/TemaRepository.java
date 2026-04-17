@@ -18,4 +18,7 @@ public interface TemaRepository extends JpaRepository<Tema, Integer> {
 	// También optimizamos la búsqueda por categoría con EntityGraph
 	@EntityGraph(attributePaths = { "usuario", "categoria" })
 	List<Tema> findByCategoriaIdentificador(int identificador);
+
+    @EntityGraph(attributePaths = { "usuario", "categoria" })
+    java.util.Optional<Tema> findBySlug(String slug);
 }

@@ -2,6 +2,7 @@ package gittogether.tfg.services;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -58,5 +59,13 @@ public class TemaService {
 
     public List<Tema> obtenerTemasPorCategoria(int categoriaId) {
         return temaRepository.findByCategoriaIdentificador(categoriaId);
+    }
+
+    public Optional<Tema> obtenerTemaPorId(int id) {
+        return temaRepository.findById(id);
+    }
+
+    public Optional<Tema> obtenerTemaPorSlug(String slug) {
+        return temaRepository.findBySlug(slug);
     }
 }

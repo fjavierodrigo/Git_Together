@@ -1,0 +1,110 @@
+<div class="foro-tema-container">
+    <!-- Iconos de marca flotantes (misma estética que el foro principal) -->
+    <div class="bg-brand-icon icon-1">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1"
+                stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </div>
+    <div class="bg-brand-icon icon-2">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1"
+                stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </div>
+
+    <app-navbar></app-navbar>
+
+    <div class="tema-layout">
+        <div class="tema-container-inner">
+            <header class="tema-header-nav">
+                <button class="btn-back" (click)="volver()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Volver al Foro</span>
+                </button>
+            </header>
+
+            <main class="tema-main-content">
+                <!-- Skeleton loader -->
+                <div class="tema-detail-card skeleton-card" *ngIf="cargando && !tema">
+                    <div class="skeleton-text sk-category"></div>
+                    <div class="skeleton-text sk-title"></div>
+                </div>
+
+                <!-- Cabecera del Tema -->
+                <article class="tema-detail-card" *ngIf="tema">
+                    <div class="tema-header">
+                        <span class="tema-category-tag" *ngIf="tema.categoria">
+                            {{ tema.categoria.nombre }}
+                        </span>
+                        <h1 class="tema-title-main">{{ tema.titulo || 'Sin título' }}</h1>
+
+                        <div class="tema-author-info">
+                            <div class="author-avatar">{{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}</div>
+                            <div class="author-details">
+                                <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
+                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'fullDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Sección de Mensajes/Comentarios -->
+                <section class="comments-section" *ngIf="tema || cargando">
+                    <div class="comments-header">
+                        <h2 class="section-title">
+                            {{ cargando ? 'Cargando mensajes...' : 'Aportaciones (' + mensajes.length + ')' }}
+                        </h2>
+                    </div>
+
+                    <div class="comments-list">
+                        <!-- Skeletons -->
+                        <ng-container *ngIf="cargando && mensajes.length === 0">
+                            <div class="comment-card skeleton-card" *ngFor="let s of skeletonMensajes">
+                                <div class="sk-avatar"></div>
+                                <div class="sk-info">
+                                    <div class="skeleton-text sk-name"></div>
+                                    <div class="skeleton-text sk-comment"></div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <!-- Lista Real de Mensajes -->
+                        <div class="comment-card" *ngFor="let mensaje of mensajes; let i = index">
+                            <div class="comment-sidebar">
+                                <div class="comment-avatar" 
+                                     [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
+                                    {{ (mensaje.usuario?.nombre || 'U')[0].toUpperCase() }}
+                                </div>
+                                <div class="comment-line" *ngIf="i < mensajes.length - 1"></div>
+                            </div>
+                            <div class="comment-content" 
+                                 [class.op-content]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
+                                <div class="comment-meta">
+                                    <div class="author-badge-group">
+                                        <span class="comment-author">{{ mensaje.usuario?.nombre || 'Usuario' }}</span>
+                                        <span class="badge-op" *ngIf="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">AUTOR DEL TEMA</span>
+                                    </div>
+                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
+                                </div>
+                                <div class="comment-text">
+                                    <p>{{ mensaje.contenido }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado Vacío -->
+                        <div class="empty-comments" *ngIf="!cargando && mensajes.length === 0">
+                            <div class="empty-icon-small">💬</div>
+                            <p>Este tema aún no tiene mensajes.</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>

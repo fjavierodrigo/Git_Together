@@ -9,6 +9,7 @@ import { shareReplay } from 'rxjs/operators';
 export class ForoService {
     private API_TEMAS = 'http://localhost:8080/api/temas';
     private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
+    private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
 
     // Variables para almacenar la caché en memoria RAM del navegador
     private temasCache$: Observable<any[]> | null = null;
@@ -26,6 +27,18 @@ export class ForoService {
         return this.temasCache$;
     }
 
+    getTema(id: number): Observable<any> {
+        return this.http.get<any>(`${this.API_TEMAS}/${id}`);
+    }
+
+    getTemaBySlug(slug: string): Observable<any> {
+        return this.http.get<any>(`${this.API_TEMAS}/slug/${slug}`);
+    }
+
+    getMensajesPorTema(id: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.API_MENSAJES}/tema/${id}`);
+    }
+
     getCategorias(forceRefresh = false): Observable<any[]> {
         if (!this.categoriasCache$ || forceRefresh) {
             this.categoriasCache$ = this.http.get<any[]>(this.API_CATEGORIAS).pipe(
@@ -38,7 +51,7 @@ export class ForoService {
     getTemasPorCategoria(id: number): Observable<any[]> {
         return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`);
     }
-    
+
     // Método para limpiar la caché si es necesario obligar a refrescar
     clearCache() {
         this.temasCache$ = null;

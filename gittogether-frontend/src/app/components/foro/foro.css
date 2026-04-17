@@ -39,11 +39,13 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: var(--bg-dark); /* Principal background remains here */
+    background-color: var(--bg-dark);
+    /* Principal background remains here */
     color: var(--text-primary);
     font-family: 'Outfit', 'Inter', sans-serif;
     position: relative;
-    overflow: hidden; /* Prevent icons from causing scroll */
+    overflow: hidden;
+    /* Prevent icons from causing scroll */
 }
 
 /* Floating Brand Icons Style */
@@ -51,7 +53,8 @@
     position: absolute;
     width: 65vh;
     height: 65vh;
-    opacity: 0.1; /* Increased opacity for better visibility */
+    opacity: 0.1;
+    /* Increased opacity for better visibility */
     pointer-events: none;
     filter: blur(5px);
     color: var(--accent-color);
@@ -81,17 +84,20 @@
     overflow: hidden;
     position: relative;
     z-index: 1;
-    background: transparent; /* TRANSPARENT to show background icons */
+    background: transparent;
+    /* TRANSPARENT to show background icons */
 }
 
 /* Sidebar */
 .sidebar {
     width: 280px;
-    background-color: transparent; /* TRANSPARENT */
+    background-color: transparent;
+    /* TRANSPARENT */
     padding: 32px 24px;
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
-    backdrop-filter: blur(4px); /* Subtle glass effect */
+    backdrop-filter: blur(4px);
+    /* Subtle glass effect */
 }
 
 .sidebar-header h3 {
@@ -136,7 +142,8 @@
 .main-content {
     flex: 1;
     overflow-y: auto;
-    background: transparent; /* TRANSPARENT */
+    background: transparent;
+    /* TRANSPARENT */
     scroll-behavior: smooth;
     position: relative;
 }
@@ -173,7 +180,6 @@
     max-width: 650px;
 }
 
-/* Content Header & Search */
 .content-header {
     padding: 24px 48px;
     display: flex;
@@ -182,7 +188,7 @@
     position: sticky;
     top: 0;
     z-index: 5;
-    background: transparent; /* FULLY TRANSPARENT as requested */
+    background: transparent;
     backdrop-filter: none;
 }
 
@@ -239,7 +245,8 @@
     align-items: center;
     gap: 24px;
     padding: 24px 32px;
-    background-color: rgba(22, 27, 34, 0.6); /* Slightly transparent card */
+    background-color: rgba(22, 27, 34, 0.6);
+    /* Slightly transparent card */
     backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);

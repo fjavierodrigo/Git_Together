@@ -88,7 +88,7 @@
                 </ng-container>
 
                 <ng-container *ngIf="!cargando && temasFiltrados.length > 0">
-                    <div class="tema-card" *ngFor="let tema of temasFiltrados">
+                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)">
                         <div class="tema-category-tag"></div>
                         <div class="tema-info">
                             <h4 class="tema-title">{{ tema.titulo }}</h4>

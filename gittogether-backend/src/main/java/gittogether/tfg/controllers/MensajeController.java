@@ -20,19 +20,19 @@ import gittogether.tfg.services.MensajeService;
 @CrossOrigin(origins = "http://localhost:4200") // Para conectar con Angular
 public class MensajeController {
 
-	@Autowired
-	private MensajeService mensajeService;
+    @Autowired
+    private MensajeService mensajeService;
 
-	// Endpoint: http://localhost:8080/api/mensajes-foro/crear
-	@PostMapping("/registrar")
-	public ResponseEntity<?> crearMensaje(@RequestBody Mensaje mensaje) {
-		try {
-			Mensaje nuevoMensaje = mensajeService.crearMensaje(mensaje);
-			return ResponseEntity.ok(nuevoMensaje);
-		} catch (RuntimeException e) {
-			return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-		}
-	}
+    // Endpoint: http://localhost:8080/api/mensajes-foro/crear
+    @PostMapping("/registrar")
+    public ResponseEntity<?> crearMensaje(@RequestBody Mensaje mensaje) {
+        try {
+            Mensaje nuevoMensaje = mensajeService.crearMensaje(mensaje);
+            return ResponseEntity.ok(nuevoMensaje);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 
     /**
      * GET http://localhost:8080/api/mensajes-foro/todos
@@ -46,13 +46,13 @@ public class MensajeController {
         }
         return ResponseEntity.ok(mensajes);
     }
-    
+
     /**
      * GET http://localhost:8080/api/mensajes-foro/tema/{id}
-     * Opcional: Para filtrar mensajes por un tema específico
+     * Filtra mensajes por un tema específico
      */
     @GetMapping("/tema/{temaId}")
     public ResponseEntity<List<Mensaje>> obtenerPorTema(@PathVariable int temaId) {
-        return ResponseEntity.ok(mensajeService.listarTodos()); 
+        return ResponseEntity.ok(mensajeService.obtenerMensajesDeUnTema(temaId));
     }
 }

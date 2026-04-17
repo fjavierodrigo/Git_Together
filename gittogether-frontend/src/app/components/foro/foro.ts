@@ -120,4 +120,11 @@ export class Foro implements OnInit {
     // Resultado Final: Devolvemos solo los temas que superaron todos los filtros activos
     return filtrados;
   }
+
+  // Navegación: Redirige al usuario a la página de detalle del tema seleccionado
+  verTema(tema: any) {
+    if (tema && tema.slug) {
+      this.router.navigate(['/foro/tema', tema.slug]);
+    }
+  }
 }
