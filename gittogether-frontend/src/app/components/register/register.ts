@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Usuario } from '../services/usuario';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +16,7 @@ export class Register {
   registerData = { nombre: '', email: '', password: '' };
   errorMessage = '';
 
-  constructor(private apiUsuario: Usuario, private router: Router, private cdr: ChangeDetectorRef) { }
+  constructor(private apiUsuario: Usuario, private router: Router, private cdr: ChangeDetectorRef, private toastService: ToastService) { }
 
   onRegister(event: Event) {
     event.preventDefault();
@@ -25,6 +26,7 @@ export class Register {
     this.apiUsuario.register(this.registerData).subscribe({
       next: (res) => {
         console.log("Registro exitoso", res);
+        this.toastService.success("¡Registro completado! Ya puedes entrar.");
         // Navigate back to login on success
         this.router.navigate(['/login']);
       },

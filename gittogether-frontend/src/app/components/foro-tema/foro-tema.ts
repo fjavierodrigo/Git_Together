@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ForoService } from '../services/foro.service';
 import { Usuario } from '../services/usuario';
 import { NavbarComponent } from '../navbar/navbar';
+import { ToastService } from '../../services/toast.service';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -27,7 +28,8 @@ export class ForoTema implements OnInit {
     private router: Router,
     private foroService: ForoService,
     private cdr: ChangeDetectorRef,
-    private usuarioService: Usuario // Inyectar Usuario service
+    public usuarioService: Usuario, // Inyectar Usuario service (Público para el HTML)
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -129,6 +131,7 @@ export class ForoTema implements OnInit {
       const id = this.tema.identificador || this.tema.id;
       this.foroService.deleteTema(id).subscribe({
         next: () => {
+          this.toastService.success("Tema eliminado correctamente");
           this.foroService.clearCache();
           const cacheKey = `tema_slug_${this.temaSlug}_cache`;
           localStorage.removeItem(cacheKey); // Limpiamos la cache del tema eliminado
@@ -136,7 +139,7 @@ export class ForoTema implements OnInit {
         },
         error: (err) => {
           console.error("Error al borrar el tema", err);
-          alert("Error al borrar el tema en el servidor. Revisa la consola.");
+          this.toastService.error("Error al borrar el tema.");
         }
       });
     }
@@ -153,6 +156,7 @@ export class ForoTema implements OnInit {
         next: (res) => {
           console.log("Respuesta del servidor al editar tema:", res);
           this.tema.titulo = nuevoTitulo;
+          this.toastService.success("Título del tema actualizado");
           this.foroService.clearCache();
           
           // Actualizamos la memoria del navegador
@@ -166,7 +170,7 @@ export class ForoTema implements OnInit {
         },
         error: (err) => {
           console.error("Error al editar el tema", err);
-          alert("Error al editar el tema. Asegúrate de que el servidor está guardando correctamente.");
+          this.toastService.error("Error al editar el tema.");
         }
       });
     }
@@ -192,7 +196,7 @@ export class ForoTema implements OnInit {
         },
         error: (err) => {
           console.error("Error al borrar el mensaje", err);
-          alert("Error al borrar el mensaje en el servidor.");
+          this.toastService.error("No se pudo borrar el mensaje.");
         }
       });
     }
@@ -221,6 +225,7 @@ export class ForoTema implements OnInit {
       next: (res) => {
         console.log("Respuesta del servidor al editar mensaje:", res);
         mensaje.contenido = this.mensajeEditandoTexto;
+        this.toastService.success("Mensaje editado");
         this.cancelarEdicion();
         
         // Actualizamos la memoria del navegador
@@ -234,7 +239,55 @@ export class ForoTema implements OnInit {
       },
       error: (err) => {
         console.error("Error al editar el mensaje", err);
-        alert("Error al editar el mensaje. Revisa la consola.");
+        this.toastService.error("Error al guardar los cambios.");
+      }
+    });
+  }
+
+  // --- ACCIÓN COMENTAR ---
+  nuevoComentario: string = '';
+
+  comentar() {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    if (!usuarioActual) {
+      this.toastService.warning("Inicia sesión para comentar");
+      return;
+    }
+
+    if (!this.nuevoComentario.trim()) return;
+
+    const mensaje = {
+      contenido: this.nuevoComentario.trim(),
+      tema: { identificador: this.tema.identificador || this.tema.id },
+      usuario: { identificador: usuarioActual.identificador || usuarioActual.id }
+    };
+
+    console.log("Publicando comentario:", mensaje);
+    this.foroService.createMensaje(mensaje).subscribe({
+      next: (res) => {
+        console.log("Comentario publicado:", res);
+        this.toastService.success("¡Mensaje enviado!");
+        // Añadir el nuevo mensaje a la lista local
+        this.mensajes.push(res);
+        this.nuevoComentario = '';
+        
+        // Actualizar caché
+        const cacheKey = `tema_slug_${this.temaSlug}_cache`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          tema: this.tema,
+          mensajes: this.mensajes
+        }));
+        
+        this.cdr.detectChanges();
+        
+        // Hacer scroll al final para ver el nuevo comentario
+        setTimeout(() => {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 100);
+      },
+      error: (err) => {
+        console.error("Error al publicar el comentario", err);
+        this.toastService.error("Error al enviar el comentario");
       }
     });
   }

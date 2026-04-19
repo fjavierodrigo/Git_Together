@@ -64,7 +64,12 @@
             </section>
 
             <div class="content-header">
-                <h2>{{ categoriaActiva ? categoriaActiva.nombre : 'Temas Populares' }}</h2>
+                <div class="header-title-row">
+                    <h2>{{ categoriaActiva ? categoriaActiva.nombre : 'Temas Populares' }}</h2>
+                    <button *ngIf="usuarioService.getUsuarioLogueado() && categoriaActiva" class="btn-create-tema" (click)="crearTema()">
+                        <span class="btn-icon">＋</span> Nuevo Tema
+                    </button>
+                </div>
                 <div class="search-bar">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path

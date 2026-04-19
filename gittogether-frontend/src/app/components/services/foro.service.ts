@@ -64,6 +64,10 @@ export class ForoService {
         return this.http.put(`${this.API_MENSAJES}/${id}`, { contenido });
     }
 
+    createMensaje(mensaje: any): Observable<any> {
+        return this.http.post(`${this.API_MENSAJES}/registrar`, mensaje);
+    }
+
     // Temas
     deleteTema(id: number): Observable<any> {
         return this.http.delete(`${this.API_TEMAS}/${id}`);
@@ -71,6 +75,10 @@ export class ForoService {
 
     editTema(id: number, titulo: string): Observable<any> {
         return this.http.put(`${this.API_TEMAS}/${id}`, { titulo });
+    }
+
+    createTema(tema: any): Observable<any> {
+        return this.http.post(this.API_TEMAS, tema);
     }
 
     // Categorías

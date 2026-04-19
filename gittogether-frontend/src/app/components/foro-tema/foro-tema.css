@@ -394,6 +394,71 @@
     border-color: rgba(248, 81, 73, 0.3);
 }
 
+/* Reply Panel */
+.reply-panel {
+    margin-top: 40px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+}
+
+.reply-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.reply-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    color: white;
+    font-size: 1rem;
+    resize: vertical;
+    transition: var(--transition-base);
+    margin-bottom: 20px;
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.reply-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-submit-comment {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-base);
+    box-shadow: 0 4px 15px rgba(58, 123, 213, 0.3);
+}
+
+.btn-submit-comment:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(58, 123, 213, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-submit-comment:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #484f58;
+    box-shadow: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tema-title-main {

@@ -156,6 +156,21 @@
                             <p>Este tema aún no tiene mensajes.</p>
                         </div>
                     </div>
+
+                    <!-- Panel de Respuesta -->
+                    <div class="reply-panel" *ngIf="usuarioService.getUsuarioLogueado() && !cargando">
+                        <div class="reply-header">
+                            <h3>Añadir un comentario</h3>
+                        </div>
+                        <div class="reply-body">
+                            <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu respuesta aquí..." rows="4" class="reply-textarea"></textarea>
+                            <div class="reply-actions">
+                                <button class="btn-submit-comment" (click)="comentar()" [disabled]="!nuevoComentario.trim()">
+                                    Publicar comentario
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </main>
         </div>

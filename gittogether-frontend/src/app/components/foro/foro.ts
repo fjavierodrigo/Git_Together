@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ForoService } from '../services/foro.service';
 import { Usuario } from '../services/usuario';
 import { Router } from '@angular/router';
+import { ToastService } from '../../services/toast.service';
 import { forkJoin } from 'rxjs';
 import { NavbarComponent } from '../navbar/navbar';
 
@@ -31,7 +32,7 @@ export class Foro implements OnInit {
 
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
   /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
-  constructor(private foroService: ForoService, private router: Router, private cdr: ChangeDetectorRef, private usuarioService: Usuario) { }
+  constructor(private foroService: ForoService, private router: Router, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService) { }
 
   // Ciclo de Vida OnInit: Punto de entrada principal al renderizar el componente
   ngOnInit(): void {
@@ -160,7 +161,7 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al borrar el tema", err);
-          alert("Error al borrar el tema en el servidor.");
+          this.toastService.error("Error al borrar el tema en el servidor.");
         }
       });
     }
@@ -178,13 +179,14 @@ export class Foro implements OnInit {
           console.log("Respuesta del servidor al editar tema:", res);
           tema.titulo = nuevoTitulo;
           this.foroService.clearCache();
+          this.toastService.success("Tema actualizado correctamente");
           // Removemos la cache individual de este tema por si entra
           localStorage.removeItem(`tema_slug_${tema.slug}_cache`);
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error("Error al editar el tema", err);
-          alert("Error al editar el tema. Revisa la consola.");
+          this.toastService.error("Error al editar el tema.");
         }
       });
     }
@@ -207,7 +209,7 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al borrar la categoría", err);
-          alert("Error al borrar la categoría. Podría tener temas dentro (ConstraintViolation).");
+          this.toastService.error("Error al borrar la categoría. Podría tener temas dentro.");
         }
       });
     }
@@ -229,9 +231,55 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al editar la categoría", err);
-          alert("Error al editar la categoría. Revisa la consola.");
+          this.toastService.error("Error al editar la categoría.");
         }
       });
     }
+  }
+
+  // --- ACCIÓN CREAR TEMA ---
+  crearTema() {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    if (!usuarioActual) {
+      this.toastService.warning("Debes iniciar sesión para crear un tema.");
+      return;
+    }
+
+    if (!this.categoriaActiva) {
+      this.toastService.info("Por favor, selecciona una categoría antes de crear un tema.");
+      return;
+    }
+
+    const titulo = window.prompt(`Crear nuevo tema en "${this.categoriaActiva.nombre}":\n\nIntroduce el título:`);
+    if (titulo !== null && titulo.trim() !== "") {
+      const nuevoTema = {
+        titulo: titulo.trim(),
+        slug: this.generarSlug(titulo.trim()),
+        categoria: { identificador: this.categoriaActiva.identificador || this.categoriaActiva.id },
+        usuario: { identificador: usuarioActual.identificador || usuarioActual.id }
+      };
+
+      console.log("Creando tema:", nuevoTema);
+      this.foroService.createTema(nuevoTema).subscribe({
+        next: (res) => {
+          console.log("Tema creado:", res);
+          this.toastService.success("¡Tema creado con éxito!");
+          // Refrescar lista
+          this.foroService.clearCache();
+          this.cargarDatosIniciales();
+        },
+        error: (err) => {
+          console.error("Error al crear el tema", err);
+          this.toastService.error("Error al crear el tema.");
+        }
+      });
+    }
+  }
+
+  generarSlug(texto: string): string {
+    return texto.toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '') + '-' + Date.now();
   }
 }

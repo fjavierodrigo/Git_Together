@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Usuario } from '../services/usuario';
 import { Router } from '@angular/router';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ export class Login {
   errorMessage = '';
 
   /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
-  constructor(private apiUsuario: Usuario, private router: Router, private cdr: ChangeDetectorRef) { }
+  constructor(private apiUsuario: Usuario, private router: Router, private cdr: ChangeDetectorRef, private toastService: ToastService) { }
 
   // Se ejecuta al enviar el formulario
   onLogin(event: Event) {
@@ -32,6 +33,7 @@ export class Login {
         // Guardamos el objeto usuario que viene dentro de la respuesta
         if (res && res.usuario) {
           localStorage.setItem('usuarioLogueado', JSON.stringify(res.usuario));
+          this.toastService.success(`¡Hola de nuevo, ${res.usuario.nombre}!`);
         }
 
         // Navegamos hacia la página principal del foro
