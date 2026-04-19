@@ -29,21 +29,17 @@ public class TemaService {
     private CategoriaRepository categoriaRepository;
 
     public Tema crearTema(Tema tema) {
-        // 1. Asignamos los valores por defecto de un tema nuevo
         tema.setVisitas(0);
         tema.setContadorMensajes(0);
         tema.setAbierto(true);
         tema.setFechaCreacion(LocalDate.now());
 
-        // 2. Buscamos al usuario real en la Base de Datos
         Usuario autorReal = usuarioRepository.findById(tema.getUsuario().getIdentificador())
                 .orElseThrow(() -> new RuntimeException("El usuario autor no existe"));
 
-        // 3. Buscamos la categoría real en la Base de Datos
         Categoria categoriaReal = categoriaRepository.findById(tema.getCategoria().getIdentificador())
                 .orElseThrow(() -> new RuntimeException("La categoría no existe"));
 
-        // 4. Se los asignamos al tema para que devuelva el JSON completo
         tema.setUsuario(autorReal);
         tema.setCategoria(categoriaReal);
 
@@ -51,9 +47,6 @@ public class TemaService {
     }
 
     public List<Tema> listarTemas() {
-        // Cargamos solo los 20 más visitados para que la respuesta sea instantánea
-        // Importante: Asegúrate de usar "JOIN FETCH" en tu TemaRepository para evitar
-        // el N+1
         return temaRepository.findAll(PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "visitas"))).getContent();
     }
 
@@ -68,4 +61,19 @@ public class TemaService {
     public Optional<Tema> obtenerTemaPorSlug(String slug) {
         return temaRepository.findBySlug(slug);
     }
+    
+	public void eliminarTema(Integer id) {
+		if (!temaRepository.existsById(id)) {
+			throw new RuntimeException("El tema no existe");
+		}
+		temaRepository.deleteById(id);
+	}
+
+	public Tema editarTema(Integer id, String nuevoTitulo) {
+		Tema tema = temaRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("El tema no existe"));
+		
+		tema.setTitulo(nuevoTitulo);
+		return temaRepository.save(tema);
+	}
 }

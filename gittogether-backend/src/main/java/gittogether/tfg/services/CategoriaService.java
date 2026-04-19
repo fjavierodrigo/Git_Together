@@ -19,20 +19,30 @@ public class CategoriaService {
 				|| categoriaRepository.existsBySlug(categoria.getSlug())) {
 			throw new RuntimeException("La categoria ya existe");
 		}
-		// categoria.setOrdenVisual();
 		return categoriaRepository.save(categoria);
 	}
 
-	// Método para obtener TODAS las categorías
 	public List<Categoria> obtenerTodas() {
-		// findAll() busca en la tabla y las devuelve todas
 		return categoriaRepository.findAll();
 	}
 
-	// Método para obtener UNA categoría por su ID
 	public Categoria obtenerPorId(int id) {
-		// findById() busca una, y si no la encuentra, lanza nuestro error
 		return categoriaRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("La categoría con ID " + id + " no existe"));
+	}
+	
+	public void eliminarCategoria(Integer id) {
+		if (!categoriaRepository.existsById(id)) {
+			throw new RuntimeException("La categoría no existe");
+		}
+		categoriaRepository.deleteById(id);
+	}
+
+	public Categoria editarCategoria(Integer id, String nuevoNombre) {
+		Categoria categoria = categoriaRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("La categoría no existe"));
+		
+		categoria.setNombre(nuevoNombre);
+		return categoriaRepository.save(categoria);
 	}
 }

@@ -39,4 +39,35 @@ export class Usuario {
   logout() {
     localStorage.clear()
   }
+
+  // Obtiene el usuario actualmente logueado desde localStorage
+  getUsuarioLogueado(): any {
+    const userStr = localStorage.getItem('usuarioLogueado');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Comprueba si el usuario logueado es Administrador
+  esAdmin(): boolean {
+    const user = this.getUsuarioLogueado();
+    return user && user.rol === 'Admin';
+  }
+
+  // Comprueba si el usuario logueado es Moderador
+  esModerador(): boolean {
+    const user = this.getUsuarioLogueado();
+    return user && user.rol === 'Moderador';
+  }
+
+  // Comprueba si el usuario logueado es el autor del contenido
+  esAutor(idAutor: number): boolean {
+    const user = this.getUsuarioLogueado();
+    return user && user.identificador === idAutor;
+  }
 }

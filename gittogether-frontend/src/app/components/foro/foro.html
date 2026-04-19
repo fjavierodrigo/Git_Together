@@ -38,10 +38,15 @@
                     <li class="category-item" *ngFor="let cat of categorias">
                         <a href="javascript:void(0)" class="category-link"
                             [class.active]="categoriaActiva?.identificador === cat.identificador"
-                            (click)="seleccionarCategoria(cat)">
+                            (click)="seleccionarCategoria(cat)"
+                            style="flex-grow: 1;">
                             <span class="cat-icon">📁</span>
                             <span class="cat-name">{{ cat.nombre }}</span>
                         </a>
+                        <div class="category-actions" *ngIf="esAdmin()" style="display: flex; gap: 4px; padding-right: 12px;">
+                            <button class="icon-action-btn edit-btn" (click)="editarCategoria(cat, $event)" title="Editar Categoría" style="width: 24px; height: 24px; font-size: 0.8rem;">✏️</button>
+                            <button class="icon-action-btn delete-btn" (click)="borrarCategoria(cat, $event)" title="Eliminar Categoría" style="width: 24px; height: 24px; font-size: 0.8rem;">🗑️</button>
+                        </div>
                     </li>
                 </ng-container>
             </ul>
@@ -88,7 +93,7 @@
                 </ng-container>
 
                 <ng-container *ngIf="!cargando && temasFiltrados.length > 0">
-                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)">
+                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)" style="position: relative;">
                         <div class="tema-category-tag"></div>
                         <div class="tema-info">
                             <h4 class="tema-title">{{ tema.titulo }}</h4>
@@ -116,7 +121,7 @@
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                                 </svg>
                                 <span>{{ tema.contadorMensajes || 0 }}</span>
-                                <span class="stat-label">Réplicas</span>
+                                <span class="stat-label">Comentarios</span>
                             </div>
                         </div>
                     </div>

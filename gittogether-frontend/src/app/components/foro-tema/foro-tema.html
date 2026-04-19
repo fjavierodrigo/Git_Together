@@ -37,7 +37,20 @@
 
                 <!-- Cabecera del Tema -->
                 <article class="tema-detail-card" *ngIf="tema">
-                    <div class="tema-header">
+                    <div class="tema-header" style="position: relative;">
+                        <!-- Botones de Acción Tema -->
+                        <div class="action-buttons-container"
+                            style="position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px;">
+                            <button *ngIf="puedeEditarTema()" class="icon-action-btn edit-btn" (click)="editarTema()"
+                                title="Editar Tema">
+                                ✏️
+                            </button>
+                            <button *ngIf="puedeBorrarTema()" class="icon-action-btn delete-btn" (click)="borrarTema()"
+                                title="Eliminar Tema">
+                                🗑️
+                            </button>
+                        </div>
+
                         <span class="tema-category-tag" *ngIf="tema.categoria">
                             {{ tema.categoria.nombre }}
                         </span>
@@ -47,7 +60,8 @@
                             <div class="author-avatar">{{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}</div>
                             <div class="author-details">
                                 <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'fullDate' }}</span>
+                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'fullDate'
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -76,24 +90,63 @@
                         <!-- Lista Real de Mensajes -->
                         <div class="comment-card" *ngFor="let mensaje of mensajes; let i = index">
                             <div class="comment-sidebar">
-                                <div class="comment-avatar" 
-                                     [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
+                                <div class="comment-avatar"
+                                    [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
                                     {{ (mensaje.usuario?.nombre || 'U')[0].toUpperCase() }}
                                 </div>
                                 <div class="comment-line" *ngIf="i < mensajes.length - 1"></div>
                             </div>
-                            <div class="comment-content" 
-                                 [class.op-content]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
+                            <div class="comment-content"
+                                [class.op-content]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador"
+                                style="position: relative;">
+
+                                <!-- Botones de Acción Mensaje -->
+                                <div class="action-buttons-container"
+                                    style="position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px;">
+                                    <button
+                                        *ngIf="puedeEditarMensaje(mensaje) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
+                                        class="icon-action-btn edit-btn" (click)="iniciarEdicion(mensaje)"
+                                        title="Editar Mensaje">
+                                        ✏️
+                                    </button>
+                                    <button
+                                        *ngIf="puedeBorrarMensaje(mensaje) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
+                                        class="icon-action-btn delete-btn" (click)="borrarMensaje(mensaje)"
+                                        title="Eliminar Mensaje">
+                                        🗑️
+                                    </button>
+                                </div>
+
                                 <div class="comment-meta">
                                     <div class="author-badge-group">
                                         <span class="comment-author">{{ mensaje.usuario?.nombre || 'Usuario' }}</span>
-                                        <span class="badge-op" *ngIf="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">AUTOR DEL TEMA</span>
+                                        <span class="badge-op"
+                                            *ngIf="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">AUTOR
+                                            DEL TEMA</span>
                                     </div>
                                     <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
                                 </div>
-                                <div class="comment-text">
+
+                                <!-- Modo Visualización -->
+                                <div class="comment-text"
+                                    *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
                                     <p>{{ mensaje.contenido }}</p>
                                 </div>
+
+                                <!-- Modo Edición -->
+                                <div class="comment-edit-mode"
+                                    *ngIf="mensajeEditandoId === (mensaje.identificador || mensaje.id)"
+                                    style="margin-top: 10px;">
+                                    <textarea [(ngModel)]="mensajeEditandoTexto" class="edit-textarea" rows="3"
+                                        style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.2); color: white; border: 1px solid var(--border-color);"></textarea>
+                                    <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end;">
+                                        <button class="btn-cancel" (click)="cancelarEdicion()"
+                                            style="padding: 6px 12px; background: transparent; color: white; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Cancelar</button>
+                                        <button class="btn-save" (click)="guardarEdicion(mensaje)"
+                                            style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">Guardar</button>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 

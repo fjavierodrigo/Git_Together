@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ForoService } from '../services/foro.service';
+import { Usuario } from '../services/usuario';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { NavbarComponent } from '../navbar/navbar';
@@ -30,7 +31,7 @@ export class Foro implements OnInit {
 
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
   /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
-  constructor(private foroService: ForoService, private router: Router, private cdr: ChangeDetectorRef) { }
+  constructor(private foroService: ForoService, private router: Router, private cdr: ChangeDetectorRef, private usuarioService: Usuario) { }
 
   // Ciclo de Vida OnInit: Punto de entrada principal al renderizar el componente
   ngOnInit(): void {
@@ -125,6 +126,112 @@ export class Foro implements OnInit {
   verTema(tema: any) {
     if (tema && tema.slug) {
       this.router.navigate(['/foro/tema', tema.slug]);
+    }
+  }
+
+  // --- PERMISOS ---
+  puedeEditarTema(tema: any): boolean {
+    if (this.usuarioService.esAdmin()) return true;
+    if (tema.usuario && this.usuarioService.esAutor(tema.usuario.identificador)) return true;
+    return false;
+  }
+
+  puedeBorrarTema(tema: any): boolean {
+    if (this.usuarioService.esAdmin() || this.usuarioService.esModerador()) return true;
+    if (tema.usuario && this.usuarioService.esAutor(tema.usuario.identificador)) return true;
+    return false;
+  }
+
+  esAdmin(): boolean {
+    return this.usuarioService.esAdmin();
+  }
+
+  // --- ACCIONES TEMA ---
+  borrarTema(tema: any, event: Event) {
+    event.stopPropagation(); // Evitar que el clic abra el tema
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar este tema?");
+    if (confirmacion) {
+      const id = tema.identificador || tema.id;
+      this.foroService.deleteTema(id).subscribe({
+        next: () => {
+          this.temas = this.temas.filter(t => (t.identificador || t.id) !== id);
+          this.foroService.clearCache();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error al borrar el tema", err);
+          alert("Error al borrar el tema en el servidor.");
+        }
+      });
+    }
+  }
+
+  editarTema(tema: any, event: Event) {
+    event.stopPropagation(); // Evitar que el clic abra el tema
+    const nuevoTitulo = window.prompt("Editar título del tema:", tema.titulo);
+    if (nuevoTitulo !== null && nuevoTitulo.trim() !== "") {
+      const id = tema.identificador || tema.id;
+      console.log("Enviando petición PUT para Tema ID:", id, "con título:", nuevoTitulo);
+
+      this.foroService.editTema(id, nuevoTitulo).subscribe({
+        next: (res) => {
+          console.log("Respuesta del servidor al editar tema:", res);
+          tema.titulo = nuevoTitulo;
+          this.foroService.clearCache();
+          // Removemos la cache individual de este tema por si entra
+          localStorage.removeItem(`tema_slug_${tema.slug}_cache`);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error al editar el tema", err);
+          alert("Error al editar el tema. Revisa la consola.");
+        }
+      });
+    }
+  }
+
+  // --- ACCIONES CATEGORIA ---
+  borrarCategoria(cat: any, event: Event) {
+    event.stopPropagation();
+    const confirmacion = window.confirm(`¿Estás seguro de que deseas eliminar la categoría "${cat.nombre}"? Esto podría eliminar los temas dentro de ella.`);
+    if (confirmacion) {
+      const id = cat.identificador || cat.id;
+      this.foroService.deleteCategoria(id).subscribe({
+        next: () => {
+          this.categorias = this.categorias.filter(c => (c.identificador || c.id) !== id);
+          if (this.categoriaActiva && (this.categoriaActiva.identificador || this.categoriaActiva.id) === id) {
+            this.categoriaActiva = null;
+          }
+          this.foroService.clearCache();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error al borrar la categoría", err);
+          alert("Error al borrar la categoría. Podría tener temas dentro (ConstraintViolation).");
+        }
+      });
+    }
+  }
+
+  editarCategoria(cat: any, event: Event) {
+    event.stopPropagation();
+    const nuevoNombre = window.prompt("Editar nombre de la categoría:", cat.nombre);
+    if (nuevoNombre !== null && nuevoNombre.trim() !== "") {
+      const id = cat.identificador || cat.id;
+      console.log("Enviando petición PUT para Categoría ID:", id, "con nombre:", nuevoNombre);
+
+      this.foroService.editCategoria(id, nuevoNombre).subscribe({
+        next: (res) => {
+          console.log("Respuesta del servidor al editar categoría:", res);
+          cat.nombre = nuevoNombre;
+          this.foroService.clearCache();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error al editar la categoría", err);
+          alert("Error al editar la categoría. Revisa la consola.");
+        }
+      });
     }
   }
 }

@@ -366,6 +366,34 @@
     }
 }
 
+/* Action Buttons (Edit/Delete) */
+.icon-action-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #768390;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.edit-btn:hover {
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    border-color: rgba(88, 166, 255, 0.3);
+}
+
+.delete-btn:hover {
+    color: #f85149;
+    background: rgba(248, 81, 73, 0.1);
+    border-color: rgba(248, 81, 73, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tema-title-main {

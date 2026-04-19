@@ -37,6 +37,7 @@ public class Likes {
 
 	@ManyToOne
 	@JoinColumn(name = "mensaje_id", foreignKey = @ForeignKey(name = "FK_LIKES_MENSAJE"), nullable = false)
+	@org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
 	private Mensaje mensaje;
 
 	public int getIdentificador() {

@@ -52,6 +52,36 @@ export class ForoService {
         return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`);
     }
 
+    // --- NUEVOS MÉTODOS PARA RBAC (EDITAR/ELIMINAR) ---
+
+    // Mensajes
+    deleteMensaje(id: number): Observable<any> {
+        return this.http.delete(`${this.API_MENSAJES}/${id}`);
+    }
+
+    editMensaje(id: number, contenido: string): Observable<any> {
+        // Asumiendo que el backend espera un objeto con el contenido actualizado
+        return this.http.put(`${this.API_MENSAJES}/${id}`, { contenido });
+    }
+
+    // Temas
+    deleteTema(id: number): Observable<any> {
+        return this.http.delete(`${this.API_TEMAS}/${id}`);
+    }
+
+    editTema(id: number, titulo: string): Observable<any> {
+        return this.http.put(`${this.API_TEMAS}/${id}`, { titulo });
+    }
+
+    // Categorías
+    deleteCategoria(id: number): Observable<any> {
+        return this.http.delete(`${this.API_CATEGORIAS}/${id}`);
+    }
+
+    editCategoria(id: number, nombre: string): Observable<any> {
+        return this.http.put(`${this.API_CATEGORIAS}/${id}`, { nombre });
+    }
+
     // Método para limpiar la caché si es necesario obligar a refrescar
     clearCache() {
         this.temasCache$ = null;
