@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,6 +24,9 @@ export class ForoTema implements OnInit {
   mensajes: any[] = [];
   cargando: boolean = true;
   skeletonMensajes = Array(3).fill(0);
+  
+  // Para controlar qué menú de opciones (3 puntos) está abierto
+  activeMenuId: string | number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -97,6 +100,21 @@ export class ForoTema implements OnInit {
 
   volver(): void {
     this.router.navigate(['/foro']);
+  }
+
+  toggleMenu(id: string | number, event: Event) {
+    event.stopPropagation(); // Evitamos que el click llegue al document
+    if (this.activeMenuId === id) {
+      this.activeMenuId = null;
+    } else {
+      this.activeMenuId = id;
+    }
+  }
+
+  // Cerrar menús al hacer clic fuera
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.activeMenuId = null;
   }
 
   // --- PERMISOS ---

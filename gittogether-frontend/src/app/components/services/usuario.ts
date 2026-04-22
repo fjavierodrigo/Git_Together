@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Usuario {
-  // URL base del backend para las peticiones relacionadas con usuarios
   private API_URL = 'http://localhost:8080/api/usuarios';
+  
+  // Subject reactivo para que toda la app sepa cuando cambia el usuario
+  private currentUserSubject = new BehaviorSubject<any>(this.getUsuarioLogueado());
+  public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
-  // Realiza la petición de login y almacena el token JWT si la respuesta es exitosa
   login(datos: any): Observable<any> {
     return this.http.post<any>(`${this.API_URL}/login`, datos).pipe(
       tap(response => {
-        // Guardamos el token en local storage
         if (response && response.token) {
           localStorage.setItem('auth_token', response.token);
-          // Guardamos los datos del usuario para el perfil
-          localStorage.setItem('usuarioLogueado', JSON.stringify(response.usuario));
+          this.setUsuarioLogueado(response.usuario);
         }
       })
     );
@@ -29,33 +29,52 @@ export class Usuario {
     return this.http.get<any>(`${this.API_URL}/${id}/stats`);
   }
 
-  updatePerfil(id: number, datos: any): Observable<any> {
-    return this.http.put<any>(`${this.API_URL}/${id}`, datos).pipe(
+  // Ahora acepta datos (JSON) y opcionalmente un archivo (File)
+  updatePerfil(id: number, datos: any, archivo: File | null = null): Observable<any> {
+    const formData = new FormData();
+    const usuarioBlob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
+    formData.append('usuario', usuarioBlob);
+
+    if (archivo) {
+      formData.append('avatar', archivo);
+    }
+
+    return this.http.put<any>(`${this.API_URL}/${id}`, formData).pipe(
       tap(usuarioActualizado => {
         if (usuarioActualizado) {
-          localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioActualizado));
+          this.setUsuarioLogueado(usuarioActualizado);
         }
       })
     );
   }
 
-  // Realiza la petición de registro
-  register(datos: any): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}/register`, datos);
+  register(datos: any, archivo: File | null): Observable<any> {
+    const formData = new FormData();
+    const usuarioBlob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
+    formData.append('usuario', usuarioBlob);
+
+    if (archivo) {
+      formData.append('avatar', archivo);
+    }
+
+    return this.http.post<any>(`${this.API_URL}/register`, formData);
   }
 
-  // Recupera el token guardado para enviarlo en las cabeceras HTTP
   getToken(): string | null {
     return localStorage.getItem('auth_token');
   }
 
-  // Elimina el caché del navegador
+  setUsuarioLogueado(usuario: any) {
+    localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
+    this.currentUserSubject.next(usuario); // Notificamos el cambio
+  }
+
   logout() {
     localStorage.clear();
     sessionStorage.clear();
+    this.currentUserSubject.next(null);
   }
 
-  // Obtiene el usuario actualmente logueado desde localStorage
   getUsuarioLogueado(): any {
     const userStr = localStorage.getItem('usuarioLogueado');
     if (userStr) {
@@ -68,19 +87,16 @@ export class Usuario {
     return null;
   }
 
-  // Comprueba si el usuario logueado es Administrador
   esAdmin(): boolean {
     const user = this.getUsuarioLogueado();
     return user && user.rol === 'Admin';
   }
 
-  // Comprueba si el usuario logueado es Moderador
   esModerador(): boolean {
     const user = this.getUsuarioLogueado();
     return user && user.rol === 'Moderador';
   }
 
-  // Comprueba si el usuario logueado es el autor del contenido
   esAutor(idAutor: number): boolean {
     const user = this.getUsuarioLogueado();
     return user && user.identificador === idAutor;

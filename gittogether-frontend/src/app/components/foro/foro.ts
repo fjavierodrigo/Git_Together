@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ForoService } from '../services/foro.service';
@@ -34,6 +34,9 @@ export class Foro implements OnInit {
 
   // Categoría Seleccionada: Almacena la categoría activa para filtrar los temas mostrados
   categoriaActiva: any = null;
+
+  // Para controlar qué menú de opciones (3 puntos) está abierto
+  activeMenuId: string | number | null = null;
 
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
   /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
@@ -106,6 +109,21 @@ export class Foro implements OnInit {
       // Estado de Selección: Aplicamos la nueva categoría al filtro
       this.categoriaActiva = cat;
     }
+  }
+
+  toggleMenu(id: string | number, event: Event) {
+    event.stopPropagation(); // Evitamos que el click llegue al document
+    if (this.activeMenuId === id) {
+      this.activeMenuId = null;
+    } else {
+      this.activeMenuId = id;
+    }
+  }
+
+  // Cerrar menús al hacer clic fuera
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.activeMenuId = null;
   }
 
   // Propiedad Calculada: Devuelve la lista de temas aplicando los filtros activos en tiempo real

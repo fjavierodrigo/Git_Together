@@ -1,11 +1,13 @@
 package gittogether.tfg.controllers;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,17 +16,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import gittogether.tfg.entities.LoginRequest;
 import gittogether.tfg.entities.LoginResponse;
 import gittogether.tfg.entities.Usuario;
-import gittogether.tfg.entities.enums.TipoUsuario;
+import gittogether.tfg.repositories.MensajeRepository;
+import gittogether.tfg.repositories.TemaRepository;
+import gittogether.tfg.services.S3Service;
 import gittogether.tfg.services.UsuarioService;
 import gittogether.tfg.util.JwtUtil;
-import gittogether.tfg.repositories.TemaRepository;
-import gittogether.tfg.repositories.MensajeRepository;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -40,17 +45,41 @@ public class UsuarioController {
 	@Autowired
 	private MensajeRepository mensajeRepository;
 	
+	@Autowired
+	private S3Service s3Service;
 	
 
-	@PostMapping("/register")
-	public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
-	    try {
-	        Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-	        return ResponseEntity.ok(nuevoUsuario);
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.badRequest().body(e.getMessage());
-	    }
-	}
+	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> registrar(
+            @RequestPart("usuario") String usuarioJson, 
+            @RequestPart(value = "avatar", required = false) MultipartFile archivo) {
+        try {
+            // 1. Convertir el String JSON manualmente a objeto Usuario
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
+            Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
+
+            // 2. Subir imagen a S3 si existe
+            if (archivo != null && !archivo.isEmpty()) {
+                String urlImagen = s3Service.subirArchivo(archivo);
+                usuario.setAvatar(urlImagen);
+            }
+
+            // 3. Asignar fecha si no viene
+            if (usuario.getFechaRegistro() == null) {
+                usuario.setFechaRegistro(LocalDate.now());
+            }
+
+            // 4. Guardar en BD
+            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error en el servidor: " + e.getMessage());
+        }
+    }
+	
 
 	// GET: http://localhost:8080/api/usuarios
 	@GetMapping

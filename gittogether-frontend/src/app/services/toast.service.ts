@@ -17,10 +17,10 @@ export class ToastService {
 
   toasts$ = this.toastsSubject.asObservable();
 
-  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 4000) {
+  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 300) {
     const id = this.counter++;
     const toast: Toast = { message, type, id };
-    
+
     this.toasts.push(toast);
     this.toastsSubject.next([...this.toasts]);
 

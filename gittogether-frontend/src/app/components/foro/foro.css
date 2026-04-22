@@ -431,3 +431,105 @@
         padding: 20px;
     }
 }
+
+/* --- OPTIONS MENU (3 DOTS) --- */
+.options-menu-container, .category-options-menu {
+    z-index: 100;
+}
+
+/* Específico para categorías en el sidebar */
+.category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.category-options-menu .options-dropdown {
+    position: absolute;
+    top: 0;
+    right: 100%; /* Aparece a la izquierda de los puntos */
+    left: auto;
+    margin-top: 0;
+    margin-right: 10px;
+    animation: dropdownSlideLeft 0.2s ease-out;
+    z-index: 1001;
+}
+
+@keyframes dropdownSlideLeft {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.btn-options, .btn-options-small {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-options svg, .btn-options-small svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-options:hover, .btn-options-small:hover {
+    background: var(--bg-hover);
+    color: var(--accent-color);
+}
+
+.options-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #1c2128; /* Fondo sólido oscuro */
+    border: 1px solid #444c56;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    min-width: 160px;
+    overflow: hidden;
+    animation: dropdownSlide 0.2s ease-out;
+    z-index: 1000;
+}
+
+.small-dropdown {
+    min-width: 120px;
+}
+
+@keyframes dropdownSlide {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-hover);
+}
+
+.dropdown-item.delete {
+    color: #ff4d4d;
+}
+
+.dropdown-item.delete:hover {
+    background: rgba(255, 77, 77, 0.1);
+}

@@ -41,17 +41,25 @@
                 <!-- Cabecera del Tema -->
                 <article class="tema-detail-card" *ngIf="tema">
                     <div class="tema-header" style="position: relative;">
-                        <!-- Botones de Acción Tema -->
-                        <div class="action-buttons-container"
-                            style="position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px;">
-                            <button *ngIf="puedeEditarTema()" class="icon-action-btn edit-btn" (click)="editarTema()"
-                                title="Editar Tema">
-                                ✏️
+                        <!-- Menú de Opciones Tema (3 Puntos) -->
+                        <div class="options-menu-container" *ngIf="puedeEditarTema() || puedeBorrarTema()"
+                            style="position: absolute; top: 16px; right: 16px;">
+                            <button class="btn-options" (click)="toggleMenu('tema', $event)" title="Opciones">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
                             </button>
-                            <button *ngIf="puedeBorrarTema()" class="icon-action-btn delete-btn" (click)="borrarTema()"
-                                title="Eliminar Tema">
-                                🗑️
-                            </button>
+                            
+                            <div class="options-dropdown" *ngIf="activeMenuId === 'tema'">
+                                <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
+                                    <span>Editar Tema</span>
+                                </button>
+                                <button *ngIf="puedeBorrarTema()" (click)="borrarTema()" class="dropdown-item delete">
+                                    <span>Eliminar Tema</span>
+                                </button>
+                            </div>
                         </div>
 
                         <span class="tema-category-tag" *ngIf="tema.categoria">
@@ -108,21 +116,27 @@
                                 [class.op-content]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador"
                                 style="position: relative;">
 
-                                <!-- Botones de Acción Mensaje -->
-                                <div class="action-buttons-container"
-                                    style="position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px;">
-                                    <button
-                                        *ngIf="puedeEditarMensaje(mensaje) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
-                                        class="icon-action-btn edit-btn" (click)="iniciarEdicion(mensaje)"
-                                        title="Editar Mensaje">
-                                        ✏️
+                                <!-- Menú de Opciones Mensaje (3 Puntos) -->
+                                <div class="options-menu-container" 
+                                    *ngIf="(puedeEditarMensaje(mensaje) || puedeBorrarMensaje(mensaje)) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
+                                    style="position: absolute; top: 12px; right: 12px;">
+                                    
+                                    <button class="btn-options" (click)="toggleMenu(mensaje.identificador || mensaje.id, $event)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="5" r="1"></circle>
+                                            <circle cx="12" cy="12" r="1"></circle>
+                                            <circle cx="12" cy="19" r="1"></circle>
+                                        </svg>
                                     </button>
-                                    <button
-                                        *ngIf="puedeBorrarMensaje(mensaje) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
-                                        class="icon-action-btn delete-btn" (click)="borrarMensaje(mensaje)"
-                                        title="Eliminar Mensaje">
-                                        🗑️
-                                    </button>
+
+                                    <div class="options-dropdown" *ngIf="activeMenuId === (mensaje.identificador || mensaje.id)">
+                                        <button *ngIf="puedeEditarMensaje(mensaje)" (click)="iniciarEdicion(mensaje)" class="dropdown-item">
+                                            <span>Editar</span>
+                                        </button>
+                                        <button *ngIf="puedeBorrarMensaje(mensaje)" (click)="borrarMensaje(mensaje)" class="dropdown-item delete">
+                                            <span>Eliminar</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="comment-meta">
@@ -132,13 +146,17 @@
                                             *ngIf="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">AUTOR
                                             DEL TEMA</span>
                                     </div>
-                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
                                 </div>
 
                                 <!-- Modo Visualización -->
                                 <div class="comment-text"
                                     *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
                                     <p>{{ mensaje.contenido }}</p>
+                                </div>
+
+                                <!-- Fecha abajo -->
+                                <div class="comment-footer" *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
+                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
                                 </div>
 
                                 <!-- Modo Edición -->

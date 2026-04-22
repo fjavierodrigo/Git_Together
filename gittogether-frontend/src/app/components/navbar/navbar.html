@@ -10,8 +10,13 @@
     <div class="header-user" *ngIf="usuarioLogueado">
         <div class="user-info-section" (click)="goToProfile()" style="cursor: pointer;" title="Ver Perfil">
             <div class="avatar-container">
-                <img [src]="usuarioLogueado.avatar || 'https://ui-avatars.com/api/?name=' + usuarioLogueado.nombre + '&background=0D8ABC&color=fff'" 
+                <img *ngIf="usuarioLogueado?.avatar && !imageError" 
+                     [src]="getAvatarUrl()" 
+                     (error)="handleImageError()"
                      alt="Avatar" class="user-avatar">
+                <div *ngIf="!usuarioLogueado?.avatar || imageError" class="initials-avatar">
+                    {{ getInitials() }}
+                </div>
                 <div class="online-dot"></div>
             </div>
             <span class="user-name">{{ usuarioLogueado.nombre }}</span>

@@ -1,23 +1,30 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Usuario } from './usuario'; // Ajusta la ruta si es necesario
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { Usuario } from './usuario';
 
-// Función que intercepta todas las peticiones HTTP salientes
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const usuarioService = inject(Usuario);
+  const router = inject(Router);
   const token = usuarioService.getToken();
 
-  // Si tenemos un token, clonamos la petición original y le añadimos la cabecera Authorization
+  let authReq = req;
   if (token) {
-    const cloned = req.clone({
+    authReq = req.clone({
       setHeaders: {
-        // Formato estándar Bearer para tokens JWT
         Authorization: `Bearer ${token}`
       }
     });
-    return next(cloned);
   }
 
-  // Si no hay token, la petición sigue su curso original (útil para el login mismo)
-  return next(req);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        usuarioService.logout();
+        router.navigate(['/login']);
+      }
+      return throwError(() => error);
+    })
+  );
 };

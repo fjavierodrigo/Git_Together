@@ -16,3 +16,16 @@ export const authGuard: CanActivateFn = (route, state) => {
   router.navigate(['/login']);
   return false;
 };
+
+// Guard para rutas no encontradas (404)
+export const wildcardGuard: CanActivateFn = (route, state) => {
+  const usuarioService = inject(Usuario);
+  const router = inject(Router);
+
+  if (usuarioService.getToken()) {
+    router.navigate(['/foro']);
+  } else {
+    router.navigate(['/login']);
+  }
+  return false;
+};

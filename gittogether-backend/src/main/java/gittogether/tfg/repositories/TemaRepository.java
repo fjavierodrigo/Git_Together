@@ -10,7 +10,6 @@ import java.util.List;
 public interface TemaRepository extends JpaRepository<Tema, Integer> {
 
 	// Usamos @EntityGraph para traer usuario y categoria en una sola consulta
-	// (Instantáneo)
 	// Cambiamos el retorno a Page para que funcione el .getContent() en el Service
 	@EntityGraph(attributePaths = { "usuario", "categoria" })
 	Page<Tema> findAll(Pageable pageable);

@@ -43,11 +43,9 @@ public class Usuario {
 	@Column(name = "password", length = 255, nullable = false)
 	private String password;
 
-	// El avatar es pesado, mejor pedirlo solo cuando sea necesario
-	@JsonIgnore
 	@Lob
-	@Column(name = "avatar", columnDefinition = "LONGBLOB")
-	private byte[] avatar;
+	@Column(name = "avatar", columnDefinition = "TEXT")
+	private String avatar;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "rol", nullable = false)
@@ -92,11 +90,11 @@ public class Usuario {
 		this.password = password;
 	}
 
-	public byte[] getAvatar() {
+	public String getAvatar() {
 		return avatar;
 	}
 
-	public void setAvatar(byte[] avatar) {
+	public void setAvatar(String avatar) {
 		this.avatar = avatar;
 	}
 
@@ -127,7 +125,7 @@ public class Usuario {
 	@Override
 	public String toString() {
 		return "Usuario [identificador=" + identificador + ", nombre=" + nombre + ", email=" + email + ", password="
-				+ password + ", avatar=" + Arrays.toString(avatar) + ", rol=" + rol + ", fechaRegistro=" + fechaRegistro
+				+ password + ", avatar=" + avatar + ", rol=" + rol + ", fechaRegistro=" + fechaRegistro
 				+ ", descripcion=" + descripcion + "]";
 	}
 
