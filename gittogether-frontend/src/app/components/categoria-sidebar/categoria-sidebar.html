@@ -1,0 +1,56 @@
+<aside class="sidebar-container">
+    <div class="sidebar-header">
+        <h3>Categorías</h3>
+    </div>
+    <ul class="category-list">
+        <li class="category-item">
+            <a href="javascript:void(0)" class="category-link" [class.active]="!activeCategorySlug"
+                (click)="onCategoryClick({slug: null})">
+                <span class="cat-icon">🌏</span>
+                <span class="cat-name">Todo el foro</span>
+            </a>
+        </li>
+        <li class="category-item" *ngFor="let cat of categorias">
+            <a href="javascript:void(0)" class="category-link"
+                [class.active]="activeCategorySlug === cat.slug"
+                (click)="onCategoryClick(cat)" style="flex-grow: 1;">
+                <span class="cat-icon">📁</span>
+                <span class="cat-name">{{ cat.nombre }}</span>
+            </a>
+            
+            <div class="category-options-menu" *ngIf="usuarioService.esAdmin()"
+                style="position: relative; padding-right: 8px;">
+                <button class="btn-options-small" (click)="toggleMenu(cat.identificador || cat.id, $event)"
+                    title="Opciones">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+
+                <div class="options-dropdown" *ngIf="activeMenuId === (cat.identificador || cat.id)">
+                    <button (click)="editarCategoria(cat, $event)" class="dropdown-item">
+                        <span>Editar</span>
+                    </button>
+                    <button (click)="borrarCategoria(cat, $event)" class="dropdown-item delete">
+                        <span>Eliminar</span>
+                    </button>
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="sidebar-header" style="margin-top: 2rem;">
+        <h3>Etiquetas</h3>
+    </div>
+    <div class="tag-cloud">
+        <button *ngFor="let tag of tags" 
+                class="tag-pill" 
+                [class.active]="activeTagId === tag.identificador"
+                (click)="onTagClick(tag)">
+            #{{ tag.nombre }}
+        </button>
+    </div>
+</aside>

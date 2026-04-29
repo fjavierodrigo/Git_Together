@@ -1,0 +1,156 @@
+:host {
+    height: 100%;
+    display: block;
+}
+
+/* Sidebar Original Style */
+.sidebar-container {
+    width: 280px;
+    background-color: transparent;
+    padding: 32px 24px;
+    border-right: 1px solid #30363d !important; /* Línea separadora fija */
+    overflow-y: auto;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.sidebar-header h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.category-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+}
+
+.category-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 12px !important;
+    /* Redondeado fijo para asegurar consistencia */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+}
+
+.category-link:hover {
+    background-color: #21262d !important;
+    color: #58a6ff !important;
+    transform: translateX(8px) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.category-link.active {
+    background: rgba(88, 166, 255, 0.1) !important;
+    color: #58a6ff !important;
+    font-weight: 700 !important;
+    border-left: 4px solid #58a6ff !important; /* LA LÍNEA AZUL FIJA */
+}
+
+.cat-icon {
+    font-size: 1.1rem;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.category-options-menu {
+    position: relative;
+    padding-right: 8px;
+    z-index: 100;
+}
+
+.category-options-menu .options-dropdown {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    margin-right: 10px;
+    animation: dropdownSlideLeft 0.2s ease-out;
+    z-index: 1001;
+}
+
+@keyframes dropdownSlideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.btn-options-small {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+    transition: all 0.2s;
+    border-radius: 50%;
+}
+
+.btn-options-small:hover {
+    background: var(--bg-hover);
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+.btn-options-small svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Tag Cloud Original */
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.tag-pill {
+    background: rgba(88, 166, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 999px !important;
+    /* Estilo píldora forzado */
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.tag-pill:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.tag-pill.active {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+}

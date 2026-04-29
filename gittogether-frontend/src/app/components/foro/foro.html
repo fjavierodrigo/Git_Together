@@ -16,55 +16,9 @@
     <app-navbar></app-navbar>
 
     <div class="foro-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h3>Categorías</h3>
-            </div>
-            <ul class="category-list">
-                <ng-container *ngIf="cargando">
-                    <li class="category-item skeleton-item" *ngFor="let s of skeletonCats">
-                        <div class="skeleton-text cat-skel"></div>
-                    </li>
-                </ng-container>
-
-                <ng-container *ngIf="!cargando">
-                    <li class="category-item">
-                        <a href="javascript:void(0)" class="category-link" [class.active]="!categoriaActiva"
-                            (click)="categoriaActiva = null">
-                            <span class="cat-icon">🌏</span>
-                            <span class="cat-name">Todo el foro</span>
-                        </a>
-                    </li>
-                    <li class="category-item" *ngFor="let cat of categorias">
-                        <a href="javascript:void(0)" class="category-link"
-                            [class.active]="categoriaActiva?.identificador === cat.identificador"
-                            (click)="seleccionarCategoria(cat)"
-                            style="flex-grow: 1;">
-                            <span class="cat-icon">📁</span>
-                            <span class="cat-name">{{ cat.nombre }}</span>
-                        </a>
-                        <div class="category-options-menu" *ngIf="esAdmin()" style="position: relative; padding-right: 8px;">
-                            <button class="btn-options-small" (click)="toggleMenu(cat.identificador || cat.id, $event)" title="Opciones">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
-                                    <circle cx="12" cy="5" r="1"></circle>
-                                    <circle cx="12" cy="12" r="1"></circle>
-                                    <circle cx="12" cy="19" r="1"></circle>
-                                </svg>
-                            </button>
-                            
-                            <div class="options-dropdown small-dropdown" *ngIf="activeMenuId === (cat.identificador || cat.id)">
-                                <button (click)="editarCategoria(cat, $event)" class="dropdown-item">
-                                    <span>Editar</span>
-                                </button>
-                                <button (click)="borrarCategoria(cat, $event)" class="dropdown-item delete">
-                                    <span>Eliminar</span>
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                </ng-container>
-            </ul>
-        </aside>
+        <app-categoria-sidebar [categorias]="categorias" [tags]="tags" (categorySelected)="onCategorySelected($event)"
+            (tagSelected)="onTagSelected($event)">
+        </app-categoria-sidebar>
 
         <main class="main-content" #mainContent>
             <!-- Hero Section for a premium feel -->
@@ -80,7 +34,8 @@
             <div class="content-header">
                 <div class="header-title-row">
                     <h2>{{ categoriaActiva ? categoriaActiva.nombre : 'Temas Populares' }}</h2>
-                    <button *ngIf="usuarioService.getUsuarioLogueado() && categoriaActiva" class="btn-create-tema" (click)="crearTema()">
+                    <button *ngIf="usuarioService.getUsuarioLogueado() && categoriaActiva" class="btn-create-tema"
+                        (click)="crearTema()">
                         <span class="btn-icon">＋</span> Nuevo Tema
                     </button>
                 </div>
@@ -112,14 +67,18 @@
                 </ng-container>
 
                 <ng-container *ngIf="!cargando && temasFiltrados.length > 0">
-                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)" style="position: relative;">
+                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)"
+                        [style.z-index]="activeMenuId === (tema.identificador || tema.id) ? 1000 : 1"
+                        style="position: relative;">
                         <div class="tema-category-tag"></div>
                         <div class="tema-info">
                             <h4 class="tema-title">{{ tema.titulo }}</h4>
                             <div class="tema-meta">
                                 <span class="tema-author-wrapper">
                                     <div class="tema-author-avatar-container">
-                                        <img *ngIf="tema.usuario?.avatar" [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" class="tema-author-avatar">
+                                        <img *ngIf="tema.usuario?.avatar"
+                                            [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
+                                            class="tema-author-avatar">
                                         <div *ngIf="!tema.usuario?.avatar" class="tema-author-fallback">
                                             {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
                                         </div>
@@ -129,24 +88,35 @@
                                 <span class="tema-date">{{ tema.fechaCreacion ? (tema.fechaCreacion |
                                     date:'mediumDate') : 'Hace un momento' }}</span>
                             </div>
+                            <!-- Tags del tema -->
+                            <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0">
+                                <span class="tema-tag" *ngFor="let tt of tema.tags"
+                                    (click)="$event.stopPropagation(); onTagSelected(tt.tag)">
+                                    #{{ tt.tag?.nombre }}
+                                </span>
+                            </div>
                         </div>
                         <div class="tema-stats">
                             <!-- Menú de Opciones Tema (3 Puntos) -->
                             <div class="options-menu-container" *ngIf="puedeEditarTema(tema) || puedeBorrarTema(tema)"
                                 style="margin-right: 8px;">
-                                <button class="btn-options" (click)="toggleMenu(tema.identificador || tema.id, $event)" title="Opciones">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <button class="btn-options" (click)="toggleMenu(tema.identificador || tema.id, $event)"
+                                    title="Opciones">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="12" cy="5" r="1"></circle>
                                         <circle cx="12" cy="12" r="1"></circle>
                                         <circle cx="12" cy="19" r="1"></circle>
                                     </svg>
                                 </button>
-                                
+
                                 <div class="options-dropdown" *ngIf="activeMenuId === (tema.identificador || tema.id)">
-                                    <button *ngIf="puedeEditarTema(tema)" (click)="editarTema(tema, $event)" class="dropdown-item">
+                                    <button *ngIf="puedeEditarTema(tema)" (click)="editarTema(tema, $event)"
+                                        class="dropdown-item">
                                         <span>Editar Tema</span>
                                     </button>
-                                    <button *ngIf="puedeBorrarTema(tema)" (click)="borrarTema(tema, $event)" class="dropdown-item delete">
+                                    <button *ngIf="puedeBorrarTema(tema)" (click)="borrarTema(tema, $event)"
+                                        class="dropdown-item delete">
                                         <span>Eliminar Tema</span>
                                     </button>
                                 </div>

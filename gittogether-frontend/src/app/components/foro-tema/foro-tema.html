@@ -16,6 +16,14 @@
     <app-navbar></app-navbar>
 
     <div class="tema-layout">
+        <app-categoria-sidebar 
+            [categorias]="categorias" 
+            [tags]="tags"
+            [activeCategorySlug]="tema?.categoria?.slug"
+            (categorySelected)="onCategorySelected($event)"
+            (tagSelected)="onTagSelected($event)">
+        </app-categoria-sidebar>
+
         <div class="tema-container-inner">
             <header class="tema-header-nav">
                 <button class="btn-back" (click)="volver()">
@@ -45,13 +53,14 @@
                         <div class="options-menu-container" *ngIf="puedeEditarTema() || puedeBorrarTema()"
                             style="position: absolute; top: 16px; right: 16px;">
                             <button class="btn-options" (click)="toggleMenu('tema', $event)" title="Opciones">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="5" r="1"></circle>
                                     <circle cx="12" cy="12" r="1"></circle>
                                     <circle cx="12" cy="19" r="1"></circle>
                                 </svg>
                             </button>
-                            
+
                             <div class="options-dropdown" *ngIf="activeMenuId === 'tema'">
                                 <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
                                     <span>Editar Tema</span>
@@ -69,7 +78,8 @@
 
                         <div class="tema-author-info">
                             <div class="author-avatar-container">
-                                <img *ngIf="tema.usuario?.avatar" [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" class="author-avatar-img">
+                                <img *ngIf="tema.usuario?.avatar"
+                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" class="author-avatar-img">
                                 <div *ngIf="!tema.usuario?.avatar" class="author-avatar-fallback">
                                     {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
                                 </div>
@@ -111,8 +121,11 @@
                         <!-- Lista Real de Mensajes -->
                         <div class="comment-card" *ngFor="let mensaje of mensajes; let i = index">
                             <div class="comment-sidebar">
-                                <div class="comment-avatar-container" [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
-                                    <img *ngIf="mensaje.usuario?.avatar" [src]="usuarioService.getAvatarUrl(mensaje.usuario.avatar)" class="comment-avatar-img">
+                                <div class="comment-avatar-container"
+                                    [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
+                                    <img *ngIf="mensaje.usuario?.avatar"
+                                        [src]="usuarioService.getAvatarUrl(mensaje.usuario.avatar)"
+                                        class="comment-avatar-img">
                                     <div *ngIf="!mensaje.usuario?.avatar" class="comment-avatar-fallback">
                                         {{ (mensaje.usuario?.nombre || 'U')[0].toUpperCase() }}
                                     </div>
@@ -124,23 +137,28 @@
                                 style="position: relative;">
 
                                 <!-- Menú de Opciones Mensaje (3 Puntos) -->
-                                <div class="options-menu-container" 
+                                <div class="options-menu-container"
                                     *ngIf="(puedeEditarMensaje(mensaje) || puedeBorrarMensaje(mensaje)) && mensajeEditandoId !== (mensaje.identificador || mensaje.id)"
                                     style="position: absolute; top: 12px; right: 12px;">
-                                    
-                                    <button class="btn-options" (click)="toggleMenu(mensaje.identificador || mensaje.id, $event)">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
+                                    <button class="btn-options"
+                                        (click)="toggleMenu(mensaje.identificador || mensaje.id, $event)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
                                             <circle cx="12" cy="5" r="1"></circle>
                                             <circle cx="12" cy="12" r="1"></circle>
                                             <circle cx="12" cy="19" r="1"></circle>
                                         </svg>
                                     </button>
 
-                                    <div class="options-dropdown" *ngIf="activeMenuId === (mensaje.identificador || mensaje.id)">
-                                        <button *ngIf="puedeEditarMensaje(mensaje)" (click)="iniciarEdicion(mensaje)" class="dropdown-item">
+                                    <div class="options-dropdown"
+                                        *ngIf="activeMenuId === (mensaje.identificador || mensaje.id)">
+                                        <button *ngIf="puedeEditarMensaje(mensaje)" (click)="iniciarEdicion(mensaje)"
+                                            class="dropdown-item">
                                             <span>Editar</span>
                                         </button>
-                                        <button *ngIf="puedeBorrarMensaje(mensaje)" (click)="borrarMensaje(mensaje)" class="dropdown-item delete">
+                                        <button *ngIf="puedeBorrarMensaje(mensaje)" (click)="borrarMensaje(mensaje)"
+                                            class="dropdown-item delete">
                                             <span>Eliminar</span>
                                         </button>
                                     </div>
@@ -162,7 +180,8 @@
                                 </div>
 
                                 <!-- Fecha abajo -->
-                                <div class="comment-footer" *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
+                                <div class="comment-footer"
+                                    *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
                                     <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
                                 </div>
 

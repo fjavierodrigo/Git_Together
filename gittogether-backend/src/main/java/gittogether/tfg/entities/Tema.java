@@ -1,6 +1,10 @@
 package gittogether.tfg.entities;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.HashSet;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,6 +60,10 @@ public class Tema {
 	@ManyToOne
 	@JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "FK_TEMA_USUARIO"), nullable = false)
 	private Usuario usuario;
+
+	@OneToMany(mappedBy = "tema")
+	@JsonIgnoreProperties("tema")
+	private Set<TemaTag> tags = new HashSet<>();
 
 	public int getIdentificador() {
 		return identificador;
@@ -136,11 +145,20 @@ public class Tema {
 		this.usuario = usuario;
 	}
 
+	public Set<TemaTag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<TemaTag> tags) {
+		this.tags = tags;
+	}
+
 	@Override
 	public String toString() {
 		return "Tema [identificador=" + identificador + ", titulo=" + titulo + ", descripcion=" + descripcion
 				+ ", slug=" + slug + ", visitas=" + visitas + ", contadorMensajes=" + contadorMensajes + ", abierto="
-				+ abierto + ", fechaCreacion=" + fechaCreacion + ", categoria=" + categoria + ", usuario=" + usuario + "]";
+				+ abierto + ", fechaCreacion=" + fechaCreacion + ", categoria=" + categoria + ", usuario=" + usuario
+				+ "]";
 	}
 
 }

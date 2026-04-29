@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ForoService } from '../services/foro.service';
 import { Usuario } from '../services/usuario';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 
 import { forkJoin } from 'rxjs';
 import { NavbarComponent } from '../navbar/navbar';
+import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
 
 @Component({
   selector: 'app-foro',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, CategoriaSidebar],
   templateUrl: './foro.html',
   styleUrl: './foro.css'
 })
@@ -24,6 +25,7 @@ export class Foro implements OnInit {
   // Lista de Temas y Categorias: Almacena todos los temas y categorias obtenidos del backend o del caché
   temas: any[] = [];
   categorias: any[] = [];
+  tags: any[] = [];
   // Búsqueda: Texto introducido por el usuario en la barra de búsqueda superior
   searchQuery: string = '';
   // Estado de Carga: Indica si la aplicación está esperando datos del servidor
@@ -34,81 +36,101 @@ export class Foro implements OnInit {
 
   // Categoría Seleccionada: Almacena la categoría activa para filtrar los temas mostrados
   categoriaActiva: any = null;
+  tagActivo: any = null;
 
   // Para controlar qué menú de opciones (3 puntos) está abierto
   activeMenuId: string | number | null = null;
 
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
   /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
-  constructor(private foroService: ForoService, private router: Router, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService, private modalService: ModalService) { }
+  constructor(private foroService: ForoService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService, private modalService: ModalService) { }
 
 
   // Ciclo de Vida OnInit: Punto de entrada principal al renderizar el componente
   ngOnInit(): void {
+    // 1. Detectar parámetros de la URL inmediatamente
+    this.route.queryParams.subscribe(params => {
+      const catSlug = params['cat'];
+      const tagName = params['tag'];
+      
+      // Intentar aplicar filtros si ya tenemos datos en caché
+      if (this.categorias.length > 0) {
+        this.categoriaActiva = this.categorias.find(c => c.slug === catSlug) || null;
+      }
+      if (this.tags.length > 0) {
+        this.tagActivo = this.tags.find(t => t.nombre === tagName) || null;
+      }
+      this.cdr.detectChanges();
+    });
+
     this.cargarDatosIniciales();
   }
 
   // Método de Carga: Gestiona la obtención de temas y categorías mediante el patrón SWR
   cargarDatosIniciales() {
-    // Caché de Temas y Categorias: Intentamos recuperar los datos guardados localmente
     const cachedTemas = sessionStorage.getItem('foro_temas_cache');
     const cachedCats = sessionStorage.getItem('foro_categorias_cache');
+    const cachedTags = sessionStorage.getItem('foro_tags_cache');
 
-    // Validación de Caché: Si hay datos guardados, los mostramos inmediatamente para evitar esperas
     if (cachedTemas && cachedCats) {
       this.temas = JSON.parse(cachedTemas);
       this.categorias = JSON.parse(cachedCats);
-      // Feedback Instantáneo: Desactivamos el estado de carga porque ya tenemos datos que mostrar
+      this.tags = cachedTags ? JSON.parse(cachedTags) : [];
+      
+      // Aplicar filtros de la URL sobre la caché recién cargada
+      const params = this.route.snapshot.queryParams;
+      if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
+      if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
+      
       this.cargando = false;
       this.restaurarScroll();
+      this.cdr.detectChanges();
     } else {
-      // Estado Inicial: Si no hay caché, activamos los componentes de carga (skeletons) hasta que llegen los datos
       this.cargando = true;
     }
 
-    // Actualización en Background: Consultamos al servidor para obtener todos los datos al mismo tiempo sin bloquear al usuario
     forkJoin({
       categorias: this.foroService.getCategorias(true),
-      temas: this.foroService.getTemas(true)
+      temas: this.foroService.getTemas(true),
+      tags: this.foroService.getTags()
     }).subscribe({
-      // Respuesta Exitosa: Procesamos los datos recibidos del backend
       next: (res) => {
-        // Actualizamos las listas con la respuesta del servidor
         this.categorias = res.categorias;
         this.temas = res.temas;
+        this.tags = res.tags;
 
-        // Actualización Local de Temas y Categorías: Guardamos las nuevos temas y categorias en el caché local
         sessionStorage.setItem('foro_categorias_cache', JSON.stringify(res.categorias));
         sessionStorage.setItem('foro_temas_cache', JSON.stringify(res.temas));
+        sessionStorage.setItem('foro_tags_cache', JSON.stringify(res.tags));
 
-        // Finalización de Carga: Indicamos que ya no estamos esperando datos
+        // Re-confirmar filtros con datos frescos
+        const params = this.route.snapshot.queryParams;
+        if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
+        if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
+
         this.cargando = false;
-        // Sincronización de Vista: Forzamos a Angular a detectar los cambios para actualizar el HTML inmediatamente
-        this.cdr.detectChanges();
         this.restaurarScroll();
+        this.cdr.detectChanges();
       },
-      // Gestión de Errores: Manejamos posibles fallos en la comunicación con el servidor
       error: (err) => {
-        // Log de Error: Mostramos el detalle técnico en la consola del navegador
-        console.error("Error cargando el foro desde el backend", err);
-        // Desbloqueo de UI: Aunque falle la red, quitamos el estado de carga para permitir interacción
+        console.error("Error cargando el foro", err);
         this.cargando = false;
-        // Refresco de Interfaz: Aseguramos que el mensaje de error o el estado vacío se pinten correctamente
         this.cdr.detectChanges();
       }
     });
   }
 
   // Selección de Categoría: Lógica para filtrar por una categoría específica o desmarcarla
-  seleccionarCategoria(cat: any) {
-    // Comprobación de Reincidencia: Si pulsamos en la categoría que ya estaba activa, la quitamos
-    if (this.categoriaActiva && this.categoriaActiva.identificador === cat.identificador) {
-      // Estado de Desmarcado: Volvemos a mostrar todos los temas al resetear la categoría activa
-      this.categoriaActiva = null;
-    } else {
-      // Estado de Selección: Aplicamos la nueva categoría al filtro
-      this.categoriaActiva = cat;
-    }
+  onCategorySelected(slug: string | null) {
+    this.categoriaActiva = this.categorias.find(c => c.slug === slug) || null;
+    this.tagActivo = null;
+    this.cdr.detectChanges();
+  }
+
+  onTagSelected(tag: any) {
+    this.tagActivo = tag;
+    this.categoriaActiva = null;
+    this.cdr.detectChanges();
   }
 
   toggleMenu(id: string | number, event: Event) {
@@ -133,8 +155,15 @@ export class Foro implements OnInit {
 
     // Filtro por Categoría: Si hay una categoría seleccionada, buscamos solo sus temas
     if (this.categoriaActiva) {
-      // Comparación de Identificadores: Filtramos los temas cuyo ID de categoría coincida con la activa
-      filtrados = filtrados.filter(t => t.categoria?.identificador === this.categoriaActiva.identificador);
+      // Comparación de Slugs: Filtramos los temas cuyo slug de categoría coincida con la activa
+      filtrados = filtrados.filter(t => t.categoria?.slug === this.categoriaActiva.slug);
+    }
+
+    // Filtro por Tag (usando la estructura TemaTag -> Tag -> identificador)
+    if (this.tagActivo) {
+      filtrados = filtrados.filter(t => 
+        t.tags?.some((tt: any) => tt.tag?.identificador === this.tagActivo.identificador)
+      );
     }
 
     // Filtro de Texto: Si el usuario ha escrito algo, refinamos la búsqueda
@@ -162,7 +191,7 @@ export class Foro implements OnInit {
   // Restaura el scroll guardado previamente al volver desde un tema
   restaurarScroll() {
     if (this.scrollRestaurado) return;
-    
+
     setTimeout(() => {
       if (this.mainContent) {
         const scroll = sessionStorage.getItem('foroScrollPosition');
@@ -170,7 +199,7 @@ export class Foro implements OnInit {
           // Desactivamos momentáneamente el scroll suave para que sea instantáneo
           this.mainContent.nativeElement.style.scrollBehavior = 'auto';
           this.mainContent.nativeElement.scrollTop = parseInt(scroll, 10);
-          
+
           // Y luego volvemos a dejar el valor por defecto en css
           setTimeout(() => {
             if (this.mainContent) {
@@ -218,7 +247,7 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al borrar el tema", err);
-          this.toastService.error("Error al borrar el tema en el servidor.");
+          this.toastService.error("Error al borrar el tema.");
         }
       });
     }
@@ -234,7 +263,7 @@ export class Foro implements OnInit {
     if (data && data.titulo?.trim()) {
       const id = tema.identificador || tema.id;
       this.foroService.editTema(id, data.titulo, data.descripcion).subscribe({
-        next: (res) => {
+        next: () => {
           tema.titulo = data.titulo;
           tema.descripcion = data.descripcion;
           this.foroService.clearCache();
@@ -250,53 +279,12 @@ export class Foro implements OnInit {
     }
   }
 
-  // --- ACCIONES CATEGORIA ---
-  async borrarCategoria(cat: any, event: Event) {
-    event.stopPropagation();
-    const confirmacion = await this.modalService.confirm(
-      "Eliminar Categoría",
-      `¿Estás seguro de que deseas eliminar la categoría "${cat.nombre}"? Esto podría eliminar los temas dentro de ella.`,
-      true
-    );
-    if (confirmacion) {
-      const id = cat.identificador || cat.id;
-      this.foroService.deleteCategoria(id).subscribe({
-        next: () => {
-          this.categorias = this.categorias.filter(c => (c.identificador || c.id) !== id);
-          if (this.categoriaActiva && (this.categoriaActiva.identificador || this.categoriaActiva.id) === id) {
-            this.categoriaActiva = null;
-          }
-          this.foroService.clearCache();
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error("Error al borrar la categoría", err);
-          this.toastService.error("Error al borrar la categoría. Podría tener temas dentro.");
-        }
-      });
-    }
-  }
-
-  async editarCategoria(cat: any, event: Event) {
-    event.stopPropagation();
-    const data = await this.modalService.prompt("Editar Categoría", [
-      { name: 'nombre', label: 'Nombre de la Categoría', type: 'text', value: cat.nombre }
-    ]);
-
-    if (data && data.nombre?.trim()) {
-      const id = cat.identificador || cat.id;
-      this.foroService.editCategoria(id, data.nombre).subscribe({
-        next: (res) => {
-          cat.nombre = data.nombre;
-          this.foroService.clearCache();
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error("Error al editar la categoría", err);
-          this.toastService.error("Error al editar la categoría.");
-        }
-      });
-    }
+  // Métodos que ahora delega el sidebar pero que el componente principal necesita conocer
+  actualizarCategorias() {
+    this.foroService.getCategorias(true).subscribe(cats => {
+      this.categorias = cats;
+      this.cdr.detectChanges();
+    });
   }
 
   // --- ACCIÓN CREAR TEMA ---
@@ -314,20 +302,27 @@ export class Foro implements OnInit {
 
     const data = await this.modalService.prompt(`Nuevo Tema en "${this.categoriaActiva.nombre}"`, [
       { name: 'titulo', label: 'Título del Tema', type: 'text', placeholder: 'Escribe un título atractivo...' },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', placeholder: '¿De qué trata este tema?' }
+      { name: 'descripcion', label: 'Descripción', type: 'textarea', placeholder: '¿De qué trata este tema?' },
+      { name: 'tags', label: 'Etiquetas (separadas por comas)', type: 'text', placeholder: 'ej: java, angular, ayuda' }
     ]);
 
     if (data && data.titulo?.trim()) {
+      // Procesar tags: convertimos el string en array de objetos compatibles con TemaTag/Tag
+      const tagsArray = (data.tags || '').split(',')
+        .map((tag: string) => ({ tag: { nombre: tag.trim() } }))
+        .filter((tt: any) => tt.tag.nombre.length > 0);
+
       const nuevoTema = {
         titulo: data.titulo.trim(),
         descripcion: (data.descripcion || '').trim(),
         slug: this.generarSlug(data.titulo.trim()),
         categoria: { identificador: this.categoriaActiva.identificador || this.categoriaActiva.id },
-        usuario: { identificador: usuarioActual.identificador || usuarioActual.id }
+        usuario: { identificador: usuarioActual.identificador || usuarioActual.id },
+        tags: tagsArray
       };
 
       this.foroService.createTema(nuevoTema).subscribe({
-        next: (res) => {
+        next: () => {
           this.toastService.success("¡Tema creado con éxito!");
           this.foroService.clearCache();
           this.cargarDatosIniciales();

@@ -10,10 +10,15 @@ export class ForoService {
     private API_TEMAS = 'http://localhost:8080/api/temas';
     private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
     private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
+    private API_TAGS = 'http://localhost:8080/api/tags';
 
-    // Variables para almacenar la caché en memoria RAM del navegador
     private temasCache$: Observable<any[]> | null = null;
     private categoriasCache$: Observable<any[]> | null = null;
+    private tagsCache$: Observable<any[]> | null = null;
+
+    // Para acceso instantáneo
+    private lastCategorias: any[] = [];
+    private lastTags: any[] = [];
 
     constructor(private http: HttpClient) { }
 
@@ -44,12 +49,39 @@ export class ForoService {
             this.categoriasCache$ = this.http.get<any[]>(this.API_CATEGORIAS).pipe(
                 shareReplay(1)
             );
+            this.categoriasCache$.subscribe(data => this.lastCategorias = data);
         }
         return this.categoriasCache$;
     }
 
+    getCategoriasCache(): any[] {
+        return this.lastCategorias;
+    }
+
     getTemasPorCategoria(id: number): Observable<any[]> {
         return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`);
+    }
+
+    getTags(forceRefresh = false): Observable<any[]> {
+        if (!this.tagsCache$ || forceRefresh) {
+            this.tagsCache$ = this.http.get<any[]>(this.API_TAGS).pipe(
+                shareReplay(1)
+            );
+            this.tagsCache$.subscribe(data => this.lastTags = data);
+        }
+        return this.tagsCache$;
+    }
+
+    getTagsCache(): any[] {
+        return this.lastTags;
+    }
+
+    getTemasPorTag(nombre: string): Observable<any[]> {
+        return this.http.get<any[]>(`${this.API_TEMAS}/tag/${nombre}`);
+    }
+
+    getTemasRelacionados(id: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.API_TEMAS}/${id}/relacionados`);
     }
 
     // --- NUEVOS MÉTODOS PARA RBAC (EDITAR/ELIMINAR) ---

@@ -66,6 +66,20 @@ public class TemaController {
 		return temas;
 	}
 
+	@GetMapping("/tag/{nombre}")
+	public List<Tema> listarPorTag(@PathVariable String nombre) {
+		List<Tema> temas = temaService.obtenerTemasPorTag(nombre);
+		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		return temas;
+	}
+
+	@GetMapping("/{id}/relacionados")
+	public List<Tema> obtenerRelacionados(@PathVariable int id) {
+		List<Tema> temas = temaService.obtenerTemasRelacionados(id);
+		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		return temas;
+	}
+
 	@PostMapping
 	public Tema crear(@RequestBody Tema tema) {
 		Tema nuevoTema = temaService.crearTema(tema);

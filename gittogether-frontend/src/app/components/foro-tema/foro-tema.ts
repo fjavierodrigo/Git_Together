@@ -9,12 +9,18 @@ import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 
 import { switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, forkJoin } from 'rxjs';
+import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
 
 @Component({
   selector: 'app-foro-tema',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NavbarComponent, 
+    CategoriaSidebar
+  ],
   templateUrl: './foro-tema.html',
   styleUrl: './foro-tema.css'
 })
@@ -22,6 +28,8 @@ export class ForoTema implements OnInit {
   temaSlug: string | null = null;
   tema: any = null;
   mensajes: any[] = [];
+  categorias: any[] = [];
+  tags: any[] = [];
   cargando: boolean = true;
   skeletonMensajes = Array(3).fill(0);
 
@@ -43,6 +51,7 @@ export class ForoTema implements OnInit {
     this.temaSlug = this.route.snapshot.paramMap.get('slug');
     if (this.temaSlug) {
       this.cargarDatos();
+      this.cargarSidebar();
     } else {
       this.router.navigate(['/foro']);
     }
@@ -96,6 +105,50 @@ export class ForoTema implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  cargarSidebar(): void {
+    // 1. Intentar cargar de la caché persistente del navegador (sessionStorage)
+    const cachedCats = sessionStorage.getItem('foro_categorias_cache');
+    const cachedTags = sessionStorage.getItem('foro_tags_cache');
+
+    if (cachedCats && cachedTags) {
+      this.categorias = JSON.parse(cachedCats);
+      this.tags = JSON.parse(cachedTags);
+      this.cdr.detectChanges();
+      // Actualizamos también la caché del servicio por si acaso
+      return;
+    }
+
+    // 2. Fallback: Usar la caché del servicio si existe
+    const catCache = this.foroService.getCategoriasCache();
+    const tagCache = this.foroService.getTagsCache();
+
+    if (catCache.length > 0 && tagCache.length > 0) {
+      this.categorias = catCache;
+      this.tags = tagCache;
+      this.cdr.detectChanges();
+    } else {
+      // 3. Último recurso: Cargar del servidor
+      forkJoin({
+        categorias: this.foroService.getCategorias(),
+        tags: this.foroService.getTags()
+      }).subscribe({
+        next: (res) => {
+          this.categorias = res.categorias;
+          this.tags = res.tags;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  onCategorySelected(slug: string | null) {
+    if (slug) this.router.navigate(['/foro'], { queryParams: { cat: slug } });
+  }
+
+  onTagSelected(tag: any) {
+    this.router.navigate(['/foro'], { queryParams: { tag: tag.nombre } });
   }
 
   volver(): void {
