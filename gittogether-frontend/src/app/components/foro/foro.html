@@ -16,7 +16,10 @@
     <app-navbar></app-navbar>
 
     <div class="foro-layout">
-        <app-categoria-sidebar [categorias]="categorias" [tags]="tags" (categorySelected)="onCategorySelected($event)"
+        <app-categoria-sidebar [categorias]="categorias" [tags]="tags" 
+            [activeCategorySlug]="categoriaActiva?.slug"
+            [activeTagId]="tagActivo?.identificador"
+            (categorySelected)="onCategorySelected($event)"
             (tagSelected)="onTagSelected($event)">
         </app-categoria-sidebar>
 
@@ -86,7 +89,7 @@
                                     <span class="tema-author">{{ tema.usuario?.nombre || 'Usuario' }}</span>
                                 </span>
                                 <span class="tema-date">{{ tema.fechaCreacion ? (tema.fechaCreacion |
-                                    date:'mediumDate') : 'Hace un momento' }}</span>
+                                    date:'dd/MM/yyyy') : 'Hace un momento' }}</span>
                             </div>
                             <!-- Tags del tema -->
                             <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0">
@@ -146,8 +149,12 @@
                 <div class="empty-state" *ngIf="!cargando && temasFiltrados.length === 0">
                     <div class="empty-icon">📂</div>
                     <h3>No encontramos lo que buscas</h3>
-                    <p>Parece que no hay resultados para "{{ searchQuery }}". Intenta con otra palabra clave o explora
-                        las categorías.</p>
+                    <p>Parece que no hay resultados 
+                        <span *ngIf="searchQuery"> para "{{ searchQuery }}"</span>
+                        <span *ngIf="tagActivo"> con la etiqueta #{{ tagActivo.nombre }}</span>
+                        <span *ngIf="categoriaActiva"> en la categoría {{ categoriaActiva.nombre }}</span>. 
+                        Intenta con otra palabra clave o explora otras secciones.
+                    </p>
                 </div>
             </section>
         </main>

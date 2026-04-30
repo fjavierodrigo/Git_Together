@@ -86,7 +86,7 @@
                             </div>
                             <div class="author-details">
                                 <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'fullDate'
+                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
                                     }}</span>
                             </div>
                         </div>
@@ -94,6 +94,15 @@
                         <!-- Descripción del Tema -->
                         <div class="tema-body-content" *ngIf="tema.descripcion">
                             {{ tema.descripcion }}
+                        </div>
+
+                        <!-- Etiquetas del Tema -->
+                        <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0" style="margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <span class="tema-tag" *ngFor="let tt of tema.tags" 
+                                  (click)="onTagSelected(tt.tag)"
+                                  style="cursor: pointer; background: rgba(88, 166, 255, 0.1); color: #58a6ff; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; border: 1px solid rgba(88, 166, 255, 0.2); transition: all 0.2s ease;">
+                                #{{ tt.tag?.nombre }}
+                            </span>
                         </div>
                     </div>
                 </article>
@@ -182,7 +191,7 @@
                                 <!-- Fecha abajo -->
                                 <div class="comment-footer"
                                     *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
-                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'short' }}</span>
+                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'dd/MM/yyyy' }}</span>
                                 </div>
 
                                 <!-- Modo Edición -->

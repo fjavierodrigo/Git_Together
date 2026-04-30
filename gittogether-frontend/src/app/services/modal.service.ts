@@ -15,8 +15,8 @@ export interface ModalInput {
   name: string;
   label: string;
   placeholder?: string;
-  type: 'text' | 'textarea';
-  value?: string;
+  type: 'text' | 'textarea' | 'tags';
+  value?: any;
 }
 
 @Injectable({

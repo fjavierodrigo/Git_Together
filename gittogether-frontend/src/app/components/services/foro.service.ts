@@ -12,6 +12,7 @@ export class ForoService {
     private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
     private API_TAGS = 'http://localhost:8080/api/tags';
 
+    // Variables para almacenar la caché en memoria RAM del navegador
     private temasCache$: Observable<any[]> | null = null;
     private categoriasCache$: Observable<any[]> | null = null;
     private tagsCache$: Observable<any[]> | null = null;
@@ -80,6 +81,10 @@ export class ForoService {
         return this.http.get<any[]>(`${this.API_TEMAS}/tag/${nombre}`);
     }
 
+    searchTags(query: string): Observable<any[]> {
+        return this.http.get<any[]>(`${this.API_TAGS}/search?query=${query}`);
+    }
+
     getTemasRelacionados(id: number): Observable<any[]> {
         return this.http.get<any[]>(`${this.API_TEMAS}/${id}/relacionados`);
     }
@@ -105,8 +110,8 @@ export class ForoService {
         return this.http.delete(`${this.API_TEMAS}/${id}`);
     }
 
-    editTema(id: number, titulo?: string, descripcion?: string): Observable<any> {
-        return this.http.put(`${this.API_TEMAS}/${id}`, { titulo, descripcion });
+    editTema(id: number, titulo?: string, descripcion?: string, tags?: string[]): Observable<any> {
+        return this.http.put(`${this.API_TEMAS}/${id}`, { titulo, descripcion, tags });
     }
 
     createTema(tema: any): Observable<any> {

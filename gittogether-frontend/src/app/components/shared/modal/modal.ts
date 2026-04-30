@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModalService, ModalConfig } from '../../../services/modal.service';
+import { ModalService, ModalConfig, ModalInput } from '../../../services/modal.service';
 import { Subscription } from 'rxjs';
+import { ForoService } from '../../services/foro.service';
 
 @Component({
   selector: 'app-modal',
@@ -15,11 +16,17 @@ export class ModalComponent implements OnInit, OnDestroy {
   config: ModalConfig | null = null;
   private sub: Subscription | null = null;
 
-  constructor(private modalService: ModalService) {}
+  // Tag editor state
+  tagQuery: string = '';
+  suggestions: any[] = [];
+
+  constructor(private modalService: ModalService, private foroService: ForoService) {}
 
   ngOnInit(): void {
     this.sub = this.modalService.modal$.subscribe(config => {
       this.config = config;
+      this.tagQuery = '';
+      this.suggestions = [];
     });
   }
 
@@ -70,5 +77,41 @@ export class ModalComponent implements OnInit, OnDestroy {
       this.config.resolve(null);
     }
     this.modalService.close();
+  }
+
+  // Tag management
+  onTagInput(event: any) {
+    const query = this.tagQuery.trim();
+    if (query.length >= 1) {
+      this.foroService.searchTags(query).subscribe(tags => {
+        this.suggestions = tags.filter(t => {
+          // No sugerir tags que ya están seleccionados
+          const input = this.config?.inputs?.find(i => i.type === 'tags');
+          return !input?.value?.includes(t.nombre);
+        });
+      });
+    } else {
+      this.suggestions = [];
+    }
+  }
+
+  addTag(input: ModalInput, tagName: string) {
+    if (!input.value) input.value = [];
+    if (!input.value.includes(tagName)) {
+      input.value.push(tagName);
+    }
+    this.tagQuery = '';
+    this.suggestions = [];
+  }
+
+  addCustomTag(input: ModalInput) {
+    const tagName = this.tagQuery.trim();
+    if (tagName) {
+      this.addTag(input, tagName);
+    }
+  }
+
+  removeTag(input: ModalInput, tagName: string) {
+    input.value = input.value.filter((t: string) => t !== tagName);
   }
 }

@@ -63,14 +63,14 @@ public class TemaService {
         if (tema.getTags() != null && !tema.getTags().isEmpty()) {
             for (TemaTag tt : tema.getTags()) {
                 if (tt.getTag() != null && tt.getTag().getNombre() != null) {
-                    String nombreTag = tt.getTag().getNombre().trim().toLowerCase();
-                    Tag tagReal = tagRepository.findByNombre(nombreTag)
-                        .orElseGet(() -> {
-                            Tag nuevo = new Tag();
-                            nuevo.setNombre(nombreTag);
-                            return tagRepository.save(nuevo);
-                        });
-                    
+                    String nombreTag = tt.getTag().getNombre().trim();
+                    Tag tagReal = tagRepository.findByNombreIgnoreCase(nombreTag)
+                            .orElseGet(() -> {
+                                Tag nuevo = new Tag();
+                                nuevo.setNombre(nombreTag);
+                                return tagRepository.save(nuevo);
+                            });
+
                     TemaTag relacion = new TemaTag();
                     relacion.setTema(temaGuardado);
                     relacion.setTag(tagReal);
@@ -89,23 +89,25 @@ public class TemaService {
 
     public List<Tema> obtenerTemasRelacionados(int temaId) {
         List<TemaTag> misTags = temaTagRepository.findByTemaIdentificador(temaId);
-        if (misTags.isEmpty()) return new ArrayList<>();
+        if (misTags.isEmpty())
+            return new ArrayList<>();
 
         List<Integer> tagIds = misTags.stream()
-            .map(tt -> tt.getTag().getIdentificador())
-            .collect(Collectors.toList());
+                .map(tt -> tt.getTag().getIdentificador())
+                .collect(Collectors.toList());
 
-        List<TemaTag> relacionesRelacionadas = temaTagRepository.findByTagIdentificadorInAndTemaIdentificadorNot(tagIds, temaId);
-        
+        List<TemaTag> relacionesRelacionadas = temaTagRepository.findByTagIdentificadorInAndTemaIdentificadorNot(tagIds,
+                temaId);
+
         // Usamos un Set para asegurar que no devolvemos el mismo tema varias veces
         // (por ejemplo, si comparte dos etiquetas diferentes con el tema actual)
         Set<Tema> temasUnicos = relacionesRelacionadas.stream()
-            .map(TemaTag::getTema)
-            .collect(Collectors.toSet());
+                .map(TemaTag::getTema)
+                .collect(Collectors.toSet());
 
         return temasUnicos.stream()
-            .limit(5)
-            .collect(Collectors.toList());
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
     public List<Tema> listarTemas() {
@@ -136,7 +138,7 @@ public class TemaService {
         temaRepository.deleteById(id);
     }
 
-    public Tema editarTema(Integer id, String nuevoTitulo, String nuevaDescripcion) {
+    public Tema editarTema(Integer id, String nuevoTitulo, String nuevaDescripcion, List<String> tagsNombres) {
         Tema tema = temaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("El tema no existe"));
 
@@ -144,6 +146,30 @@ public class TemaService {
             tema.setTitulo(nuevoTitulo);
         if (nuevaDescripcion != null)
             tema.setDescripcion(nuevaDescripcion);
+
+        if (tagsNombres != null) {
+            // Eliminar relaciones antiguas
+            List<TemaTag> relacionesAntiguas = temaTagRepository.findByTemaIdentificador(id);
+            temaTagRepository.deleteAll(relacionesAntiguas);
+
+            // Crear nuevas relaciones
+            for (String nombre : tagsNombres) {
+                if (nombre != null && !nombre.trim().isEmpty()) {
+                    String nombreTag = nombre.trim();
+                    Tag tagReal = tagRepository.findByNombreIgnoreCase(nombreTag)
+                            .orElseGet(() -> {
+                                Tag nuevo = new Tag();
+                                nuevo.setNombre(nombreTag);
+                                return tagRepository.save(nuevo);
+                            });
+
+                    TemaTag relacion = new TemaTag();
+                    relacion.setTema(tema);
+                    relacion.setTag(tagReal);
+                    temaTagRepository.save(relacion);
+                }
+            }
+        }
 
         return temaRepository.save(tema);
     }

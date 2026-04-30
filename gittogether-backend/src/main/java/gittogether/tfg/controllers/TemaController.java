@@ -98,11 +98,17 @@ public class TemaController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> editarTema(@PathVariable Integer id, @RequestBody java.util.Map<String, String> payload) {
+	public ResponseEntity<?> editarTema(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> payload) {
 		try {
-			String nuevoTitulo = payload.get("titulo");
-			String nuevaDescripcion = payload.get("descripcion");
-			Tema temaActualizado = temaService.editarTema(id, nuevoTitulo, nuevaDescripcion);
+			String nuevoTitulo = (String) payload.get("titulo");
+			String nuevaDescripcion = (String) payload.get("descripcion");
+			
+			List<String> tagsNombres = null;
+			if (payload.get("tags") != null) {
+				tagsNombres = (List<String>) payload.get("tags");
+			}
+
+			Tema temaActualizado = temaService.editarTema(id, nuevoTitulo, nuevaDescripcion, tagsNombres);
 			s3Service.procesarAvatar(temaActualizado.getUsuario());
 			return ResponseEntity.ok(temaActualizado);
 		} catch (RuntimeException e) {

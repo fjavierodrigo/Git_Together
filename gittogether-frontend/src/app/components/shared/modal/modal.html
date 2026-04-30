@@ -22,6 +22,31 @@
                   [id]="input.name" 
                   [(ngModel)]="input.value" 
                   [placeholder]="input.placeholder || ''"></textarea>
+
+        <!-- Tag Editor -->
+        <div *ngIf="input.type === 'tags'" class="tag-editor">
+          <div class="selected-tags">
+            <span *ngFor="let tag of input.value" class="modal-tag">
+              #{{ tag }}
+              <button class="remove-tag" (click)="removeTag(input, tag)">&times;</button>
+            </span>
+          </div>
+          <div class="tag-input-wrapper">
+            <input type="text" 
+                   [(ngModel)]="tagQuery" 
+                   (input)="onTagInput($event)"
+                   [placeholder]="input.placeholder || 'Escribe para buscar tags...'"
+                   (keydown.enter)="addCustomTag(input)">
+            
+            <div class="tag-suggestions" *ngIf="suggestions.length > 0">
+              <div *ngFor="let suggestion of suggestions" 
+                   class="suggestion-item"
+                   (click)="addTag(input, suggestion.nombre)">
+                #{{ suggestion.nombre }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

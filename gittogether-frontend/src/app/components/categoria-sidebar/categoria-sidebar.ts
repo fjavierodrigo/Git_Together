@@ -56,10 +56,10 @@ export class CategoriaSidebar implements OnInit {
   onCategoryClick(cat: any) {
     if (this.activeCategorySlug === cat.slug) {
       this.activeCategorySlug = null;
-      this.router.navigate(['/foro'], { queryParams: {} });
+      this.router.navigate(['/foro'], { queryParams: { cat: null }, queryParamsHandling: 'merge' });
     } else {
       this.activeCategorySlug = cat.slug;
-      this.router.navigate(['/foro'], { queryParams: { cat: cat.slug } });
+      this.router.navigate(['/foro'], { queryParams: { cat: cat.slug }, queryParamsHandling: 'merge' });
     }
     this.categorySelected.emit(this.activeCategorySlug);
   }
@@ -67,11 +67,13 @@ export class CategoriaSidebar implements OnInit {
   onTagClick(tag: any) {
     if (this.activeTagId === tag.identificador) {
       this.activeTagId = null;
+      this.router.navigate(['/foro'], { queryParams: { tag: null }, queryParamsHandling: 'merge' });
+      this.tagSelected.emit(null);
     } else {
       this.activeTagId = tag.identificador;
-      this.activeCategorySlug = null;
+      this.router.navigate(['/foro'], { queryParams: { tag: tag.nombre }, queryParamsHandling: 'merge' });
+      this.tagSelected.emit(tag);
     }
-    this.tagSelected.emit(tag);
   }
 
   // --- MÉTODOS ADMIN (Copiados de foro.ts para mantener funcionalidad) ---

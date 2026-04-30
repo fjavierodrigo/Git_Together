@@ -123,13 +123,11 @@ export class Foro implements OnInit {
   // Selección de Categoría: Lógica para filtrar por una categoría específica o desmarcarla
   onCategorySelected(slug: string | null) {
     this.categoriaActiva = this.categorias.find(c => c.slug === slug) || null;
-    this.tagActivo = null;
     this.cdr.detectChanges();
   }
 
   onTagSelected(tag: any) {
-    this.tagActivo = tag;
-    this.categoriaActiva = null;
+    this.tagActivo = tag; // Si tag es null, se deselecciona
     this.cdr.detectChanges();
   }
 
@@ -257,15 +255,17 @@ export class Foro implements OnInit {
     event.stopPropagation(); // Evitar que el clic abra el tema
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: tema.titulo },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: tema.descripcion || '' }
+      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: tema.descripcion || '' },
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: tema.tags?.map((tt: any) => tt.tag?.nombre) || [] }
     ]);
 
     if (data && data.titulo?.trim()) {
       const id = tema.identificador || tema.id;
-      this.foroService.editTema(id, data.titulo, data.descripcion).subscribe({
-        next: () => {
+      this.foroService.editTema(id, data.titulo, data.descripcion, data.tags).subscribe({
+        next: (temaActualizado) => {
           tema.titulo = data.titulo;
           tema.descripcion = data.descripcion;
+          tema.tags = temaActualizado.tags; // Actualizar con los tags devueltos por el backend
           this.foroService.clearCache();
           this.toastService.success("Tema actualizado correctamente");
           sessionStorage.removeItem(`tema_slug_${tema.slug}_cache`);
@@ -303,12 +303,12 @@ export class Foro implements OnInit {
     const data = await this.modalService.prompt(`Nuevo Tema en "${this.categoriaActiva.nombre}"`, [
       { name: 'titulo', label: 'Título del Tema', type: 'text', placeholder: 'Escribe un título atractivo...' },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', placeholder: '¿De qué trata este tema?' },
-      { name: 'tags', label: 'Etiquetas (separadas por comas)', type: 'text', placeholder: 'ej: java, angular, ayuda' }
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: [], placeholder: 'Busca o añade etiquetas...' }
     ]);
 
     if (data && data.titulo?.trim()) {
-      // Procesar tags: convertimos el string en array de objetos compatibles con TemaTag/Tag
-      const tagsArray = (data.tags || '').split(',')
+      // Procesar tags: el modal ahora devuelve un array de strings
+      const tagsArray = (data.tags || [])
         .map((tag: string) => ({ tag: { nombre: tag.trim() } }))
         .filter((tt: any) => tt.tag.nombre.length > 0);
 

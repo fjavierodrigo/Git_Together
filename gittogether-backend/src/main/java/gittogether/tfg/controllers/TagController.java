@@ -21,4 +21,9 @@ public class TagController {
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }
+
+    @GetMapping("/search")
+    public List<Tag> searchTags(@org.springframework.web.bind.annotation.RequestParam String query) {
+        return tagRepository.findByNombreContainingIgnoreCase(query);
+    }
 }

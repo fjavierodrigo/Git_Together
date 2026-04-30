@@ -144,11 +144,21 @@ export class ForoTema implements OnInit {
   }
 
   onCategorySelected(slug: string | null) {
-    if (slug) this.router.navigate(['/foro'], { queryParams: { cat: slug } });
+    if (slug) {
+      this.router.navigate(['/foro'], { queryParams: { cat: slug } });
+    }
   }
 
   onTagSelected(tag: any) {
-    this.router.navigate(['/foro'], { queryParams: { tag: tag.nombre } });
+    if (!tag) return;
+    
+    // Si el tema actual tiene categoría, la incluimos en el filtro al volver al foro
+    const params: any = { tag: tag.nombre };
+    if (this.tema?.categoria?.slug) {
+      params.cat = this.tema.categoria.slug;
+    }
+    
+    this.router.navigate(['/foro'], { queryParams: params });
   }
 
   volver(): void {
@@ -228,15 +238,17 @@ export class ForoTema implements OnInit {
     if (!this.tema) return;
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: this.tema.titulo },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: this.tema.descripcion || '' }
+      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: this.tema.descripcion || '' },
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: this.tema.tags?.map((tt: any) => tt.tag?.nombre) || [] }
     ]);
 
     if (data && data.titulo?.trim()) {
       const id = this.tema.identificador || this.tema.id;
-      this.foroService.editTema(id, data.titulo, data.descripcion).subscribe({
-        next: (res) => {
+      this.foroService.editTema(id, data.titulo, data.descripcion, data.tags).subscribe({
+        next: (temaActualizado) => {
           this.tema.titulo = data.titulo;
           this.tema.descripcion = data.descripcion;
+          this.tema.tags = temaActualizado.tags; // Actualizar los tags con la respuesta del servidor
           this.toastService.success("Tema actualizado correctamente");
           this.foroService.clearCache();
 
