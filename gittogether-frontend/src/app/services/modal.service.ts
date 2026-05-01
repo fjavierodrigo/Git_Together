@@ -15,7 +15,7 @@ export interface ModalInput {
   name: string;
   label: string;
   placeholder?: string;
-  type: 'text' | 'textarea' | 'tags';
+  type: 'text' | 'textarea' | 'tags' | 'files';
   value?: any;
 }
 

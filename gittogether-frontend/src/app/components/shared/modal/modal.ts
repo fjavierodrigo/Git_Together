@@ -114,4 +114,21 @@ export class ModalComponent implements OnInit, OnDestroy {
   removeTag(input: ModalInput, tagName: string) {
     input.value = input.value.filter((t: string) => t !== tagName);
   }
+
+  // File management
+  onFilesSelected(input: ModalInput, event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      if (!input.value) input.value = [];
+      const newFiles = Array.from(event.target.files);
+      input.value = [...input.value, ...newFiles];
+      // Reset input so the same files can be selected again if removed
+      event.target.value = '';
+    }
+  }
+
+  removeFile(input: ModalInput, index: number) {
+    if (input.value && input.value.length > index) {
+      input.value.splice(index, 1);
+    }
+  }
 }

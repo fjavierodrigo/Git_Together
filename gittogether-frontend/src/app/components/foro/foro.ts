@@ -311,7 +311,8 @@ export class Foro implements OnInit {
     const data = await this.modalService.prompt(`Nuevo Tema en "${this.categoriaActiva.nombre}"`, [
       { name: 'titulo', label: 'Título del Tema', type: 'text', placeholder: 'Escribe un título atractivo...' },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', placeholder: '¿De qué trata este tema?' },
-      { name: 'tags', label: 'Etiquetas', type: 'tags', value: [], placeholder: 'Busca o añade etiquetas...' }
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: [], placeholder: 'Busca o añade etiquetas...' },
+      { name: 'archivos', label: 'Archivos Adjuntos', type: 'files', value: [] }
     ]);
 
     if (data && data.titulo?.trim()) {
@@ -330,10 +331,31 @@ export class Foro implements OnInit {
       };
 
       this.foroService.createTema(nuevoTema).subscribe({
-        next: () => {
-          this.toastService.success("¡Tema creado con éxito!");
-          this.foroService.clearCache();
-          this.cargarDatosIniciales();
+        next: (res) => {
+          const filesToUpload: File[] = data.archivos || [];
+          if (filesToUpload.length > 0) {
+              const uploadTasks = filesToUpload.map(file => 
+                  this.foroService.subirArchivoTema(res.identificador || res.id, usuarioActual.identificador || usuarioActual.id, file)
+              );
+              
+              forkJoin(uploadTasks).subscribe({
+                  next: () => {
+                      this.toastService.success("¡Tema creado con éxito!");
+                      this.foroService.clearCache();
+                      this.cargarDatosIniciales();
+                  },
+                  error: (err) => {
+                      console.error("Error al subir archivos del tema", err);
+                      this.toastService.error("Tema creado, pero hubo un error al subir archivos.");
+                      this.foroService.clearCache();
+                      this.cargarDatosIniciales();
+                  }
+              });
+          } else {
+              this.toastService.success("¡Tema creado con éxito!");
+              this.foroService.clearCache();
+              this.cargarDatosIniciales();
+          }
         },
         error: (err) => {
           console.error("Error al crear el tema", err);

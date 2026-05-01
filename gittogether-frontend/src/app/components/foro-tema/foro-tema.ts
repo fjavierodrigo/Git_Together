@@ -17,9 +17,9 @@ import { MarkdownComponent } from 'ngx-markdown';
   selector: 'app-foro-tema',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    NavbarComponent, 
+    CommonModule,
+    FormsModule,
+    NavbarComponent,
     CategoriaSidebar,
     MarkdownComponent
   ],
@@ -44,6 +44,12 @@ export class ForoTema implements OnInit {
 
   nuevoComentario: string = '';
   mostrandoFormulario: boolean = false;
+  archivosSeleccionados: File[] = [];
+
+  // Lightbox para visualizar imágenes
+  lightboxUrl: string | null = null;
+  lightboxNombre: string = '';
+  lightboxArchivo: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -126,12 +132,12 @@ export class ForoTema implements OnInit {
     this.foroService.getTemas().subscribe(allTemas => {
       // Filtrar temas que compartan al menos un tag, excluyendo el actual
       const currentTagIds = this.tema.tags.map((tt: any) => tt.tag?.identificador || tt.tag?.id);
-      
+
       this.temasRelacionados = allTemas.filter((t: any) => {
         const isSame = (t.identificador || t.id) === (this.tema.identificador || this.tema.id);
         if (isSame) return false;
 
-        const hasCommonTag = t.tags?.some((tt: any) => 
+        const hasCommonTag = t.tags?.some((tt: any) =>
           currentTagIds.includes(tt.tag?.identificador || tt.tag?.id)
         );
         return hasCommonTag;
@@ -194,13 +200,13 @@ export class ForoTema implements OnInit {
 
   onTagSelected(tag: any) {
     if (!tag) return;
-    
+
     // Si el tema actual tiene categoría, la incluimos en el filtro al volver al foro
     const params: any = { tag: tag.nombre };
     if (this.tema?.categoria?.slug) {
       params.cat = this.tema.categoria.slug;
     }
-    
+
     this.router.navigate(['/foro'], { queryParams: params });
   }
 
@@ -279,19 +285,43 @@ export class ForoTema implements OnInit {
 
   async editarTema() {
     if (!this.tema) return;
+    const oldFiles = this.tema.archivos ? [...this.tema.archivos] : [];
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: this.tema.titulo },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', value: this.tema.descripcion || '' },
-      { name: 'tags', label: 'Etiquetas', type: 'tags', value: this.tema.tags?.map((tt: any) => tt.tag?.nombre) || [] }
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: this.tema.tags?.map((tt: any) => tt.tag?.nombre) || [] },
+      { name: 'archivos', label: 'Archivos Adjuntos (Nuevos y Existentes)', type: 'files', value: [...oldFiles] }
     ]);
 
     if (data && data.titulo?.trim()) {
       const id = this.tema.identificador || this.tema.id;
+      const finalFiles = data.archivos || [];
+
+      // Encontrar archivos eliminados (estaban en oldFiles pero no en finalFiles)
+      const filesToDelete = oldFiles.filter(old => !finalFiles.some((f: any) => f.identificador === old.identificador));
+      // Encontrar nuevos archivos (no tienen identificador)
+      const newFiles = finalFiles.filter((f: any) => !f.identificador);
+
+      // Borrar archivos eliminados
+      for (let fd of filesToDelete) {
+        this.foroService.eliminarArchivo(fd.identificador || fd.id).subscribe();
+      }
+
       this.foroService.editTema(id, data.titulo, data.descripcion, data.tags).subscribe({
         next: (temaActualizado) => {
           this.tema.titulo = data.titulo;
           this.tema.descripcion = data.descripcion;
           this.tema.tags = temaActualizado.tags; // Actualizar los tags con la respuesta del servidor
+
+          if (newFiles.length > 0) {
+            const uploadTasks = newFiles.map((file: File) =>
+              this.foroService.subirArchivoTema(id, this.usuarioService.getUsuarioLogueado().identificador || this.usuarioService.getUsuarioLogueado().id, file)
+            );
+            forkJoin(uploadTasks).subscribe(() => this.cargarDatos());
+          } else {
+            if (filesToDelete.length > 0) this.cargarDatos(); // Refresh if files were deleted
+          }
+
           this.toastService.success("Tema actualizado correctamente");
           this.foroService.clearCache();
 
@@ -345,46 +375,54 @@ export class ForoTema implements OnInit {
     }
   }
 
-  // Estado para la edición inline de mensajes
-  mensajeEditandoId: number | null = null;
-  mensajeEditandoTexto: string = '';
+  async editarMensaje(mensaje: any) {
+    const oldFiles = mensaje.archivos ? [...mensaje.archivos] : [];
+    const data = await this.modalService.prompt("Editar Mensaje", [
+      { name: 'contenido', label: 'Mensaje', type: 'textarea', value: mensaje.contenido || '' },
+      { name: 'archivos', label: 'Archivos Adjuntos (Nuevos y Existentes)', type: 'files', value: [...oldFiles] }
+    ]);
 
-  iniciarEdicion(mensaje: any) {
-    this.mensajeEditandoId = mensaje.identificador || mensaje.id;
-    this.mensajeEditandoTexto = mensaje.contenido;
-  }
+    if (data && data.contenido?.trim()) {
+      const id = mensaje.identificador || mensaje.id;
+      const finalFiles = data.archivos || [];
 
-  cancelarEdicion() {
-    this.mensajeEditandoId = null;
-    this.mensajeEditandoTexto = '';
-  }
+      const filesToDelete = oldFiles.filter(old => !finalFiles.some((f: any) => f.identificador === old.identificador));
+      const newFiles = finalFiles.filter((f: any) => !f.identificador);
 
-  guardarEdicion(mensaje: any) {
-    if (!this.mensajeEditandoTexto.trim()) return;
-    const id = mensaje.identificador || mensaje.id;
-    console.log("Enviando petición PUT para Mensaje ID:", id, "con contenido:", this.mensajeEditandoTexto);
-
-    this.foroService.editMensaje(id, this.mensajeEditandoTexto).subscribe({
-      next: (res) => {
-        console.log("Respuesta del servidor al editar mensaje:", res);
-        mensaje.contenido = this.mensajeEditandoTexto;
-        this.toastService.success("Mensaje editado");
-        this.cancelarEdicion();
-
-        // Actualizamos la memoria del navegador
-        const cacheKey = `tema_slug_${this.temaSlug}_cache`;
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          tema: this.tema,
-          mensajes: this.mensajes
-        }));
-
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error("Error al editar el mensaje", err);
-        this.toastService.error("Error al guardar los cambios.");
+      for (let fd of filesToDelete) {
+        this.foroService.eliminarArchivo(fd.identificador || fd.id).subscribe();
       }
-    });
+
+      this.foroService.editMensaje(id, data.contenido).subscribe({
+        next: (res) => {
+          mensaje.contenido = data.contenido;
+
+          if (newFiles.length > 0) {
+            const uploadTasks = newFiles.map((file: File) =>
+              this.foroService.subirArchivoMensaje(id, this.usuarioService.getUsuarioLogueado().identificador || this.usuarioService.getUsuarioLogueado().id, file)
+            );
+            forkJoin(uploadTasks).subscribe(() => this.cargarDatos());
+          } else {
+            if (filesToDelete.length > 0) this.cargarDatos(); // Refresh if files were deleted
+          }
+
+          this.toastService.success("Mensaje editado");
+
+          // Actualizamos la memoria del navegador
+          const cacheKey = `tema_slug_${this.temaSlug}_cache`;
+          sessionStorage.setItem(cacheKey, JSON.stringify({
+            tema: this.tema,
+            mensajes: this.mensajes
+          }));
+
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error al editar el mensaje", err);
+          this.toastService.error("Error al guardar los cambios.");
+        }
+      });
+    }
   }
 
   // --- ACCIÓN COMENTAR ---
@@ -417,27 +455,28 @@ export class ForoTema implements OnInit {
           res.usuario.avatar = usuarioActual.avatar;
         }
 
-        // Añadir el nuevo mensaje a la lista local
-        this.mensajes.push(res);
-        if (this.tema) {
-          this.tema.contadorMensajes = (this.tema.contadorMensajes || 0) + 1;
+        // Si hay archivos seleccionados, subirlos
+        if (this.archivosSeleccionados.length > 0) {
+          const uploadTasks = this.archivosSeleccionados.map(file =>
+            this.foroService.subirArchivoMensaje(res.identificador || res.id, usuarioActual.identificador || usuarioActual.id, file)
+          );
+
+          forkJoin(uploadTasks).subscribe({
+            next: (archivosSubidos) => {
+              res.archivos = archivosSubidos;
+              this.archivosSeleccionados = [];
+              this.finalizarComentario(res);
+            },
+            error: (err) => {
+              console.error("Error al subir archivos", err);
+              this.toastService.error("Mensaje publicado, pero hubo un error al subir los archivos");
+              this.archivosSeleccionados = [];
+              this.finalizarComentario(res);
+            }
+          });
+        } else {
+          this.finalizarComentario(res);
         }
-        this.nuevoComentario = '';
-        this.mostrandoFormulario = false;
-
-        // Actualizar caché
-        const cacheKey = `tema_slug_${this.temaSlug}_cache`;
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          tema: this.tema,
-          mensajes: this.mensajes
-        }));
-
-        this.cdr.detectChanges();
-
-        // Hacer scroll al final para ver el nuevo comentario
-        setTimeout(() => {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
       },
       error: (err) => {
         console.error("Error al publicar el comentario", err);
@@ -446,19 +485,96 @@ export class ForoTema implements OnInit {
     });
   }
 
+  private finalizarComentario(nuevoMensaje: any) {
+    // Añadir el nuevo mensaje a la lista local
+    this.mensajes.push(nuevoMensaje);
+    if (this.tema) {
+      this.tema.contadorMensajes = (this.tema.contadorMensajes || 0) + 1;
+    }
+    this.nuevoComentario = '';
+    this.mostrandoFormulario = false;
+
+    // Actualizar caché
+    const cacheKey = `tema_slug_${this.temaSlug}_cache`;
+    sessionStorage.setItem(cacheKey, JSON.stringify({
+      tema: this.tema,
+      mensajes: this.mensajes
+    }));
+
+    this.cdr.detectChanges();
+
+    // Hacer scroll al final para ver el nuevo comentario
+    setTimeout(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 100);
+  }
+
+  // --- MÉTODOS PARA ARCHIVOS ---
+  onArchivosSeleccionados(event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      this.archivosSeleccionados = Array.from(event.target.files);
+    }
+  }
+
+  removerArchivo(index: number) {
+    this.archivosSeleccionados.splice(index, 1);
+  }
+
+  esImagen(nombreArchivo: string): boolean {
+    if (!nombreArchivo) return false;
+    const extension = nombreArchivo.split('.').pop()?.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '');
+  }
+
+  abrirLightbox(archivo: any, event: Event) {
+    event.preventDefault();
+    this.lightboxUrl = archivo.url;
+    this.lightboxNombre = archivo.nombreOriginal;
+    this.lightboxArchivo = archivo;
+  }
+
+  cerrarLightbox() {
+    this.lightboxUrl = null;
+    this.lightboxNombre = '';
+    this.lightboxArchivo = null;
+  }
+
+  descargarArchivo(archivo: any, event: Event) {
+    event.preventDefault();
+    const id = archivo.identificador || archivo.id;
+    
+    // Si no tenemos ID (por ejemplo, archivos temporales del lightbox), usamos la URL de S3
+    if (!id) {
+        if (archivo.url) window.location.href = archivo.url;
+        return;
+    }
+
+    // Usamos el endpoint proxy del backend.
+    // Al ser del mismo dominio que la API, el navegador respeta el "Content-Disposition: attachment"
+    // y abre directamente el explorador de archivos para guardar.
+    const backendUrl = `http://localhost:8080/api/archivos/${id}/descargar`;
+    const a = document.createElement('a');
+    a.href = backendUrl;
+    a.download = archivo.nombreOriginal || 'descarga';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 150);
+  }
+
   // --- MÉTODOS PARA EL TOOLBAR DE MARKDOWN ---
-  insertarMarkdown(tag: string, isBlock: boolean = false, isEdit: boolean = false) {
-    const selector = isEdit ? '.edit-textarea' : '.reply-textarea';
+  insertarMarkdown(tag: string, isBlock: boolean = false) {
+    const selector = '.reply-textarea';
     const textarea = document.querySelector(selector) as HTMLTextAreaElement;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const textoOriginal = isEdit ? this.mensajeEditandoTexto : this.nuevoComentario;
+    const textoOriginal = this.nuevoComentario;
     const seleccion = textoOriginal.substring(start, end);
 
     let nuevoTexto = '';
-    
+
     switch (tag) {
       case 'bold':
         nuevoTexto = `**${seleccion || 'texto'}**`;
@@ -480,12 +596,8 @@ export class ForoTema implements OnInit {
         break;
     }
 
-    if (isEdit) {
-      this.mensajeEditandoTexto = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
-    } else {
-      this.nuevoComentario = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
-    }
-    
+    this.nuevoComentario = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
+
     // Devolver el foco y ajustar cursor
     setTimeout(() => {
       textarea.focus();

@@ -35,7 +35,10 @@ public class TemaController {
 	@GetMapping
 	public List<Tema> listar() {
 		List<Tema> temas = temaService.listarTemas();
-		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		temas.forEach(t -> {
+			s3Service.procesarAvatar(t.getUsuario());
+			s3Service.procesarArchivos(t.getArchivos());
+		});
 		return temas;
 	}
 
@@ -44,6 +47,7 @@ public class TemaController {
 		return temaService.obtenerTemaPorId(id)
 				.map(t -> {
 					s3Service.procesarAvatar(t.getUsuario());
+					s3Service.procesarArchivos(t.getArchivos());
 					return ResponseEntity.ok(t);
 				})
 				.orElse(ResponseEntity.notFound().build());
@@ -54,6 +58,7 @@ public class TemaController {
 		return temaService.obtenerTemaPorSlug(slug)
 				.map(t -> {
 					s3Service.procesarAvatar(t.getUsuario());
+					s3Service.procesarArchivos(t.getArchivos());
 					return ResponseEntity.ok(t);
 				})
 				.orElse(ResponseEntity.notFound().build());
@@ -62,21 +67,30 @@ public class TemaController {
 	@GetMapping("/categoria/{id}")
 	public List<Tema> listarPorCategoria(@PathVariable int id) {
 		List<Tema> temas = temaService.obtenerTemasPorCategoria(id);
-		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		temas.forEach(t -> {
+			s3Service.procesarAvatar(t.getUsuario());
+			s3Service.procesarArchivos(t.getArchivos());
+		});
 		return temas;
 	}
 
 	@GetMapping("/tag/{nombre}")
 	public List<Tema> listarPorTag(@PathVariable String nombre) {
 		List<Tema> temas = temaService.obtenerTemasPorTag(nombre);
-		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		temas.forEach(t -> {
+			s3Service.procesarAvatar(t.getUsuario());
+			s3Service.procesarArchivos(t.getArchivos());
+		});
 		return temas;
 	}
 
 	@GetMapping("/{id}/relacionados")
 	public List<Tema> obtenerRelacionados(@PathVariable int id) {
 		List<Tema> temas = temaService.obtenerTemasRelacionados(id);
-		temas.forEach(t -> s3Service.procesarAvatar(t.getUsuario()));
+		temas.forEach(t -> {
+			s3Service.procesarAvatar(t.getUsuario());
+			s3Service.procesarArchivos(t.getArchivos());
+		});
 		return temas;
 	}
 
@@ -84,6 +98,7 @@ public class TemaController {
 	public Tema crear(@RequestBody Tema tema) {
 		Tema nuevoTema = temaService.crearTema(tema);
 		s3Service.procesarAvatar(nuevoTema.getUsuario());
+		s3Service.procesarArchivos(nuevoTema.getArchivos());
 		return nuevoTema;
 	}
 
@@ -110,6 +125,7 @@ public class TemaController {
 
 			Tema temaActualizado = temaService.editarTema(id, nuevoTitulo, nuevaDescripcion, tagsNombres);
 			s3Service.procesarAvatar(temaActualizado.getUsuario());
+			s3Service.procesarArchivos(temaActualizado.getArchivos());
 			return ResponseEntity.ok(temaActualizado);
 		} catch (RuntimeException e) {
 			return ResponseEntity.badRequest().body("Error al editar el tema: " + e.getMessage());

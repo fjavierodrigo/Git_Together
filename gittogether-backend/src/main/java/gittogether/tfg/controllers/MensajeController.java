@@ -36,6 +36,7 @@ public class MensajeController {
         try {
             Mensaje nuevoMensaje = mensajeService.crearMensaje(mensaje);
             s3Service.procesarAvatar(nuevoMensaje.getUsuario());
+            s3Service.procesarArchivos(nuevoMensaje.getArchivos());
             return ResponseEntity.ok(nuevoMensaje);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
@@ -48,14 +49,20 @@ public class MensajeController {
         if (mensajes.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        mensajes.forEach(m -> s3Service.procesarAvatar(m.getUsuario()));
+        mensajes.forEach(m -> {
+            s3Service.procesarAvatar(m.getUsuario());
+            s3Service.procesarArchivos(m.getArchivos());
+        });
         return ResponseEntity.ok(mensajes);
     }
 
     @GetMapping("/tema/{temaId}")
     public ResponseEntity<List<Mensaje>> obtenerPorTema(@PathVariable int temaId) {
         List<Mensaje> mensajes = mensajeService.obtenerMensajesDeUnTema(temaId);
-        mensajes.forEach(m -> s3Service.procesarAvatar(m.getUsuario()));
+        mensajes.forEach(m -> {
+            s3Service.procesarAvatar(m.getUsuario());
+            s3Service.procesarArchivos(m.getArchivos());
+        });
         return ResponseEntity.ok(mensajes);
     }
     
@@ -75,6 +82,7 @@ public class MensajeController {
             String nuevoContenido = payload.get("contenido");
             Mensaje mensajeActualizado = mensajeService.editarMensaje(id, nuevoContenido);
             s3Service.procesarAvatar(mensajeActualizado.getUsuario());
+            s3Service.procesarArchivos(mensajeActualizado.getArchivos());
             return ResponseEntity.ok(mensajeActualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error al editar: " + e.getMessage());

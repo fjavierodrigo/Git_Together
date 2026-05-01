@@ -65,6 +65,9 @@ public class Tema {
 	@JsonIgnoreProperties("tema")
 	private Set<TemaTag> tags = new HashSet<>();
 
+	@OneToMany(mappedBy = "tema", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	private java.util.List<ArchivoAdjunto> archivos = new java.util.ArrayList<>();
+
 	public int getIdentificador() {
 		return identificador;
 	}
@@ -151,6 +154,14 @@ public class Tema {
 
 	public void setTags(Set<TemaTag> tags) {
 		this.tags = tags;
+	}
+
+	public java.util.List<ArchivoAdjunto> getArchivos() {
+		return archivos;
+	}
+
+	public void setArchivos(java.util.List<ArchivoAdjunto> archivos) {
+		this.archivos = archivos;
 	}
 
 	@Override

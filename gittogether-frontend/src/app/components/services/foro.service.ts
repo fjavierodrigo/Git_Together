@@ -11,6 +11,7 @@ export class ForoService {
     private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
     private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
     private API_TAGS = 'http://localhost:8080/api/tags';
+    private API_ARCHIVOS = 'http://localhost:8080/api/archivos';
 
     // Variables para almacenar la caché en memoria RAM del navegador
     private temasCache$: Observable<any[]> | null = null;
@@ -125,6 +126,23 @@ export class ForoService {
 
     editCategoria(id: number, nombre: string): Observable<any> {
         return this.http.put(`${this.API_CATEGORIAS}/${id}`, { nombre });
+    }
+
+    // --- ARCHIVOS ---
+    subirArchivoTema(temaId: number, usuarioId: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post(`${this.API_ARCHIVOS}/tema/${temaId}/usuario/${usuarioId}`, formData);
+    }
+
+    subirArchivoMensaje(mensajeId: number, usuarioId: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post(`${this.API_ARCHIVOS}/mensaje/${mensajeId}/usuario/${usuarioId}`, formData);
+    }
+
+    eliminarArchivo(archivoId: number): Observable<any> {
+        return this.http.delete(`${this.API_ARCHIVOS}/${archivoId}`);
     }
 
     // Método para limpiar la caché si es necesario obligar a refrescar

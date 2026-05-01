@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import gittogether.tfg.entities.Mensaje;
 import gittogether.tfg.entities.Tema;
 import gittogether.tfg.entities.Usuario;
+import gittogether.tfg.entities.ArchivoAdjunto;
 import gittogether.tfg.repositories.MensajeRepository;
 import gittogether.tfg.repositories.TemaRepository;
 import gittogether.tfg.repositories.UsuarioRepository;
@@ -25,6 +26,9 @@ public class MensajeService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private S3Service s3Service;
 
 	// Permite ejecutar sentencias SQL nativas directamente en la base de datos
 	// Útil para evitar problemas de dependencias circulares o restricciones
@@ -93,6 +97,13 @@ public class MensajeService {
 		// (FK_LIKES_MENSAJE)
 		// en la base de datos antes de borrar el mensaje principal.
 		jdbcTemplate.update("DELETE FROM t_likes WHERE mensaje_id = ?", id);
+
+		// Eliminar archivos de S3
+		if (mensaje.getArchivos() != null) {
+			for (ArchivoAdjunto archivo : mensaje.getArchivos()) {
+				s3Service.eliminarArchivo(archivo.getS3Key());
+			}
+		}
 
 		mensajeRepository.delete(mensaje);
 	}

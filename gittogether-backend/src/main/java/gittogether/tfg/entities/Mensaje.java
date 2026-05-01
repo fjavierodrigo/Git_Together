@@ -49,6 +49,9 @@ public class Mensaje {
 	@JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "FK_MENSAJE_USUARIO"), nullable = false)
 	private Usuario usuario;
 
+	@jakarta.persistence.OneToMany(mappedBy = "mensaje", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	private java.util.List<ArchivoAdjunto> archivos = new java.util.ArrayList<>();
+
 	public int getIdentificador() {
 		return identificador;
 	}
@@ -95,6 +98,14 @@ public class Mensaje {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
+	}
+
+	public java.util.List<ArchivoAdjunto> getArchivos() {
+		return archivos;
+	}
+
+	public void setArchivos(java.util.List<ArchivoAdjunto> archivos) {
+		this.archivos = archivos;
 	}
 
 	@Override

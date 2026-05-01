@@ -22,6 +22,9 @@ import gittogether.tfg.repositories.TemaRepository;
 import gittogether.tfg.repositories.UsuarioRepository;
 import gittogether.tfg.repositories.TagRepository;
 import gittogether.tfg.repositories.TemaTagRepository;
+import gittogether.tfg.entities.ArchivoAdjunto;
+import gittogether.tfg.entities.Mensaje;
+import gittogether.tfg.repositories.MensajeRepository;
 
 @Service
 public class TemaService {
@@ -40,6 +43,12 @@ public class TemaService {
 
     @Autowired
     private TemaTagRepository temaTagRepository;
+
+    @Autowired
+    private S3Service s3Service;
+
+    @Autowired
+    private MensajeRepository mensajeRepository;
 
     public Tema crearTema(Tema tema) {
         tema.setVisitas(0);
@@ -132,9 +141,15 @@ public class TemaService {
     }
 
     public void eliminarTema(Integer id) {
-        if (!temaRepository.existsById(id)) {
-            throw new RuntimeException("El tema no existe");
-        }
+        Tema tema = temaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("El tema no existe"));
+        
+        // 1. Borrar TODO el directorio del tema en S3 (incluyendo subcarpetas de usuarios)
+        // Esto es mucho más eficiente que borrar uno por uno.
+        String rutaDirectorio = "temas/" + tema.getSlug();
+        s3Service.eliminarDirectorio(rutaDirectorio);
+        
+        // 2. Eliminar el tema de la DB (los registros de ArchivoAdjunto y Mensajes se borrarán en cascada)
         temaRepository.deleteById(id);
     }
 

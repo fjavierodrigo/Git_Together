@@ -47,6 +47,16 @@
             </div>
           </div>
         </div>
+
+        <div *ngIf="input.type === 'files'" class="files-editor">
+            <input type="file" multiple (change)="onFilesSelected(input, $event)" [id]="input.name">
+            <div class="selected-files-preview" *ngIf="input.value && input.value.length > 0" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <div class="selected-file-chip" *ngFor="let file of input.value; let i = index" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(var(--accent-color-rgb), 0.1); border: 1px solid rgba(var(--accent-color-rgb), 0.3); border-radius: 16px; font-size: 0.85rem;">
+                    <span class="chip-name" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ file.name || file.nombreOriginal }}</span>
+                    <button class="chip-remove" (click)="removeFile(input, i)" style="background: none; border: none; color: white; cursor: pointer;">&times;</button>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
 
