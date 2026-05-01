@@ -46,60 +46,69 @@
                 <article class="tema-detail-card" *ngIf="tema">
                     <div class="tema-header" style="position: relative;">
                         <!-- Menú de Opciones Tema (3 Puntos) -->
-                        <div class="options-menu-container" *ngIf="puedeEditarTema() || puedeBorrarTema()"
-                            style="position: absolute; top: 16px; right: 16px;">
-                            <button class="btn-options" (click)="toggleMenu('tema', $event)" title="Opciones">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="5" r="1"></circle>
-                                    <circle cx="12" cy="12" r="1"></circle>
-                                    <circle cx="12" cy="19" r="1"></circle>
-                                </svg>
-                            </button>
 
-                            <div class="options-dropdown" *ngIf="activeMenuId === 'tema'">
-                                <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
-                                    <span>Editar Tema</span>
-                                </button>
-                                <button *ngIf="puedeBorrarTema()" (click)="borrarTema()" class="dropdown-item delete">
-                                    <span>Eliminar Tema</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <span class="tema-category-tag" *ngIf="tema.categoria">
-                            {{ tema.categoria.nombre }}
-                        </span>
                         <h1 class="tema-title-main">{{ tema.titulo || 'Sin título' }}</h1>
 
-                        <div class="tema-author-info">
-                            <div class="author-avatar-container">
-                                <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
-                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" 
-                                    (error)="tema.avatarError = true"
-                                    class="author-avatar-img">
-                                <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
-                                    {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
-                                </div>
-                            </div>
-                            <div class="author-details">
-                                <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
-                                    }}</span>
+                        <div class="tema-meta-badges">
+                            <span class="tema-category-tag" *ngIf="tema.categoria">
+                                {{ tema.categoria.nombre }}
+                            </span>
+                            <!-- Etiquetas del Tema -->
+                            <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0">
+                                <span class="tema-tag" *ngFor="let tt of tema.tags" (click)="onTagSelected(tt.tag)">
+                                    #{{ tt.tag?.nombre }}
+                                </span>
                             </div>
                         </div>
 
                         <!-- Descripción del Tema -->
                         <div class="tema-body-content" *ngIf="tema.descripcion">
-                            {{ tema.descripcion }}
+                            <markdown [data]="tema.descripcion" class="markdown-content"></markdown>
                         </div>
 
-                        <!-- Etiquetas del Tema -->
-                        <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0">
-                            <span class="tema-tag" *ngFor="let tt of tema.tags" (click)="onTagSelected(tt.tag)">
-                                #{{ tt.tag?.nombre }}
-                            </span>
+                        <!-- Footer del Tema -->
+                        <div class="tema-footer">
+                            <hr class="tema-divider">
+                            <div class="tema-author-info">
+                                <div class="author-avatar-container">
+                                    <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
+                                        [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" 
+                                        (error)="tema.avatarError = true"
+                                        class="author-avatar-img">
+                                    <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
+                                        {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
+                                    </div>
+                                </div>
+                                <div class="author-details">
+                                    <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
+                                    <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
+                                        }}</span>
+                                </div>
+
+                                <!-- Opciones del Tema (3 puntos) -->
+                                <div class="card-options-container" style="margin-left: auto; position: relative;"
+                                    *ngIf="puedeEditarTema() || puedeBorrarTema()">
+                                    <button class="btn-options" (click)="toggleMenu('tema', $event)" title="Opciones">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="5" r="1"></circle>
+                                            <circle cx="12" cy="12" r="1"></circle>
+                                            <circle cx="12" cy="19" r="1"></circle>
+                                        </svg>
+                                    </button>
+                                    <div class="options-dropdown" *ngIf="activeMenuId === 'tema'" style="right: 0; bottom: 100%; margin-bottom: 10px;">
+                                        <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
+                                            <span>Editar Tema</span>
+                                        </button>
+                                        <button *ngIf="puedeBorrarTema()" (click)="borrarTema()" class="dropdown-item delete">
+                                            <span>Eliminar Tema</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+
                     </div>
                 </article>
 
@@ -136,7 +145,7 @@
                                         {{ (mensaje.usuario?.nombre || 'U')[0].toUpperCase() }}
                                     </div>
                                 </div>
-                                <div class="comment-line" *ngIf="i < mensajes.length - 1"></div>
+                                <div class="comment-line" *ngIf="i < mensajes.length - 1 || mostrandoFormulario"></div>
                             </div>
                             <div class="comment-content"
                                 [class.op-content]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador"
@@ -182,7 +191,7 @@
                                 <!-- Modo Visualización -->
                                 <div class="comment-text"
                                     *ngIf="mensajeEditandoId !== (mensaje.identificador || mensaje.id)">
-                                    <p>{{ mensaje.contenido }}</p>
+                                    <markdown [data]="mensaje.contenido" class="markdown-content"></markdown>
                                 </div>
 
                                 <!-- Fecha abajo -->
@@ -195,8 +204,13 @@
                                 <div class="comment-edit-mode"
                                     *ngIf="mensajeEditandoId === (mensaje.identificador || mensaje.id)"
                                     style="margin-top: 10px;">
+                                    <div class="markdown-toolbar mini">
+                                        <button type="button" (click)="insertarMarkdown('bold', false, true)" title="Negrita"><b>B</b></button>
+                                        <button type="button" (click)="insertarMarkdown('code', false, true)" title="Código"><code>&lt;/&gt;</code></button>
+                                        <button type="button" (click)="insertarMarkdown('link', false, true)" title="Enlace">Link</button>
+                                    </div>
                                     <textarea [(ngModel)]="mensajeEditandoTexto" class="edit-textarea" rows="3"
-                                        style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.2); color: white; border: 1px solid var(--border-color);"></textarea>
+                                        placeholder="Edita tu mensaje..."></textarea>
                                     <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end;">
                                         <button class="btn-cancel" (click)="cancelarEdicion()"
                                             style="padding: 6px 12px; background: transparent; color: white; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Cancelar</button>
@@ -208,6 +222,50 @@
                             </div>
                         </div>
 
+                        <!-- Panel de Respuesta (Estilo Card) - Ahora al final de la lista -->
+                        <div class="comment-card reply-card-form" *ngIf="mostrandoFormulario">
+                            <div class="comment-sidebar">
+                                <div class="comment-avatar-container">
+                                    <img *ngIf="usuarioService.getUsuarioLogueado()?.avatar" 
+                                         [src]="usuarioService.getAvatarUrl(usuarioService.getUsuarioLogueado()?.avatar)" 
+                                         class="comment-avatar-img">
+                                    <div *ngIf="!usuarioService.getUsuarioLogueado()?.avatar" class="comment-avatar-fallback">
+                                        {{ (usuarioService.getUsuarioLogueado()?.nombre || 'U')[0].toUpperCase() }}
+                                    </div>
+                                </div>
+                                <div class="comment-line"></div>
+                            </div>
+
+                            <div class="comment-content">
+                                <div class="comment-meta">
+                                    <span class="comment-author">{{ usuarioService.getUsuarioLogueado()?.nombre }}</span>
+                                </div>
+
+                                <div class="reply-body">
+                                    <div class="markdown-toolbar">
+                                        <button type="button" (click)="insertarMarkdown('bold')" title="Negrita"><b>B</b></button>
+                                        <button type="button" (click)="insertarMarkdown('italic')" title="Cursiva"><i>I</i></button>
+                                        <button type="button" (click)="insertarMarkdown('h1')" title="Encabezado">H1</button>
+                                        <button type="button" (click)="insertarMarkdown('list')" title="Lista">List</button>
+                                        <button type="button" (click)="insertarMarkdown('code')" title="Código"><code>&lt;/&gt;</code></button>
+                                        <button type="button" (click)="insertarMarkdown('code', true)" title="Bloque de código">Code Block</button>
+                                        <button type="button" (click)="insertarMarkdown('link')" title="Enlace">Link</button>
+                                    </div>
+                                    <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu respuesta aquí (Markdown soportado)..." rows="4"
+                                        class="reply-textarea" (selectionchange)="actualizarPosicionCursor($event)"
+                                        #replyTextarea></textarea>
+                                </div>
+
+                                <div class="reply-actions-row">
+                                    <button class="btn-cancel-reply" (click)="mostrandoFormulario = false">Cancelar</button>
+                                    <button class="btn-submit-comment" (click)="comentar()"
+                                        [disabled]="!nuevoComentario.trim()">
+                                        Publicar comentario
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Estado Vacío -->
                         <div class="empty-comments" *ngIf="!cargando && mensajes.length === 0">
                             <div class="empty-icon-small">💬</div>
@@ -215,22 +273,13 @@
                         </div>
                     </div>
 
-                    <!-- Panel de Respuesta -->
-                    <div class="reply-panel" *ngIf="usuarioService.getUsuarioLogueado() && !cargando">
-                        <div class="reply-header">
-                            <h3>Añadir un comentario</h3>
-                        </div>
-                        <div class="reply-body">
-                            <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu respuesta aquí..." rows="4"
-                                class="reply-textarea"></textarea>
-                            <div class="reply-actions">
-                                <button class="btn-submit-comment" (click)="comentar()"
-                                    [disabled]="!nuevoComentario.trim()">
-                                    Publicar comentario
-                                </button>
-                            </div>
-                        </div>
+                    <!-- Botón para añadir comentario (Abajo del todo) -->
+                    <div class="reply-toggle-container" *ngIf="usuarioService.getUsuarioLogueado() && !mostrandoFormulario">
+                        <button class="btn-toggle-reply" (click)="mostrandoFormulario = true">
+                            <i class="fas fa-plus"></i> Añadir un comentario
+                        </button>
                     </div>
+
                 </section>
             </main>
         </div>

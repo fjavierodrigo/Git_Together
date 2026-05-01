@@ -60,4 +60,83 @@ html, body {
     color: var(--text-primary);
     font-family: 'Inter', 'Outfit', sans-serif;
     transition: background-color var(--transition-base), color var(--transition-base);
-}
+}
+
+/* --- Markdown & PrismJS Styling --- */
+pre[class*="language-"] {
+    background: var(--bg-surface-elevated) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5em !important;
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+    overflow: auto;
+}
+
+code[class*="language-"] {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace !important;
+    font-size: 0.95rem !important;
+    text-shadow: none !important;
+}
+
+/* Inline code (el que va entre texto) */
+:not(pre) > code {
+    background: var(--bg-hover) !important;
+    color: var(--accent-color) !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 6px !important;
+    font-size: 0.9em !important;
+}
+
+/* Markdown Headers */
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+    color: var(--text-primary);
+    margin-top: 0 !important;
+    margin-bottom: 4px !important; /* Mínimo */
+    font-family: 'Outfit', sans-serif;
+}
+
+.markdown-content p {
+    margin-top: 0 !important;
+    margin-bottom: 1px !important; /* Prácticamente pegados */
+    line-height: 1.4;
+}
+
+.markdown-content ul, .markdown-content ol {
+    margin-top: 0 !important;
+    margin-bottom: 1px !important;
+    padding-left: 1rem;
+}
+
+.markdown-content li {
+    margin-top: 0 !important;
+    margin-bottom: 1px !important;
+}
+
+.markdown-content p:last-child, 
+.markdown-content ul:last-child, 
+.markdown-content ol:last-child {
+    margin-bottom: 0 !important;
+}
+
+.markdown-content blockquote {
+    border-left: 3px solid var(--accent-color);
+    padding-left: 0.8rem;
+    margin-top: 0 !important;
+    margin-bottom: 2px !important;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.markdown-content hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 4px 0;
+}
+
+/* PrismJS margins fix */
+.markdown-content pre[class*="language-"] {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+}
+

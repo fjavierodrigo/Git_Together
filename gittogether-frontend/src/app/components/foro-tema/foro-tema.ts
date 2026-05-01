@@ -11,6 +11,7 @@ import { ModalService } from '../../services/modal.service';
 import { switchMap } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
 import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
+import { MarkdownComponent } from 'ngx-markdown';
 
 @Component({
   selector: 'app-foro-tema',
@@ -19,7 +20,8 @@ import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
     CommonModule, 
     FormsModule, 
     NavbarComponent, 
-    CategoriaSidebar
+    CategoriaSidebar,
+    MarkdownComponent
   ],
   templateUrl: './foro-tema.html',
   styleUrl: './foro-tema.css'
@@ -38,6 +40,10 @@ export class ForoTema implements OnInit {
   activeMenuId: string | number | null = null;
 
   @ViewChild('innerContainer') innerContainer!: ElementRef;
+  @ViewChild('replyTextarea') replyTextarea!: ElementRef;
+
+  nuevoComentario: string = '';
+  mostrandoFormulario: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -382,7 +388,6 @@ export class ForoTema implements OnInit {
   }
 
   // --- ACCIÓN COMENTAR ---
-  nuevoComentario: string = '';
 
   comentar() {
     const usuarioActual = this.usuarioService.getUsuarioLogueado();
@@ -418,6 +423,7 @@ export class ForoTema implements OnInit {
           this.tema.contadorMensajes = (this.tema.contadorMensajes || 0) + 1;
         }
         this.nuevoComentario = '';
+        this.mostrandoFormulario = false;
 
         // Actualizar caché
         const cacheKey = `tema_slug_${this.temaSlug}_cache`;
@@ -438,5 +444,62 @@ export class ForoTema implements OnInit {
         this.toastService.error("Error al enviar el comentario");
       }
     });
+  }
+
+  // --- MÉTODOS PARA EL TOOLBAR DE MARKDOWN ---
+  insertarMarkdown(tag: string, isBlock: boolean = false, isEdit: boolean = false) {
+    const selector = isEdit ? '.edit-textarea' : '.reply-textarea';
+    const textarea = document.querySelector(selector) as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const textoOriginal = isEdit ? this.mensajeEditandoTexto : this.nuevoComentario;
+    const seleccion = textoOriginal.substring(start, end);
+
+    let nuevoTexto = '';
+    
+    switch (tag) {
+      case 'bold':
+        nuevoTexto = `**${seleccion || 'texto'}**`;
+        break;
+      case 'italic':
+        nuevoTexto = `*${seleccion || 'texto'}*`;
+        break;
+      case 'code':
+        nuevoTexto = isBlock ? `\n\`\`\`javascript\n${seleccion || '// código aquí'}\n\`\`\`\n` : `\`${seleccion || 'código'}\``;
+        break;
+      case 'h1':
+        nuevoTexto = `\n# ${seleccion || 'Título'}\n`;
+        break;
+      case 'link':
+        nuevoTexto = `[${seleccion || 'enlace'}](https://...)`;
+        break;
+      case 'list':
+        nuevoTexto = `\n- ${seleccion || 'elemento'}`;
+        break;
+    }
+
+    if (isEdit) {
+      this.mensajeEditandoTexto = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
+    } else {
+      this.nuevoComentario = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
+    }
+    
+    // Devolver el foco y ajustar cursor
+    setTimeout(() => {
+      textarea.focus();
+      const pos = start + nuevoTexto.length;
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  }
+
+
+  // Método para forzar la actualización de la posición del cursor
+
+  // Método para forzar la actualización de la posición del cursor
+  actualizarPosicionCursor(event: any) {
+    // Este método puede estar vacío; su propósito principal es disparar
+    // la detección de cambios de Angular cuando el usuario interactúa con el textarea.
   }
 }
