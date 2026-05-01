@@ -12,12 +12,13 @@
     align-items: center;
     width: 100%;
     padding: 0 48px;
-    background-color: rgba(13, 17, 23, 0.8);
+    background-color: var(--bg-surface);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-sizing: border-box;
-    border-bottom: 1px solid #30363d;
+    border-bottom: 1px solid var(--border-color);
     height: 72px;
+    transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .header-logo {
@@ -29,16 +30,85 @@
 .logo-icon {
     width: 28px;
     height: 28px;
-    color: #58a6ff;
+    color: var(--accent-color);
 }
 
 .logo-text {
     font-family: 'Outfit', sans-serif;
     font-size: 1.25rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
 }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Theme Switch Styles */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 54px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
+    transition: var(--transition-base);
+    border-radius: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 3px;
+    background-color: var(--accent-color);
+    transition: var(--transition-base);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+.icon {
+    width: 14px;
+    height: 14px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: var(--transition-base);
+}
+
+.sun { color: #f59e0b; }
+.moon { color: #818cf8; }
 
 .header-user {
     display: flex;
@@ -51,13 +121,19 @@
     align-items: center;
     gap: 10px;
     padding: 6px 14px;
-    background: #1d232c;
-    border: 1px solid #30363d;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
     border-radius: 100px;
+    transition: var(--transition-base);
+}
+
+.user-info-section:hover {
+    border-color: var(--accent-color);
+    background-color: var(--bg-hover);
 }
 
 .user-name {
-    color: #adbac7;
+    color: var(--text-primary);
     font-size: 0.85rem;
     font-weight: 600;
 }
@@ -73,21 +149,21 @@
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #0d1117;
+    border: 2px solid var(--bg-surface);
 }
 
 .initials-avatar {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background-color: #0D8ABC;
-    color: #fff;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
     font-weight: 800;
-    border: 2px solid #0d1117;
+    border: 2px solid var(--bg-surface);
     text-transform: uppercase;
 }
 
@@ -97,21 +173,21 @@
     right: 0;
     width: 8px;
     height: 8px;
-    background-color: #238636;
-    border: 1.5px solid #0d1117;
+    background-color: var(--success-color);
+    border: 1.5px solid var(--bg-surface);
     border-radius: 50%;
 }
 
 .header-divider {
     width: 1px;
     height: 20px;
-    background-color: #30363d;
+    background-color: var(--border-color);
 }
 
 .btn-header-logout {
-    background: rgba(248, 81, 73, 0.1);
-    border: 1px solid rgba(248, 81, 73, 0.2);
-    color: #f85149;
+    background: var(--error-bg);
+    border: 1px solid var(--error-bg);
+    color: var(--error-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -123,8 +199,8 @@
 }
 
 .btn-header-logout:hover {
-    background-color: #f85149;
-    color: #ffffff;
+    background-color: var(--error-color);
+    color: white;
     transform: translateY(-1px);
 }
 
@@ -136,4 +212,4 @@
 @media (max-width: 768px) {
     .navbar-container { padding: 0 24px; }
     .user-name { display: none; }
-}
+}

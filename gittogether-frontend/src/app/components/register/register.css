@@ -1,22 +1,6 @@
-/* Design System - Sophisticated Blue Dark Mode */
+/* Design System - Global Variables Used */
 :host {
-    --bg-dark: #0b0e14;
-    --bg-surface: #161b22;
-    --border-color: #30363d;
-
-    --text-primary: #adbac7;
-    --text-secondary: #768390;
-    --text-tertiary: #444c56;
-
-    --accent-color: #58a6ff;
-    --accent-gradient: linear-gradient(135deg, #1f6feb 0%, #58a6ff 100%);
-
-    --error-color: #f85149;
-    --error-bg: rgba(248, 81, 73, 0.1);
-
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
 }
 
 .login-wrapper {
@@ -31,9 +15,9 @@
     left: 0;
     font-family: 'Inter', sans-serif;
     overflow: hidden;
-    background:
-        radial-gradient(circle at 100% 0%, rgba(31, 111, 235, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 0% 100%, rgba(33, 38, 45, 0.2) 0%, transparent 40%);
+    background-image:
+        radial-gradient(circle at 100% 0%, var(--accent-glow) 0%, transparent 40%),
+        radial-gradient(circle at 0% 100%, var(--bg-surface-elevated) 0%, transparent 40%);
 }
 
 .bg-brand-icon {
@@ -73,7 +57,7 @@
 }
 
 .login-card {
-    background: rgba(22, 27, 34, 0.8);
+    background: var(--bg-surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 64px 48px;
@@ -114,7 +98,7 @@
     margin: 0 0 10px;
     font-size: 2.5rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
     letter-spacing: -0.04em;
 }
 
@@ -200,7 +184,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     margin-bottom: 8px;
 }
 
@@ -215,17 +199,17 @@
     left: 16px;
     width: 18px;
     height: 18px;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     transition: var(--transition);
 }
 
 .input-wrapper input {
     width: 100%;
     padding: 12px 16px 12px 48px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-surface-elevated);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 1rem;
     transition: var(--transition);
 }
@@ -245,7 +229,7 @@
     width: 100%;
     align-self: center;
     background: var(--accent-gradient);
-    color: #ffffff;
+    color: white;
     border: none;
     border-radius: var(--radius-md);
     font-size: 0.95rem;
@@ -318,7 +302,7 @@
 .login-footer {
     margin-top: 32px;
     font-size: 0.9rem;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
 }
 
 .login-footer a {

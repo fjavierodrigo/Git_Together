@@ -79,10 +79,11 @@
                             <div class="tema-meta">
                                 <span class="tema-author-wrapper">
                                     <div class="tema-author-avatar-container">
-                                        <img *ngIf="tema.usuario?.avatar"
+                                        <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
                                             [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
+                                            (error)="tema.avatarError = true"
                                             class="tema-author-avatar">
-                                        <div *ngIf="!tema.usuario?.avatar" class="tema-author-fallback">
+                                        <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="tema-author-fallback">
                                             {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
                                         </div>
                                     </div>

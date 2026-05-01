@@ -16,15 +16,11 @@
     <app-navbar></app-navbar>
 
     <div class="tema-layout">
-        <app-categoria-sidebar 
-            [categorias]="categorias" 
-            [tags]="tags"
-            [activeCategorySlug]="tema?.categoria?.slug"
-            (categorySelected)="onCategorySelected($event)"
-            (tagSelected)="onTagSelected($event)">
+        <app-categoria-sidebar [categorias]="categorias" [tags]="tags" [activeCategorySlug]="tema?.categoria?.slug"
+            (categorySelected)="onCategorySelected($event)" (tagSelected)="onTagSelected($event)">
         </app-categoria-sidebar>
 
-        <div class="tema-container-inner">
+        <div class="tema-container-inner" #innerContainer>
             <header class="tema-header-nav">
                 <button class="btn-back" (click)="volver()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -78,9 +74,11 @@
 
                         <div class="tema-author-info">
                             <div class="author-avatar-container">
-                                <img *ngIf="tema.usuario?.avatar"
-                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" class="author-avatar-img">
-                                <div *ngIf="!tema.usuario?.avatar" class="author-avatar-fallback">
+                                <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
+                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" 
+                                    (error)="tema.avatarError = true"
+                                    class="author-avatar-img">
+                                <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
                                     {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
                                 </div>
                             </div>
@@ -97,10 +95,8 @@
                         </div>
 
                         <!-- Etiquetas del Tema -->
-                        <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0" style="margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
-                            <span class="tema-tag" *ngFor="let tt of tema.tags" 
-                                  (click)="onTagSelected(tt.tag)"
-                                  style="cursor: pointer; background: rgba(88, 166, 255, 0.1); color: #58a6ff; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; border: 1px solid rgba(88, 166, 255, 0.2); transition: all 0.2s ease;">
+                        <div class="tema-tags-list" *ngIf="tema.tags && tema.tags.length > 0">
+                            <span class="tema-tag" *ngFor="let tt of tema.tags" (click)="onTagSelected(tt.tag)">
                                 #{{ tt.tag?.nombre }}
                             </span>
                         </div>
@@ -132,10 +128,11 @@
                             <div class="comment-sidebar">
                                 <div class="comment-avatar-container"
                                     [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">
-                                    <img *ngIf="mensaje.usuario?.avatar"
+                                    <img *ngIf="mensaje.usuario?.avatar && !mensaje.avatarError"
                                         [src]="usuarioService.getAvatarUrl(mensaje.usuario.avatar)"
+                                        (error)="mensaje.avatarError = true"
                                         class="comment-avatar-img">
-                                    <div *ngIf="!mensaje.usuario?.avatar" class="comment-avatar-fallback">
+                                    <div *ngIf="!mensaje.usuario?.avatar || mensaje.avatarError" class="comment-avatar-fallback">
                                         {{ (mensaje.usuario?.nombre || 'U')[0].toUpperCase() }}
                                     </div>
                                 </div>
@@ -237,5 +234,41 @@
                 </section>
             </main>
         </div>
+
+        <!-- Right Sidebar: Related Topics -->
+        <aside class="tema-sidebar-right">
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">Temas Relacionados</h3>
+                <div class="related-list" *ngIf="temasRelacionados.length > 0">
+                    <div class="related-item" *ngFor="let rel of temasRelacionados" (click)="verTemaRelacionado(rel)">
+                        <div class="related-tag">{{ rel.categoria?.nombre }}</div>
+                        <h4 class="related-title">{{ rel.titulo }}</h4>
+                        <div class="related-meta">
+                            <span>{{ rel.usuario?.nombre }}</span>
+                            <span class="dot">•</span>
+                            <span>{{ rel.contadorMensajes || 0 }} respuestas</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-related" *ngIf="temasRelacionados.length === 0 && !cargando">
+                    <p>No hay temas similares en este momento.</p>
+                </div>
+            </div>
+
+            <!-- Optional: Thread Stats Card -->
+            <div class="sidebar-card stats-card" *ngIf="tema">
+                <h3 class="sidebar-title">Estadísticas</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ tema.visitas || 0 }}</span>
+                        <span class="stat-label">Visitas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ mensajes.length }}</span>
+                        <span class="stat-label">Mensajes</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Usuario } from '../services/usuario';
+import { ThemeService } from '../../services/theme.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
@@ -12,6 +13,9 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   styleUrl: './navbar.css'
 })
 export class NavbarComponent implements OnInit {
+  private themeService = inject(ThemeService);
+  isDarkTheme$ = this.themeService.isDarkTheme$;
+  
   usuarioLogueado: any = null;
   imageError: boolean = false;
 
@@ -20,6 +24,11 @@ export class NavbarComponent implements OnInit {
     private router: Router,
     private sanitizer: DomSanitizer
   ) { }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
 
   ngOnInit(): void {
     // Nos suscribimos al usuario para reaccionar a cambios (ej: subir foto)

@@ -73,17 +73,25 @@ export class Foro implements OnInit {
     const cachedTags = sessionStorage.getItem('foro_tags_cache');
 
     if (cachedTemas && cachedCats) {
-      this.temas = JSON.parse(cachedTemas);
-      this.categorias = JSON.parse(cachedCats);
-      this.tags = cachedTags ? JSON.parse(cachedTags) : [];
-      
-      // Aplicar filtros de la URL sobre la caché recién cargada
-      const params = this.route.snapshot.queryParams;
-      if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
-      if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
-      
-      this.cargando = false;
-      this.restaurarScroll();
+      try {
+        this.temas = JSON.parse(cachedTemas);
+        this.categorias = JSON.parse(cachedCats);
+        this.tags = cachedTags ? JSON.parse(cachedTags) : [];
+        
+        // Aplicar filtros de la URL sobre la caché recién cargada
+        const params = this.route.snapshot.queryParams;
+        if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
+        if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
+        
+        this.cargando = false;
+        this.restaurarScroll();
+      } catch (e) {
+        console.error("Error al parsear caché del foro", e);
+        sessionStorage.removeItem('foro_temas_cache');
+        sessionStorage.removeItem('foro_categorias_cache');
+        sessionStorage.removeItem('foro_tags_cache');
+        this.cargando = true;
+      }
       this.cdr.detectChanges();
     } else {
       this.cargando = true;

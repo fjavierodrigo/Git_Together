@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -30,11 +30,14 @@ export class ForoTema implements OnInit {
   mensajes: any[] = [];
   categorias: any[] = [];
   tags: any[] = [];
+  temasRelacionados: any[] = [];
   cargando: boolean = true;
   skeletonMensajes = Array(3).fill(0);
 
   // Para controlar qué menú de opciones (3 puntos) está abierto
   activeMenuId: string | number | null = null;
+
+  @ViewChild('innerContainer') innerContainer!: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -48,13 +51,16 @@ export class ForoTema implements OnInit {
 
 
   ngOnInit(): void {
-    this.temaSlug = this.route.snapshot.paramMap.get('slug');
-    if (this.temaSlug) {
-      this.cargarDatos();
-      this.cargarSidebar();
-    } else {
-      this.router.navigate(['/foro']);
-    }
+    // Escuchar cambios en el slug de la URL para recargar datos sin refrescar la página
+    this.route.paramMap.subscribe(params => {
+      this.temaSlug = params.get('slug');
+      if (this.temaSlug) {
+        this.cargarDatos();
+        this.cargarSidebar();
+      } else {
+        this.router.navigate(['/foro']);
+      }
+    });
   }
 
   cargarDatos(): void {
@@ -97,12 +103,43 @@ export class ForoTema implements OnInit {
         }));
 
         this.cargando = false;
+        this.cargarTemasRelacionados();
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error("Error cargando el tema o mensajes", err);
         this.cargando = false;
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cargarTemasRelacionados(): void {
+    if (!this.tema || !this.tema.tags || this.tema.tags.length === 0) return;
+
+    this.foroService.getTemas().subscribe(allTemas => {
+      // Filtrar temas que compartan al menos un tag, excluyendo el actual
+      const currentTagIds = this.tema.tags.map((tt: any) => tt.tag?.identificador || tt.tag?.id);
+      
+      this.temasRelacionados = allTemas.filter((t: any) => {
+        const isSame = (t.identificador || t.id) === (this.tema.identificador || this.tema.id);
+        if (isSame) return false;
+
+        const hasCommonTag = t.tags?.some((tt: any) => 
+          currentTagIds.includes(tt.tag?.identificador || tt.tag?.id)
+        );
+        return hasCommonTag;
+      }).slice(0, 5); // Limitar a 5 sugerencias
+
+      this.cdr.detectChanges();
+    });
+  }
+
+  verTemaRelacionado(tema: any) {
+    this.router.navigate(['/foro/tema', tema.slug]).then(() => {
+      // Al usar subscribe en ngOnInit, la carga se dispara sola al cambiar la URL
+      if (this.innerContainer) {
+        this.innerContainer.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   }

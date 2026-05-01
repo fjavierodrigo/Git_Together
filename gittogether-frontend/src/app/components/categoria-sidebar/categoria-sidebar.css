@@ -8,7 +8,7 @@
     width: 280px;
     background-color: transparent;
     padding: 32px 24px;
-    border-right: 1px solid #30363d !important; /* Línea separadora fija */
+    border-right: 1px solid var(--border-color) !important; /* Línea separadora fija */
     overflow-y: auto;
     height: 100%;
     transition: all 0.3s ease;
@@ -46,17 +46,17 @@
 }
 
 .category-link:hover {
-    background-color: #21262d !important;
-    color: #58a6ff !important;
+    background-color: var(--bg-hover) !important;
+    color: var(--accent-color) !important;
     transform: translateX(8px) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .category-link.active {
-    background: rgba(88, 166, 255, 0.1) !important;
-    color: #58a6ff !important;
+    background: var(--accent-glow) !important;
+    color: var(--accent-color) !important;
     font-weight: 700 !important;
-    border-left: 4px solid #58a6ff !important; /* LA LÍNEA AZUL FIJA */
+    border-left: 4px solid var(--accent-color) !important; /* LA LÍNEA AZUL FIJA */
 }
 
 .cat-icon {

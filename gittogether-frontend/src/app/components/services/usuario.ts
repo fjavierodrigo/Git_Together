@@ -97,6 +97,8 @@ export class Usuario {
       try {
         return JSON.parse(userStr);
       } catch (e) {
+        console.error("Error al parsear usuario logueado", e);
+        localStorage.removeItem('usuarioLogueado');
         return null;
       }
     }
