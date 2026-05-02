@@ -52,7 +52,7 @@ export class Foro implements OnInit {
     this.route.queryParams.subscribe(params => {
       const catSlug = params['cat'];
       const tagName = params['tag'];
-      
+
       // Intentar aplicar filtros si ya tenemos datos en caché
       if (this.categorias.length > 0) {
         this.categoriaActiva = this.categorias.find(c => c.slug === catSlug) || null;
@@ -77,12 +77,12 @@ export class Foro implements OnInit {
         this.temas = JSON.parse(cachedTemas);
         this.categorias = JSON.parse(cachedCats);
         this.tags = cachedTags ? JSON.parse(cachedTags) : [];
-        
+
         // Aplicar filtros de la URL sobre la caché recién cargada
         const params = this.route.snapshot.queryParams;
         if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
         if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
-        
+
         this.cargando = false;
         this.restaurarScroll();
       } catch (e) {
@@ -167,7 +167,7 @@ export class Foro implements OnInit {
 
     // Filtro por Tag (usando la estructura TemaTag -> Tag -> identificador)
     if (this.tagActivo) {
-      filtrados = filtrados.filter(t => 
+      filtrados = filtrados.filter(t =>
         t.tags?.some((tt: any) => tt.tag?.identificador === this.tagActivo.identificador)
       );
     }
@@ -202,7 +202,7 @@ export class Foro implements OnInit {
       if (this.mainContent) {
         const scroll = sessionStorage.getItem('foroScrollPosition');
         if (scroll) {
-          // Desactivamos momentáneamente el scroll suave para que sea instantáneo
+          // Desactivamos momentáneamente el scroll para que sea instantáneo
           this.mainContent.nativeElement.style.scrollBehavior = 'auto';
           this.mainContent.nativeElement.scrollTop = parseInt(scroll, 10);
 
@@ -334,27 +334,27 @@ export class Foro implements OnInit {
         next: (res) => {
           const filesToUpload: File[] = data.archivos || [];
           if (filesToUpload.length > 0) {
-              const uploadTasks = filesToUpload.map(file => 
-                  this.foroService.subirArchivoTema(res.identificador || res.id, usuarioActual.identificador || usuarioActual.id, file)
-              );
-              
-              forkJoin(uploadTasks).subscribe({
-                  next: () => {
-                      this.toastService.success("¡Tema creado con éxito!");
-                      this.foroService.clearCache();
-                      this.cargarDatosIniciales();
-                  },
-                  error: (err) => {
-                      console.error("Error al subir archivos del tema", err);
-                      this.toastService.error("Tema creado, pero hubo un error al subir archivos.");
-                      this.foroService.clearCache();
-                      this.cargarDatosIniciales();
-                  }
-              });
+            const uploadTasks = filesToUpload.map(file =>
+              this.foroService.subirArchivoTema(res.identificador || res.id, usuarioActual.identificador || usuarioActual.id, file)
+            );
+
+            forkJoin(uploadTasks).subscribe({
+              next: () => {
+                this.toastService.success("¡Tema creado con éxito!");
+                this.foroService.clearCache();
+                this.cargarDatosIniciales();
+              },
+              error: (err) => {
+                console.error("Error al subir archivos del tema", err);
+                this.toastService.error("Tema creado, pero hubo un error al subir archivos.");
+                this.foroService.clearCache();
+                this.cargarDatosIniciales();
+              }
+            });
           } else {
-              this.toastService.success("¡Tema creado con éxito!");
-              this.foroService.clearCache();
-              this.cargarDatosIniciales();
+            this.toastService.success("¡Tema creado con éxito!");
+            this.foroService.clearCache();
+            this.cargarDatosIniciales();
           }
         },
         error: (err) => {
