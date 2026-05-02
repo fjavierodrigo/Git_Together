@@ -27,6 +27,12 @@
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--text-primary);
   font-family: 'Outfit', 'Inter', sans-serif;
+  transition: max-width 0.3s ease;
+}
+
+.modal-large {
+  max-width: 800px;
+  width: 95%;
 }
 
 /* Header */
@@ -232,4 +238,61 @@
 .suggestion-item:hover {
   background: var(--accent-glow);
   color: var(--accent-color);
+}
+
+/* Markdown Editor Styles */
+.markdown-editor-container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-dark);
+  transition: all 0.2s ease;
+}
+
+.markdown-editor-container:focus-within {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.markdown-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.markdown-toolbar button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.markdown-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.markdown-textarea {
+  min-height: 200px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  resize: vertical;
+  background: transparent !important;
+}
+
+.markdown-textarea:focus {
+  box-shadow: none !important;
+  border-color: transparent !important;
 }

@@ -131,4 +131,49 @@ export class ModalComponent implements OnInit, OnDestroy {
       input.value.splice(index, 1);
     }
   }
+
+  // --- MÉTODOS PARA EL TOOLBAR DE MARKDOWN ---
+  insertarMarkdown(input: ModalInput, tag: string, isBlock: boolean = false) {
+    // Busca el textarea específico para este input
+    const selector = `#${input.name}`;
+    const textarea = document.querySelector(selector) as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const textoOriginal = input.value || '';
+    const seleccion = textoOriginal.substring(start, end);
+
+    let nuevoTexto = '';
+
+    switch (tag) {
+      case 'bold':
+        nuevoTexto = `**${seleccion || 'texto'}**`;
+        break;
+      case 'italic':
+        nuevoTexto = `*${seleccion || 'texto'}*`;
+        break;
+      case 'code':
+        nuevoTexto = isBlock ? `\n\`\`\`javascript\n${seleccion || '// código aquí'}\n\`\`\`\n` : `\`${seleccion || 'código'}\``;
+        break;
+      case 'h1':
+        nuevoTexto = `\n# ${seleccion || 'Título'}\n`;
+        break;
+      case 'link':
+        nuevoTexto = `[${seleccion || 'enlace'}](https://...)`;
+        break;
+      case 'list':
+        nuevoTexto = `\n- ${seleccion || 'elemento'}`;
+        break;
+    }
+
+    input.value = textoOriginal.substring(0, start) + nuevoTexto + textoOriginal.substring(end);
+
+    // Devolver el foco y ajustar cursor
+    setTimeout(() => {
+      textarea.focus();
+      const pos = start + nuevoTexto.length;
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  }
 }

@@ -263,9 +263,9 @@ export class Foro implements OnInit {
     event.stopPropagation(); // Evitar que el clic abra el tema
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: tema.titulo },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: tema.descripcion || '' },
+      { name: 'descripcion', label: 'Descripción', type: 'markdown', value: tema.descripcion || '' },
       { name: 'tags', label: 'Etiquetas', type: 'tags', value: tema.tags?.map((tt: any) => tt.tag?.nombre) || [] }
-    ]);
+    ], true);
 
     if (data && data.titulo?.trim()) {
       const id = tema.identificador || tema.id;
@@ -310,10 +310,10 @@ export class Foro implements OnInit {
 
     const data = await this.modalService.prompt(`Nuevo Tema en "${this.categoriaActiva.nombre}"`, [
       { name: 'titulo', label: 'Título del Tema', type: 'text', placeholder: 'Escribe un título atractivo...' },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', placeholder: '¿De qué trata este tema?' },
+      { name: 'descripcion', label: 'Descripción', type: 'markdown', placeholder: '¿De qué trata este tema?' },
       { name: 'tags', label: 'Etiquetas', type: 'tags', value: [], placeholder: 'Busca o añade etiquetas...' },
       { name: 'archivos', label: 'Archivos Adjuntos', type: 'files', value: [] }
-    ]);
+    ], true);
 
     if (data && data.titulo?.trim()) {
       // Procesar tags: el modal ahora devuelve un array de strings

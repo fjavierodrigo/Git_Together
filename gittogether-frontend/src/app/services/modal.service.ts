@@ -8,6 +8,7 @@ export interface ModalConfig {
   confirmText?: string;
   cancelText?: string;
   type?: 'confirm' | 'form' | 'danger';
+  isLarge?: boolean;
   resolve?: (value: any) => void;
 }
 
@@ -15,7 +16,7 @@ export interface ModalInput {
   name: string;
   label: string;
   placeholder?: string;
-  type: 'text' | 'textarea' | 'tags' | 'files';
+  type: 'text' | 'textarea' | 'markdown' | 'tags' | 'files';
   value?: any;
 }
 
@@ -49,7 +50,7 @@ export class ModalService {
    * Opens a form modal with inputs.
    * Returns a promise that resolves to an object with input values or null if cancelled.
    */
-  prompt(title: string, inputs: ModalInput[]): Promise<any> {
+  prompt(title: string, inputs: ModalInput[], isLarge: boolean = false): Promise<any> {
     return new Promise((resolve) => {
       this.modalSubject.next({
         title,
@@ -57,6 +58,7 @@ export class ModalService {
         confirmText: 'Guardar',
         cancelText: 'Cancelar',
         type: 'form',
+        isLarge,
         resolve
       });
     });

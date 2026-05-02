@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener, ViewChild, ElementRef, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -56,7 +56,7 @@ export class ForoTema implements OnInit {
     private router: Router,
     private foroService: ForoService,
     private cdr: ChangeDetectorRef,
-    public usuarioService: Usuario, // Inyectar Usuario service (Público para el HTML)
+    @Inject(Usuario) public usuarioService: any, // Inyectar Usuario service (Público para el HTML)
     private toastService: ToastService,
     private modalService: ModalService
   ) { }
@@ -288,10 +288,10 @@ export class ForoTema implements OnInit {
     const oldFiles = this.tema.archivos ? [...this.tema.archivos] : [];
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: this.tema.titulo },
-      { name: 'descripcion', label: 'Descripción', type: 'textarea', value: this.tema.descripcion || '' },
+      { name: 'descripcion', label: 'Descripción', type: 'markdown', value: this.tema.descripcion || '' },
       { name: 'tags', label: 'Etiquetas', type: 'tags', value: this.tema.tags?.map((tt: any) => tt.tag?.nombre) || [] },
       { name: 'archivos', label: 'Archivos Adjuntos (Nuevos y Existentes)', type: 'files', value: [...oldFiles] }
-    ]);
+    ], true);
 
     if (data && data.titulo?.trim()) {
       const id = this.tema.identificador || this.tema.id;
@@ -378,9 +378,9 @@ export class ForoTema implements OnInit {
   async editarMensaje(mensaje: any) {
     const oldFiles = mensaje.archivos ? [...mensaje.archivos] : [];
     const data = await this.modalService.prompt("Editar Mensaje", [
-      { name: 'contenido', label: 'Mensaje', type: 'textarea', value: mensaje.contenido || '' },
+      { name: 'contenido', label: 'Mensaje', type: 'markdown', value: mensaje.contenido || '' },
       { name: 'archivos', label: 'Archivos Adjuntos (Nuevos y Existentes)', type: 'files', value: [...oldFiles] }
-    ]);
+    ], true);
 
     if (data && data.contenido?.trim()) {
       const id = mensaje.identificador || mensaje.id;

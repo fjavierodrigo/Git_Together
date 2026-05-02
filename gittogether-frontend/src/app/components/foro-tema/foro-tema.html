@@ -61,25 +61,6 @@
                 <!-- Cabecera del Tema -->
                 <article class="tema-detail-card" *ngIf="tema">
                     <div class="tema-header" style="position: relative;">
-                        <!-- Menú de Opciones Tema (3 Puntos) -->
-                        <div class="options-menu-container" *ngIf="puedeEditarTema() || puedeBorrarTema()" style="position: absolute; top: 0px; right: 0px; z-index: 10;">
-                            <button class="btn-options" (click)="toggleMenu('tema', $event)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="5" r="1"></circle>
-                                    <circle cx="12" cy="12" r="1"></circle>
-                                    <circle cx="12" cy="19" r="1"></circle>
-                                </svg>
-                            </button>
-                            <div class="options-dropdown" *ngIf="activeMenuId === 'tema'">
-                                <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
-                                    <span>Editar</span>
-                                </button>
-                                <button *ngIf="puedeBorrarTema()" (click)="borrarTema()" class="dropdown-item delete">
-                                    <span>Eliminar</span>
-                                </button>
-                            </div>
-                        </div>
-
                         <h1 class="tema-title-main">{{ tema.titulo || 'Sin título' }}</h1>
 
                         <div class="tema-meta-badges">
@@ -156,6 +137,24 @@
                                         }}</span>
                                 </div>
 
+                                <!-- Menú de Opciones Tema (3 Puntos) -->
+                                <div class="options-menu-container" *ngIf="puedeEditarTema() || puedeBorrarTema()" style="margin-left: auto; position: relative; top: auto; right: auto;">
+                                    <button class="btn-options" (click)="toggleMenu('tema', $event)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="5" r="1"></circle>
+                                            <circle cx="12" cy="12" r="1"></circle>
+                                            <circle cx="12" cy="19" r="1"></circle>
+                                        </svg>
+                                    </button>
+                                    <div class="options-dropdown" *ngIf="activeMenuId === 'tema'" style="bottom: 100%; top: auto; margin-bottom: 8px;">
+                                        <button *ngIf="puedeEditarTema()" (click)="editarTema()" class="dropdown-item">
+                                            <span>Editar</span>
+                                        </button>
+                                        <button *ngIf="puedeBorrarTema()" (click)="borrarTema()" class="dropdown-item delete">
+                                            <span>Eliminar</span>
+                                        </button>
+                                    </div>
+                                </div>
 
                             </div>
                         </div>
