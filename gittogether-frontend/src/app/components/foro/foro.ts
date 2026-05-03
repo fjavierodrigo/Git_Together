@@ -42,90 +42,58 @@ export class Foro implements OnInit {
   activeMenuId: string | number | null = null;
 
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
-  /*private cdr: ChangeDetectorRef -> Dependencia para que Angular actualice la vista sin necesidad de interaccion del usuario al detectar cambios en los datos*/
-  constructor(private foroService: ForoService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService, private modalService: ModalService) { }
+  constructor(private foroService: ForoService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService, private modalService: ModalService) { 
+    // Verificamos instantáneamente si tenemos datos en el servicio para evitar el estado de carga (skeletons)
+    const temasSnapshot = this.foroService.getTemasSnapshot();
+    if (temasSnapshot && temasSnapshot.length > 0) {
+      this.temas = temasSnapshot;
+      this.cargando = false;
+    }
+  }
 
 
   // Ciclo de Vida OnInit: Punto de entrada principal al renderizar el componente
   ngOnInit(): void {
-    // 1. Detectar parámetros de la URL inmediatamente
-    this.route.queryParams.subscribe(params => {
-      const catSlug = params['cat'];
-      const tagName = params['tag'];
-      
-      // Intentar aplicar filtros si ya tenemos datos en caché
-      if (this.categorias.length > 0) {
-        this.categoriaActiva = this.categorias.find(c => c.slug === catSlug) || null;
-      }
-      if (this.tags.length > 0) {
-        this.tagActivo = this.tags.find(t => t.nombre === tagName) || null;
+    // 1. Suscripciones Reactivas: Los datos fluyen instantáneamente desde el servicio
+    this.foroService.temas$.subscribe(temas => {
+      this.temas = temas;
+      if (temas.length > 0) {
+        this.cargando = false;
+        this.restaurarScroll();
       }
       this.cdr.detectChanges();
     });
 
-    this.cargarDatosIniciales();
+    this.foroService.categorias$.subscribe(cats => {
+      this.categorias = cats;
+      this.actualizarFiltrosDesdeUrl();
+      this.cdr.detectChanges();
+    });
+
+    this.foroService.tags$.subscribe(tags => {
+      this.tags = tags;
+      this.actualizarFiltrosDesdeUrl();
+      this.cdr.detectChanges();
+    });
+
+    // 2. Sincronización con la URL
+    this.route.queryParams.subscribe(() => {
+      this.actualizarFiltrosDesdeUrl();
+    });
+
+    // 3. Disparar carga/refresco inicial
+    this.foroService.cargarTodo();
   }
 
-  // Método de Carga: Gestiona la obtención de temas y categorías mediante el patrón SWR
-  cargarDatosIniciales() {
-    const cachedTemas = sessionStorage.getItem('foro_temas_cache');
-    const cachedCats = sessionStorage.getItem('foro_categorias_cache');
-    const cachedTags = sessionStorage.getItem('foro_tags_cache');
-
-    if (cachedTemas && cachedCats) {
-      try {
-        this.temas = JSON.parse(cachedTemas);
-        this.categorias = JSON.parse(cachedCats);
-        this.tags = cachedTags ? JSON.parse(cachedTags) : [];
-        
-        // Aplicar filtros de la URL sobre la caché recién cargada
-        const params = this.route.snapshot.queryParams;
-        if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
-        if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
-        
-        this.cargando = false;
-        this.restaurarScroll();
-      } catch (e) {
-        console.error("Error al parsear caché del foro", e);
-        sessionStorage.removeItem('foro_temas_cache');
-        sessionStorage.removeItem('foro_categorias_cache');
-        sessionStorage.removeItem('foro_tags_cache');
-        this.cargando = true;
-      }
-      this.cdr.detectChanges();
-    } else {
-      this.cargando = true;
+  private actualizarFiltrosDesdeUrl() {
+    const params = this.route.snapshot.queryParams;
+    if (params['cat'] && this.categorias.length > 0) {
+      this.categoriaActiva = this.categorias.find((c: any) => c.slug === params['cat']) || null;
     }
-
-    forkJoin({
-      categorias: this.foroService.getCategorias(true),
-      temas: this.foroService.getTemas(true),
-      tags: this.foroService.getTags()
-    }).subscribe({
-      next: (res) => {
-        this.categorias = res.categorias;
-        this.temas = res.temas;
-        this.tags = res.tags;
-
-        sessionStorage.setItem('foro_categorias_cache', JSON.stringify(res.categorias));
-        sessionStorage.setItem('foro_temas_cache', JSON.stringify(res.temas));
-        sessionStorage.setItem('foro_tags_cache', JSON.stringify(res.tags));
-
-        // Re-confirmar filtros con datos frescos
-        const params = this.route.snapshot.queryParams;
-        if (params['cat']) this.categoriaActiva = this.categorias.find(c => c.slug === params['cat']);
-        if (params['tag']) this.tagActivo = this.tags.find(t => t.nombre === params['tag']);
-
-        this.cargando = false;
-        this.restaurarScroll();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error("Error cargando el foro", err);
-        this.cargando = false;
-        this.cdr.detectChanges();
-      }
-    });
+    if (params['tag'] && this.tags.length > 0) {
+      this.tagActivo = this.tags.find((t: any) => t.nombre === params['tag']) || null;
+    }
+    this.cdr.detectChanges();
   }
 
   // Selección de Categoría: Lógica para filtrar por una categoría específica o desmarcarla
@@ -247,9 +215,7 @@ export class Foro implements OnInit {
       const id = tema.identificador || tema.id;
       this.foroService.deleteTema(id).subscribe({
         next: () => {
-          this.temas = this.temas.filter(t => (t.identificador || t.id) !== id);
-          this.foroService.clearCache();
-          this.cdr.detectChanges();
+          this.toastService.success("Tema eliminado");
         },
         error: (err) => {
           console.error("Error al borrar el tema", err);
@@ -260,22 +226,48 @@ export class Foro implements OnInit {
   }
 
   async editarTema(tema: any, event: Event) {
-    event.stopPropagation(); // Evitar que el clic abra el tema
+    event.stopPropagation();
+    
+    // Obtenemos los archivos actuales (si no existen en el objeto resumido, se asume vacío)
+    const oldFiles = tema.archivos ? [...tema.archivos] : [];
+    
     const data = await this.modalService.prompt("Editar Tema", [
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: tema.titulo },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', value: tema.descripcion || '' },
-      { name: 'tags', label: 'Etiquetas', type: 'tags', value: tema.tags?.map((tt: any) => tt.tag?.nombre) || [] }
+      { name: 'tags', label: 'Etiquetas', type: 'tags', value: tema.tags?.map((tt: any) => tt.tag?.nombre) || [] },
+      { name: 'archivos', label: 'Archivos Adjuntos', type: 'files', value: [...oldFiles] }
     ]);
 
     if (data && data.titulo?.trim()) {
       const id = tema.identificador || tema.id;
+      const finalFiles = data.archivos || [];
+      const filesToDelete = oldFiles.filter(old => !finalFiles.some((f: any) => (f.identificador || f.id) === (old.identificador || old.id)));
+      const newFiles = finalFiles.filter((f: any) => !f.identificador && !f.id);
+
+      // 1. Borrar archivos eliminados
+      for (let fd of filesToDelete) {
+        this.foroService.eliminarArchivo(fd.identificador || fd.id).subscribe();
+      }
+
+      // 2. Actualizar datos básicos
       this.foroService.editTema(id, data.titulo, data.descripcion, data.tags).subscribe({
-        next: (temaActualizado) => {
-          tema.titulo = data.titulo;
-          tema.descripcion = data.descripcion;
-          tema.tags = temaActualizado.tags; // Actualizar con los tags devueltos por el backend
-          this.foroService.clearCache();
+        next: () => {
           this.toastService.success("Tema actualizado correctamente");
+          
+          // 3. Subir nuevos archivos si hay
+          if (newFiles.length > 0) {
+            const uploadTasks = newFiles.map((file: File) =>
+              this.foroService.subirArchivoTema(id, this.usuarioService.getUsuarioLogueado().identificador || this.usuarioService.getUsuarioLogueado().id, file)
+            );
+            forkJoin(uploadTasks).subscribe({
+              next: () => {
+                this.foroService.cargarTodo(); // Recargar para ver los cambios
+              }
+            });
+          } else {
+            this.foroService.cargarTodo();
+          }
+          
           sessionStorage.removeItem(`tema_slug_${tema.slug}_cache`);
           this.cdr.detectChanges();
         },
@@ -289,10 +281,7 @@ export class Foro implements OnInit {
 
   // Métodos que ahora delega el sidebar pero que el componente principal necesita conocer
   actualizarCategorias() {
-    this.foroService.getCategorias(true).subscribe(cats => {
-      this.categorias = cats;
-      this.cdr.detectChanges();
-    });
+    this.foroService.getCategorias().subscribe();
   }
 
   // --- ACCIÓN CREAR TEMA ---
@@ -341,20 +330,14 @@ export class Foro implements OnInit {
               forkJoin(uploadTasks).subscribe({
                   next: () => {
                       this.toastService.success("¡Tema creado con éxito!");
-                      this.foroService.clearCache();
-                      this.cargarDatosIniciales();
                   },
                   error: (err) => {
                       console.error("Error al subir archivos del tema", err);
                       this.toastService.error("Tema creado, pero hubo un error al subir archivos.");
-                      this.foroService.clearCache();
-                      this.cargarDatosIniciales();
                   }
               });
           } else {
               this.toastService.success("¡Tema creado con éxito!");
-              this.foroService.clearCache();
-              this.cargarDatosIniciales();
           }
         },
         error: (err) => {
@@ -370,5 +353,9 @@ export class Foro implements OnInit {
       .replace(/[^\w\s-]/g, '')
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '') + '-' + Date.now();
+  }
+
+  trackByTemaId(index: number, tema: any): number | string {
+    return tema.identificador || tema.id || index;
   }
 }

@@ -94,71 +94,64 @@
                             </div>
                         </div>
 
-                        <!-- Descripción del Tema -->
-                        <div class="tema-body-content" *ngIf="tema.descripcion">
-                            <markdown [data]="tema.descripcion" class="markdown-content"></markdown>
+                        <!-- Información del Autor (Ahora arriba) -->
+                        <div class="tema-author-info-top" *ngIf="tema.usuario">
+                            <div class="author-avatar-container mini">
+                                <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
+                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" 
+                                    (error)="tema.avatarError = true"
+                                    class="author-avatar-img">
+                                <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
+                                    {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
+                                </div>
+                            </div>
+                            <div class="author-details-row">
+                                <span class="author-name-small">{{ tema.usuario?.nombre || 'Usuario' }}</span>
+                                <span class="author-sep">•</span>
+                                <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                            </div>
                         </div>
 
-                        <!-- Archivos Adjuntos del Tema -->
-                        <div class="attachments-section" *ngIf="tema.archivos && tema.archivos.length > 0">
+                        <hr class="tema-divider-light">
+
+                        <!-- Descripción del Tema e Imágenes Integradas -->
+                        <div class="tema-body-content" *ngIf="tema.descripcion || getImagenes(tema.archivos).length > 0">
+                            <markdown *ngIf="tema.descripcion" [data]="tema.descripcion" class="markdown-content"></markdown>
+                            
+                            <!-- Galería de Imágenes Integrada -->
+                            <div class="attachments-images-grid integrated" *ngIf="getImagenes(tema.archivos).length > 0">
+                                <div *ngFor="let archivo of getImagenes(tema.archivos)" class="attachment-img-card" (click)="abrirLightbox(archivo, $event)">
+                                    <img [src]="archivo.url" [alt]="archivo.nombreOriginal" class="attachment-img">
+                                    <div class="attachment-img-overlay">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Otros Archivos Adjuntos (Documentos) -->
+                        <div class="attachments-section" *ngIf="getDocumentos(tema.archivos).length > 0">
                             <div class="attachments-section-header">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                <span>{{ tema.archivos.length }} archivo{{ tema.archivos.length !== 1 ? 's' : '' }} adjunto{{ tema.archivos.length !== 1 ? 's' : '' }}</span>
+                                <span>{{ getDocumentos(tema.archivos).length }} archivo{{ getDocumentos(tema.archivos).length !== 1 ? 's' : '' }} adjunto{{ getDocumentos(tema.archivos).length !== 1 ? 's' : '' }}</span>
                             </div>
                             
-                            <!-- Galería de Imágenes -->
-                            <div class="attachments-images-grid">
-                                <ng-container *ngFor="let archivo of tema.archivos">
-                                    <div *ngIf="esImagen(archivo.nombreOriginal)" class="attachment-img-card" (click)="abrirLightbox(archivo, $event)">
-                                        <img [src]="archivo.url" [alt]="archivo.nombreOriginal" class="attachment-img">
-                                        <div class="attachment-img-overlay">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                                        </div>
-                                    </div>
-                                </ng-container>
-                            </div>
-
-                            <!-- Lista de Documentos -->
                             <div class="attachments-files-list">
-                                <ng-container *ngFor="let archivo of tema.archivos">
-                                    <a *ngIf="!esImagen(archivo.nombreOriginal)" href="#" (click)="descargarArchivo(archivo, $event)" class="attachment-file-row">
-                                        <div class="attachment-file-icon-box">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                        </div>
-                                        <div class="attachment-file-details">
-                                            <span class="file-name">{{ archivo.nombreOriginal }}</span>
-                                            <span class="file-meta">{{ archivo.nombreOriginal.split('.').pop()?.toUpperCase() }} • Archivo</span>
-                                        </div>
-                                        <div class="file-action-icon">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                        </div>
-                                    </a>
-                                </ng-container>
-                            </div>
-                        </div>
-
-                        <!-- Footer del Tema -->
-                        <div class="tema-footer">
-                            <hr class="tema-divider">
-                            <div class="tema-author-info">
-                                <div class="author-avatar-container">
-                                    <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
-                                        [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)" 
-                                        (error)="tema.avatarError = true"
-                                        class="author-avatar-img">
-                                    <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
-                                        {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
+                                <a *ngFor="let archivo of getDocumentos(tema.archivos)" href="#" (click)="descargarArchivo(archivo, $event)" class="attachment-file-row">
+                                    <div class="attachment-file-icon-box">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                     </div>
-                                </div>
-                                <div class="author-details">
-                                    <span class="author-name">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                    <span class="tema-full-date">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
-                                        }}</span>
-                                </div>
-
-
+                                    <div class="attachment-file-details">
+                                        <span class="file-name">{{ archivo.nombreOriginal }}</span>
+                                        <span class="file-meta">{{ archivo.nombreOriginal.split('.').pop()?.toUpperCase() }} • Archivo</span>
+                                    </div>
+                                    <div class="file-action-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </div>
+                                </a>
                             </div>
                         </div>
+
 
 
                     </div>
@@ -240,41 +233,36 @@
                                     </div>
                                 </div>
 
-                                <!-- Modo Visualización -->
-                                <div class="comment-text">
-                                    <markdown [data]="mensaje.contenido" class="markdown-content"></markdown>
+                                <!-- Texto del Mensaje e Imágenes Integradas -->
+                                <div class="comment-text" *ngIf="mensaje.contenido || getImagenes(mensaje.archivos).length > 0">
+                                    <markdown *ngIf="mensaje.contenido" [data]="mensaje.contenido" class="markdown-content"></markdown>
+                                    
+                                    <!-- Galería de Imágenes Integrada en Mensaje -->
+                                    <div class="attachments-images-grid integrated mini" *ngIf="getImagenes(mensaje.archivos).length > 0">
+                                        <div *ngFor="let archivo of getImagenes(mensaje.archivos)" class="attachment-img-card" (click)="abrirLightbox(archivo, $event)">
+                                            <img [src]="archivo.url" [alt]="archivo.nombreOriginal" class="attachment-img">
+                                            <div class="attachment-img-overlay">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Archivos Adjuntos del Mensaje -->
-                                <div class="attachments-section msg-attachments" *ngIf="mensaje.archivos && mensaje.archivos.length > 0">
-                                    <!-- Galería de Imágenes -->
-                                    <div class="attachments-images-grid mini">
-                                        <ng-container *ngFor="let archivo of mensaje.archivos">
-                                            <div *ngIf="esImagen(archivo.nombreOriginal)" class="attachment-img-card" (click)="abrirLightbox(archivo, $event)">
-                                                <img [src]="archivo.url" [alt]="archivo.nombreOriginal" class="attachment-img">
-                                                <div class="attachment-img-overlay">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                                                </div>
-                                            </div>
-                                        </ng-container>
-                                    </div>
-
-                                    <!-- Lista de Documentos -->
+                                <!-- Otros Archivos Adjuntos en Mensaje (Documentos) -->
+                                <div class="attachments-section msg-attachments" *ngIf="getDocumentos(mensaje.archivos).length > 0">
                                     <div class="attachments-files-list">
-                                        <ng-container *ngFor="let archivo of mensaje.archivos">
-                                            <a *ngIf="!esImagen(archivo.nombreOriginal)" href="#" (click)="descargarArchivo(archivo, $event)" class="attachment-file-row">
-                                                <div class="attachment-file-icon-box">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                                </div>
-                                                <div class="attachment-file-details">
-                                                    <span class="file-name">{{ archivo.nombreOriginal }}</span>
-                                                    <span class="file-meta">{{ archivo.nombreOriginal.split('.').pop()?.toUpperCase() }}</span>
-                                                </div>
-                                                <div class="file-action-icon">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                                </div>
-                                            </a>
-                                        </ng-container>
+                                        <a *ngFor="let archivo of getDocumentos(mensaje.archivos)" href="#" (click)="descargarArchivo(archivo, $event)" class="attachment-file-row">
+                                            <div class="attachment-file-icon-box">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                            </div>
+                                            <div class="attachment-file-details">
+                                                <span class="file-name">{{ archivo.nombreOriginal }}</span>
+                                                <span class="file-meta">{{ archivo.nombreOriginal.split('.').pop()?.toUpperCase() }}</span>
+                                            </div>
+                                            <div class="file-action-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            </div>
+                                        </a>
                                     </div>
                                 </div>
 
@@ -330,9 +318,9 @@
                                         <input id="file-upload" type="file" multiple (change)="onArchivosSeleccionados($event)" style="display: none;">
                                     </div>
                                     <div style="flex: 1;"></div>
-                                    <button class="btn-cancel-reply" (click)="mostrandoFormulario = false">Cancelar</button>
-                                    <button class="btn-submit-comment" (click)="comentar()"
-                                        [disabled]="!nuevoComentario.trim()">
+                                    <button type="button" class="btn-cancel-reply" (click)="cancelarComentario()">Cancelar</button>
+                                    <button type="button" class="btn-submit-comment" (click)="comentar()"
+                                        [disabled]="!nuevoComentario || !nuevoComentario.trim()">
                                         Publicar comentario
                                     </button>
                                 </div>

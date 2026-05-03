@@ -70,11 +70,15 @@
                 </ng-container>
 
                 <ng-container *ngIf="!cargando && temasFiltrados.length > 0">
-                    <div class="tema-card" *ngFor="let tema of temasFiltrados" (click)="verTema(tema)"
+                    <div class="tema-card" *ngFor="let tema of temasFiltrados; trackBy: trackByTemaId" (click)="verTema(tema)"
                         [style.z-index]="activeMenuId === (tema.identificador || tema.id) ? 1000 : 1"
                         style="position: relative;">
                         <div class="tema-category-tag"></div>
                         <div class="tema-info">
+                            <!-- Categoría del tema visible -->
+                            <div class="tema-category-label" *ngIf="!categoriaActiva && tema.categoria">
+                                {{ tema.categoria.nombre }}
+                            </div>
                             <h4 class="tema-title">{{ tema.titulo }}</h4>
                             <div class="tema-meta">
                                 <span class="tema-author-wrapper">
@@ -83,7 +87,7 @@
                                             [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
                                             (error)="tema.avatarError = true"
                                             class="tema-author-avatar">
-                                        <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="tema-author-fallback">
+                                        <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="tema-author-avatar-fallback">
                                             {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
                                         </div>
                                     </div>

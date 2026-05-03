@@ -12,6 +12,7 @@
     --text-secondary: #768390;
     --text-muted: #444c56;
     --accent-color: #58a6ff;
+    --accent-color-rgb: 88, 166, 255;
     --accent-glow: rgba(88, 166, 255, 0.1);
     --accent-gradient: linear-gradient(135deg, #58a6ff 0%, #1f6feb 100%);
     --success-color: #238636;
@@ -19,7 +20,7 @@
     --error-color: #f85149;
     --error-bg: rgba(248, 81, 73, 0.1);
     --bg-overlay: rgba(0, 0, 0, 0.7);
-    
+
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 9999px;
@@ -40,6 +41,7 @@ body.light-theme {
     --text-secondary: #4b5563;
     --text-muted: #9ca3af;
     --accent-color: #3b82f6;
+    --accent-color-rgb: 59, 130, 246;
     --accent-glow: rgba(59, 130, 246, 0.1);
     --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     --success-color: #10b981;
@@ -51,7 +53,8 @@ body.light-theme {
     --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -80,7 +83,7 @@ code[class*="language-"] {
 }
 
 /* Inline code (el que va entre texto) */
-:not(pre) > code {
+:not(pre)>code {
     background: var(--bg-hover) !important;
     color: var(--accent-color) !important;
     padding: 0.2em 0.4em !important;
@@ -89,20 +92,25 @@ code[class*="language-"] {
 }
 
 /* Markdown Headers */
-.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
     color: var(--text-primary);
     margin-top: 0 !important;
-    margin-bottom: 4px !important; /* Mínimo */
+    margin-bottom: 4px !important;
+    /* Mínimo */
     font-family: 'Outfit', sans-serif;
 }
 
 .markdown-content p {
     margin-top: 0 !important;
-    margin-bottom: 1px !important; /* Prácticamente pegados */
+    margin-bottom: 1px !important;
+    /* Prácticamente pegados */
     line-height: 1.4;
 }
 
-.markdown-content ul, .markdown-content ol {
+.markdown-content ul,
+.markdown-content ol {
     margin-top: 0 !important;
     margin-bottom: 1px !important;
     padding-left: 1rem;
@@ -113,8 +121,8 @@ code[class*="language-"] {
     margin-bottom: 1px !important;
 }
 
-.markdown-content p:last-child, 
-.markdown-content ul:last-child, 
+.markdown-content p:last-child,
+.markdown-content ul:last-child,
 .markdown-content ol:last-child {
     margin-bottom: 0 !important;
 }
@@ -139,4 +147,3 @@ code[class*="language-"] {
     margin-top: 0 !important;
     margin-bottom: 4px !important;
 }
-

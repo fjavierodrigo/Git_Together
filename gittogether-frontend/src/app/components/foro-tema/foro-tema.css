@@ -166,6 +166,13 @@
     opacity: 0.5;
 }
 
+.tema-divider-light {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 20px 0 28px 0;
+    opacity: 0.3;
+}
+
 .comments-header {
     display: flex;
     justify-content: space-between;
@@ -189,6 +196,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .author-avatar-img {
@@ -201,6 +210,7 @@
     font-weight: 700;
     color: white;
     font-size: 1.2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .author-details {
@@ -221,12 +231,55 @@
     font-weight: 500;
 }
 
+/* Author Top Row */
+.tema-author-info-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+    padding: 4px 0;
+}
+
+.author-avatar-container.mini {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+}
+
+.author-avatar-container.mini .author-avatar-fallback {
+    font-size: 1.1rem;
+}
+
+.author-details-row {
+    display: flex;
+    flex-direction: column;
+    /* Cambiado a columna para que respire mejor */
+    gap: 2px;
+}
+
+.author-name-small {
+    font-weight: 700;
+    color: var(--accent-color);
+    /* Color de acento para que resalte el nombre */
+    font-size: 1.2rem;
+}
+
+.author-sep {
+    display: none;
+    /* Quitamos el separador de punto en modo columna */
+}
+
+.tema-date-small {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
 .tema-body-content {
     font-size: 1.1rem;
     line-height: 1.6;
     color: var(--text-primary);
     margin-bottom: 24px;
-    white-space: pre-wrap;
 }
 
 /* Comments Section */
@@ -334,9 +387,12 @@
 }
 
 .comment-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 8px;
-    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    padding-top: 5px;
+    /* Reducido de 12px */
+    margin-top: 5px;
+    /* Reducido de 20px */
+    opacity: 0.7;
 }
 
 .comment-date {
@@ -755,7 +811,19 @@
 .related-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.related-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.related-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
 }
 
 .related-item {
@@ -872,7 +940,7 @@
 .attachments-list {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    border-top: 1px dashed var(--border-color);
 }
 
 /* ==========================================================================
@@ -882,7 +950,7 @@
 .attachments-section {
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    border-top: 1px dashed var(--border-color);
 }
 
 .msg-attachments {
@@ -895,7 +963,7 @@
     align-items: center;
     gap: 8px;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
     margin-bottom: 16px;
 }
 
@@ -913,8 +981,20 @@
     margin-bottom: 16px;
 }
 
+.attachments-images-grid.integrated {
+    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
 .attachments-images-grid.mini {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.attachments-images-grid.integrated.mini {
+    margin-top: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
 }
 
 .attachment-img-card {
@@ -922,8 +1002,8 @@
     aspect-ratio: 16/10;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -948,7 +1028,7 @@
 .attachment-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -964,7 +1044,7 @@
     width: 32px;
     height: 32px;
     color: white;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 /* Lista de Archivos (Grid Horizontal) */
@@ -979,8 +1059,8 @@
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -990,10 +1070,10 @@
 }
 
 .attachment-file-row:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-hover);
     border-color: var(--accent-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .attachment-file-icon-box {
@@ -1023,7 +1103,7 @@
 
 .attachment-file-details .file-name {
     font-size: 0.88rem;
-    color: #e6edf3; /* Color estilo GitHub mas brillante */
+    color: var(--text-primary);
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -1032,7 +1112,7 @@
 
 .attachment-file-details .file-meta {
     font-size: 0.72rem;
-    color: #8b949e; /* Gris suave estilo GitHub */
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
@@ -1043,7 +1123,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-muted);
     transition: all 0.2s ease;
 }
 
@@ -1068,8 +1148,13 @@
 }
 
 @keyframes lightboxFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .lightbox-panel {
@@ -1084,8 +1169,15 @@
 }
 
 @keyframes lightboxSlideIn {
-    from { transform: scale(0.94); opacity: 0; }
-    to   { transform: scale(1);    opacity: 1; }
+    from {
+        transform: scale(0.94);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .lightbox-close {
@@ -1095,8 +1187,8 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     color: white;
     font-size: 1.4rem;
     line-height: 1;
@@ -1109,7 +1201,7 @@
 }
 
 .lightbox-close:hover {
-    background: rgba(255,60,60,0.5);
+    background: rgba(255, 60, 60, 0.5);
 }
 
 .lightbox-img {
@@ -1117,7 +1209,7 @@
     max-height: 80vh;
     object-fit: contain;
     border-radius: 10px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 .lightbox-footer {
@@ -1131,7 +1223,7 @@
 
 .lightbox-filename {
     font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255, 255, 255, 0.55);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1170,18 +1262,19 @@
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    color: var(--text-color);
+    color: var(--text-primary);
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .btn-upload-file:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    color: var(--accent-color);
 }
 
 .upload-icon {
@@ -1195,7 +1288,7 @@
     gap: 8px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-color);
     width: 100%;
 }
 
@@ -1204,11 +1297,11 @@
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    background: rgba(var(--accent-color-rgb), 0.1);
-    border: 1px solid rgba(var(--accent-color-rgb), 0.3);
+    background: var(--accent-glow);
+    border: 1px solid var(--accent-glow);
     border-radius: 16px;
     font-size: 0.85rem;
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .chip-name {
@@ -1221,7 +1314,7 @@
 .chip-remove {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 1.1rem;
     line-height: 1;

@@ -78,9 +78,6 @@ export class ForoTema implements OnInit {
   cargarDatos(): void {
     if (!this.temaSlug) return;
 
-    this.tema = null;
-    this.mensajes = [];
-
     // SWR Pattern: Intentar cargar del caché primero para carga instantánea
     const cacheKey = `tema_slug_${this.temaSlug}_cache`;
     const cachedData = sessionStorage.getItem(cacheKey);
@@ -88,9 +85,13 @@ export class ForoTema implements OnInit {
     if (cachedData) {
       const parsed = JSON.parse(cachedData);
       this.tema = parsed.tema;
-      this.mensajes = parsed.mensajes;
+      this.mensajes = parsed.mensajes || [];
+      this.temasRelacionados = parsed.temasRelacionados || [];
       this.cargando = false;
     } else {
+      // Solo limpiamos y ponemos cargando si NO tenemos nada en caché para este slug
+      this.tema = null;
+      this.mensajes = [];
       this.cargando = true;
     }
 
@@ -108,10 +109,16 @@ export class ForoTema implements OnInit {
       next: (mensajesRes) => {
         this.mensajes = mensajesRes;
 
+        // Ordenar tags alfabéticamente para evitar saltos visuales
+        if (this.tema.tags) {
+          this.tema.tags.sort((a: any, b: any) => a.tag.nombre.localeCompare(b.tag.nombre));
+        }
+
         // Guardar en caché para la próxima vez
         sessionStorage.setItem(cacheKey, JSON.stringify({
           tema: this.tema,
-          mensajes: this.mensajes
+          mensajes: this.mensajes,
+          temasRelacionados: this.temasRelacionados
         }));
 
         this.cargando = false;
@@ -141,7 +148,15 @@ export class ForoTema implements OnInit {
           currentTagIds.includes(tt.tag?.identificador || tt.tag?.id)
         );
         return hasCommonTag;
-      }).slice(0, 5); // Limitar a 5 sugerencias
+      }).slice(0, 5); // Limitar a 3 sugerencias de temas relacionados
+
+      // Actualizar la caché local para que en la próxima visita todo sea instantáneo
+      const cacheKey = `tema_slug_${this.temaSlug}_cache`;
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        tema: this.tema,
+        mensajes: this.mensajes,
+        temasRelacionados: this.temasRelacionados
+      }));
 
       this.cdr.detectChanges();
     });
@@ -509,10 +524,20 @@ export class ForoTema implements OnInit {
     }, 100);
   }
 
+  cancelarComentario() {
+    this.nuevoComentario = '';
+    this.archivosSeleccionados = [];
+    this.mostrandoFormulario = false;
+  }
+
   // --- MÉTODOS PARA ARCHIVOS ---
   onArchivosSeleccionados(event: any) {
     if (event.target.files && event.target.files.length > 0) {
-      this.archivosSeleccionados = Array.from(event.target.files);
+      const nuevos = Array.from(event.target.files) as File[];
+      // Acumular archivos en lugar de reemplazarlos
+      this.archivosSeleccionados = [...this.archivosSeleccionados, ...nuevos];
+      // Resetear el valor del input para permitir seleccionar el mismo archivo si se borra
+      event.target.value = '';
     }
   }
 
@@ -524,6 +549,14 @@ export class ForoTema implements OnInit {
     if (!nombreArchivo) return false;
     const extension = nombreArchivo.split('.').pop()?.toLowerCase();
     return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '');
+  }
+
+  getImagenes(archivos: any[]): any[] {
+    return archivos?.filter(a => this.esImagen(a.nombreOriginal)) || [];
+  }
+
+  getDocumentos(archivos: any[]): any[] {
+    return archivos?.filter(a => !this.esImagen(a.nombreOriginal)) || [];
   }
 
   abrirLightbox(archivo: any, event: Event) {
@@ -542,11 +575,11 @@ export class ForoTema implements OnInit {
   descargarArchivo(archivo: any, event: Event) {
     event.preventDefault();
     const id = archivo.identificador || archivo.id;
-    
+
     // Si no tenemos ID (por ejemplo, archivos temporales del lightbox), usamos la URL de S3
     if (!id) {
-        if (archivo.url) window.location.href = archivo.url;
-        return;
+      if (archivo.url) window.location.href = archivo.url;
+      return;
     }
 
     // Usamos el endpoint proxy del backend.
@@ -605,9 +638,6 @@ export class ForoTema implements OnInit {
       textarea.setSelectionRange(pos, pos);
     }, 0);
   }
-
-
-  // Método para forzar la actualización de la posición del cursor
 
   // Método para forzar la actualización de la posición del cursor
   actualizarPosicionCursor(event: any) {

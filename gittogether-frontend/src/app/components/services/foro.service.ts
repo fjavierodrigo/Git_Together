@@ -1,153 +1,165 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+    import { HttpClient } from '@angular/common/http';
+    import { Observable, BehaviorSubject, tap } from 'rxjs';
 
-@Injectable({
-    providedIn: 'root'
-})
-export class ForoService {
-    private API_TEMAS = 'http://localhost:8080/api/temas';
-    private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
-    private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
-    private API_TAGS = 'http://localhost:8080/api/tags';
-    private API_ARCHIVOS = 'http://localhost:8080/api/archivos';
+    @Injectable({
+        providedIn: 'root'
+    })
+    export class ForoService {
+        private API_TEMAS = 'http://localhost:8080/api/temas';
+        private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
+        private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
+        private API_TAGS = 'http://localhost:8080/api/tags';
+        private API_ARCHIVOS = 'http://localhost:8080/api/archivos';
 
-    // Variables para almacenar la caché en memoria RAM del navegador
-    private temasCache$: Observable<any[]> | null = null;
-    private categoriasCache$: Observable<any[]> | null = null;
-    private tagsCache$: Observable<any[]> | null = null;
+        // BehaviorSubjects para un estado global reactivo e instantáneo
+        private temasSubject = new BehaviorSubject<any[]>([]);
+        private categoriasSubject = new BehaviorSubject<any[]>([]);
+        private tagsSubject = new BehaviorSubject<any[]>([]);
 
-    // Para acceso instantáneo
-    private lastCategorias: any[] = [];
-    private lastTags: any[] = [];
+        // Control de tiempo para evitar refrescos constantes
+        private ultimaCarga: number = 0;
+        private readonly CACHE_TTL = 300000; // 5 minutos en milisegundos
 
-    constructor(private http: HttpClient) { }
+        // Observables públicos
+        temas$ = this.temasSubject.asObservable();
+        categorias$ = this.categoriasSubject.asObservable();
+        tags$ = this.tagsSubject.asObservable();
 
-    getTemas(forceRefresh = false): Observable<any[]> {
-        if (!this.temasCache$ || forceRefresh) {
-            // Guardamos el observable y le decimos que guarde en memoria el último resultado (shareReplay)
-            this.temasCache$ = this.http.get<any[]>(this.API_TEMAS).pipe(
-                shareReplay(1)
+        constructor(private http: HttpClient) {
+            // Intentar cargar de sessionStorage al iniciar el servicio para máxima velocidad
+            const cTemas = sessionStorage.getItem('foro_temas_cache');
+            const cCats = sessionStorage.getItem('foro_categorias_cache');
+            const cTags = sessionStorage.getItem('foro_tags_cache');
+
+            if (cTemas) this.temasSubject.next(JSON.parse(cTemas));
+            if (cCats) this.categoriasSubject.next(JSON.parse(cCats));
+            if (cTags) this.tagsSubject.next(JSON.parse(cTags));
+        }
+
+        // Carga inicial y refresco inteligente
+        cargarTodo(): void {
+            const ahora = Date.now();
+            // Solo refrescamos si la caché tiene más de 5 minutos o no hay datos
+            if (ahora - this.ultimaCarga > this.CACHE_TTL || this.temasSubject.value.length === 0) {
+                this.getTemas().subscribe();
+                this.getCategorias().subscribe();
+                this.getTags().subscribe();
+                this.ultimaCarga = ahora;
+            }
+        }
+
+        getTemas(): Observable<any[]> {
+            return this.http.get<any[]>(this.API_TEMAS).pipe(
+                tap(temas => {
+                    // Ordenar los tags dentro de cada tema para consistencia
+                    temas.forEach((tema: any) => {
+                        if (tema.tags) {
+                            tema.tags.sort((a: any, b: any) => a.tag.nombre.localeCompare(b.tag.nombre));
+                        }
+                    });
+                    this.temasSubject.next(temas);
+                    sessionStorage.setItem('foro_temas_cache', JSON.stringify(temas));
+                })
             );
         }
-        return this.temasCache$;
-    }
 
-    getTema(id: number): Observable<any> {
-        return this.http.get<any>(`${this.API_TEMAS}/${id}`);
-    }
-
-    getTemaBySlug(slug: string): Observable<any> {
-        return this.http.get<any>(`${this.API_TEMAS}/slug/${slug}`);
-    }
-
-    getMensajesPorTema(id: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.API_MENSAJES}/tema/${id}`);
-    }
-
-    getCategorias(forceRefresh = false): Observable<any[]> {
-        if (!this.categoriasCache$ || forceRefresh) {
-            this.categoriasCache$ = this.http.get<any[]>(this.API_CATEGORIAS).pipe(
-                shareReplay(1)
+        getCategorias(): Observable<any[]> {
+            return this.http.get<any[]>(this.API_CATEGORIAS).pipe(
+                tap(cats => {
+                    this.categoriasSubject.next(cats);
+                    sessionStorage.setItem('foro_categorias_cache', JSON.stringify(cats));
+                })
             );
-            this.categoriasCache$.subscribe(data => this.lastCategorias = data);
         }
-        return this.categoriasCache$;
-    }
 
-    getCategoriasCache(): any[] {
-        return this.lastCategorias;
-    }
-
-    getTemasPorCategoria(id: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`);
-    }
-
-    getTags(forceRefresh = false): Observable<any[]> {
-        if (!this.tagsCache$ || forceRefresh) {
-            this.tagsCache$ = this.http.get<any[]>(this.API_TAGS).pipe(
-                shareReplay(1)
+        getTags(): Observable<any[]> {
+            return this.http.get<any[]>(this.API_TAGS).pipe(
+                tap(tags => {
+                    // Ordenar alfabéticamente para evitar que cambien de sitio
+                    const ordenados = [...tags].sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+                    this.tagsSubject.next(ordenados);
+                    sessionStorage.setItem('foro_tags_cache', JSON.stringify(ordenados));
+                })
             );
-            this.tagsCache$.subscribe(data => this.lastTags = data);
         }
-        return this.tagsCache$;
-    }
 
-    getTagsCache(): any[] {
-        return this.lastTags;
-    }
+        // Métodos de acceso instantáneo
+        getTemasSnapshot() { return this.temasSubject.value; }
+        getCategoriasSnapshot() { return this.categoriasSubject.value; }
+        getTagsSnapshot() { return this.tagsSubject.value; }
 
-    getTemasPorTag(nombre: string): Observable<any[]> {
-        return this.http.get<any[]>(`${this.API_TEMAS}/tag/${nombre}`);
-    }
+        searchTags(query: string): Observable<any[]> {
+            return this.http.get<any[]>(`${this.API_TAGS}/search?query=${query}`);
+        }
 
-    searchTags(query: string): Observable<any[]> {
-        return this.http.get<any[]>(`${this.API_TAGS}/search?query=${query}`);
-    }
+        // --- ACCIONES CON ACTUALIZACIÓN INSTANTÁNEA DEL ESTADO ---
 
-    getTemasRelacionados(id: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.API_TEMAS}/${id}/relacionados`);
-    }
+        deleteTema(id: number): Observable<any> {
+            return this.http.delete(`${this.API_TEMAS}/${id}`).pipe(
+                tap(() => {
+                    const actual = this.temasSubject.value.filter(t => (t.identificador || t.id) !== id);
+                    this.temasSubject.next(actual);
+                    sessionStorage.setItem('foro_temas_cache', JSON.stringify(actual));
+                })
+            );
+        }
 
-    // --- NUEVOS MÉTODOS PARA RBAC (EDITAR/ELIMINAR) ---
+        createTema(tema: any): Observable<any> {
+            return this.http.post(this.API_TEMAS, tema).pipe(
+                tap(nuevo => {
+                    const actual = [nuevo, ...this.temasSubject.value];
+                    this.temasSubject.next(actual);
+                    sessionStorage.setItem('foro_temas_cache', JSON.stringify(actual));
+                })
+            );
+        }
 
-    // Mensajes
-    deleteMensaje(id: number): Observable<any> {
-        return this.http.delete(`${this.API_MENSAJES}/${id}`);
-    }
+        editTema(id: number, titulo?: string, descripcion?: string, tags?: string[]): Observable<any> {
+            return this.http.put(`${this.API_TEMAS}/${id}`, { titulo, descripcion, tags }).pipe(
+                tap(editado => {
+                    const actual = this.temasSubject.value.map(t => 
+                        (t.identificador || t.id) === id ? { ...t, ...editado } : t
+                    );
+                    this.temasSubject.next(actual);
+                    sessionStorage.setItem('foro_temas_cache', JSON.stringify(actual));
+                })
+            );
+        }
 
-    editMensaje(id: number, contenido: string): Observable<any> {
-        // Asumiendo que el backend espera un objeto con el contenido actualizado
-        return this.http.put(`${this.API_MENSAJES}/${id}`, { contenido });
-    }
+        // --- OTROS MÉTODOS (SIN CAMBIO DE LÓGICA) ---
+        getTemaBySlug(slug: string): Observable<any> { return this.http.get<any>(`${this.API_TEMAS}/slug/${slug}`); }
+        getMensajesPorTema(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_MENSAJES}/tema/${id}`); }
+        getTemasPorCategoria(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`); }
+        getTemasPorTag(nombre: string): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/tag/${nombre}`); }
+        getTemasRelacionados(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/${id}/relacionados`); }
 
-    createMensaje(mensaje: any): Observable<any> {
-        return this.http.post(`${this.API_MENSAJES}/registrar`, mensaje);
-    }
+        deleteMensaje(id: number): Observable<any> { return this.http.delete(`${this.API_MENSAJES}/${id}`); }
+        editMensaje(id: number, contenido: string): Observable<any> { return this.http.put(`${this.API_MENSAJES}/${id}`, { contenido }); }
+        createMensaje(mensaje: any): Observable<any> { return this.http.post(`${this.API_MENSAJES}/registrar`, mensaje); }
+        deleteCategoria(id: number): Observable<any> { return this.http.delete(`${this.API_CATEGORIAS}/${id}`); }
+        editCategoria(id: number, nombre: string): Observable<any> { return this.http.put(`${this.API_CATEGORIAS}/${id}`, { nombre }); }
 
-    // Temas
-    deleteTema(id: number): Observable<any> {
-        return this.http.delete(`${this.API_TEMAS}/${id}`);
-    }
+        subirArchivoTema(temaId: number, usuarioId: number, file: File): Observable<any> {
+            const formData = new FormData();
+            formData.append('file', file);
+            return this.http.post(`${this.API_ARCHIVOS}/tema/${temaId}/usuario/${usuarioId}`, formData);
+        }
 
-    editTema(id: number, titulo?: string, descripcion?: string, tags?: string[]): Observable<any> {
-        return this.http.put(`${this.API_TEMAS}/${id}`, { titulo, descripcion, tags });
-    }
+        subirArchivoMensaje(mensajeId: number, usuarioId: number, file: File): Observable<any> {
+            const formData = new FormData();
+            formData.append('file', file);
+            return this.http.post(`${this.API_ARCHIVOS}/mensaje/${mensajeId}/usuario/${usuarioId}`, formData);
+        }
 
-    createTema(tema: any): Observable<any> {
-        return this.http.post(this.API_TEMAS, tema);
-    }
+        eliminarArchivo(archivoId: number): Observable<any> { return this.http.delete(`${this.API_ARCHIVOS}/${archivoId}`); }
 
-    // Categorías
-    deleteCategoria(id: number): Observable<any> {
-        return this.http.delete(`${this.API_CATEGORIAS}/${id}`);
-    }
+        clearCache() {
+            // Ya no es necesario limpiar observables, pero podemos forzar recarga
+            this.cargarTodo();
+        }
 
-    editCategoria(id: number, nombre: string): Observable<any> {
-        return this.http.put(`${this.API_CATEGORIAS}/${id}`, { nombre });
+        // Compatibilidad con métodos antiguos que pedían cache manual
+        getCategoriasCache() { return this.getCategoriasSnapshot(); }
+        getTagsCache() { return this.getTagsSnapshot(); }
     }
-
-    // --- ARCHIVOS ---
-    subirArchivoTema(temaId: number, usuarioId: number, file: File): Observable<any> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post(`${this.API_ARCHIVOS}/tema/${temaId}/usuario/${usuarioId}`, formData);
-    }
-
-    subirArchivoMensaje(mensajeId: number, usuarioId: number, file: File): Observable<any> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post(`${this.API_ARCHIVOS}/mensaje/${mensajeId}/usuario/${usuarioId}`, formData);
-    }
-
-    eliminarArchivo(archivoId: number): Observable<any> {
-        return this.http.delete(`${this.API_ARCHIVOS}/${archivoId}`);
-    }
-
-    // Método para limpiar la caché si es necesario obligar a refrescar
-    clearCache() {
-        this.temasCache$ = null;
-        this.categoriasCache$ = null;
-    }
-}
