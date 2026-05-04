@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ModalService, ModalConfig, ModalInput } from '../../../services/modal.service';
 import { Subscription } from 'rxjs';
 import { ForoService } from '../../services/foro.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-modal',
@@ -20,7 +21,15 @@ export class ModalComponent implements OnInit, OnDestroy {
   tagQuery: string = '';
   suggestions: any[] = [];
 
-  constructor(private modalService: ModalService, private foroService: ForoService) {}
+  // Configuración de validación de archivos (50MB)
+  private readonly MAX_FILE_SIZE = 50 * 1024 * 1024;
+  private readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'txt', 'zip', 'rar', '7z'];
+
+  constructor(
+    private modalService: ModalService, 
+    private foroService: ForoService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.modalService.modal$.subscribe(config => {
@@ -119,11 +128,42 @@ export class ModalComponent implements OnInit, OnDestroy {
   onFilesSelected(input: ModalInput, event: any) {
     if (event.target.files && event.target.files.length > 0) {
       if (!input.value) input.value = [];
-      const newFiles = Array.from(event.target.files);
-      input.value = [...input.value, ...newFiles];
+      const files = Array.from(event.target.files) as File[];
+      const validos: File[] = [];
+
+      files.forEach(file => {
+        const error = this.validarArchivo(file);
+        if (error) {
+          this.toastService.error(`${file.name}: ${error}`);
+        } else {
+          validos.push(file);
+        }
+      });
+
+      if (validos.length > 0) {
+        input.value = [...input.value, ...validos];
+      }
+      
       // Reset input so the same files can be selected again if removed
       event.target.value = '';
     }
+  }
+
+  private validarArchivo(file: File): string | null {
+    if (!file || file.size === 0) {
+      return "El archivo está vacío.";
+    }
+
+    if (file.size > this.MAX_FILE_SIZE) {
+      return "Supera el límite de 50MB.";
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (!extension || !this.ALLOWED_EXTENSIONS.includes(extension)) {
+      return "Extensión no permitida.";
+    }
+
+    return null;
   }
 
   removeFile(input: ModalInput, index: number) {

@@ -10,7 +10,7 @@ public class JwtUtil {
 	public static String generateToken(String email) {
 		// Genera un token que dura una hora
 		return Jwts.builder().setSubject(email).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + 3600000)) 
+				.setExpiration(new Date(System.currentTimeMillis() + 3600000))
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
 }

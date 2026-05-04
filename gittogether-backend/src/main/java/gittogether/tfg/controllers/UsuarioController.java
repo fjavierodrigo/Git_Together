@@ -2,6 +2,7 @@ package gittogether.tfg.controllers;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,49 +39,62 @@ public class UsuarioController {
 
 	@Autowired
 	private UsuarioService usuarioService;
-	
+
 	@Autowired
 	private TemaRepository temaRepository;
-	
+
 	@Autowired
 	private MensajeRepository mensajeRepository;
-	
+
 	@Autowired
 	private S3Service s3Service;
-	
+
+	// Seguridad para Avatares: Solo imágenes y máximo 2MB
+	private static final List<String> ALLOWED_AVATAR_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
+	private static final long MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+
+	private void validarAvatar(MultipartFile file) {
+		if (file == null || file.isEmpty()) return;
+		if (file.getSize() > MAX_AVATAR_SIZE) {
+			throw new RuntimeException("La foto de perfil es demasiado grande (Máximo 2MB)");
+		}
+		if (!ALLOWED_AVATAR_TYPES.contains(file.getContentType())) {
+			throw new RuntimeException("El avatar debe ser una imagen (jpg, png, gif)");
+		}
+	}
 
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> registrar(
-            @RequestPart("usuario") String usuarioJson, 
-            @RequestPart(value = "avatar", required = false) MultipartFile archivo) {
-        try {
-            // 1. Convertir el String JSON manualmente a objeto Usuario
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
-            Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
+	public ResponseEntity<?> registrar(
+			@RequestPart("usuario") String usuarioJson,
+			@RequestPart(value = "avatar", required = false) MultipartFile archivo) {
+		try {
+			validarAvatar(archivo);
+			// 1. Convertir el String JSON manualmente a objeto Usuario
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
+			Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
 
-            // 2. Subir imagen a S3 si existe
-            if (archivo != null && !archivo.isEmpty()) {
-                String urlImagen = s3Service.subirArchivo(archivo);
-                usuario.setAvatar(urlImagen);
-            }
+			// 2. Subir imagen a S3 si existe
+			if (archivo != null && !archivo.isEmpty()) {
+				String urlImagen = s3Service.subirArchivo(archivo);
+				usuario.setAvatar(urlImagen);
+			}
 
-            // 3. Asignar fecha si no viene
-            if (usuario.getFechaRegistro() == null) {
-                usuario.setFechaRegistro(LocalDate.now());
-            }
+			// 3. Asignar fecha si no viene
+			if (usuario.getFechaRegistro() == null) {
+				usuario.setFechaRegistro(LocalDate.now());
+			}
 
-            // 4. Guardar en BD
-            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-            s3Service.procesarAvatar(nuevoUsuario);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+			// 4. Guardar en BD
+			Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
+			s3Service.procesarAvatar(nuevoUsuario);
+			return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error en el servidor: " + e.getMessage());
-        }
-    }
-	
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Error en el servidor: " + e.getMessage());
+		}
+	}
 
 	// GET: http://localhost:8080/api/usuarios
 	@GetMapping
@@ -104,14 +118,15 @@ public class UsuarioController {
 
 	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> actualizarPerfil(
-			@PathVariable int id, 
-			@RequestPart("usuario") String usuarioJson, 
+			@PathVariable int id,
+			@RequestPart("usuario") String usuarioJson,
 			@RequestPart(value = "avatar", required = false) MultipartFile archivo) {
 		try {
+			validarAvatar(archivo);
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.registerModule(new JavaTimeModule());
 			Usuario usuarioDatos = objectMapper.readValue(usuarioJson, Usuario.class);
-			
+
 			String urlImagen = null;
 			if (archivo != null && !archivo.isEmpty()) {
 				urlImagen = s3Service.subirArchivo(archivo);
@@ -139,21 +154,21 @@ public class UsuarioController {
 			return ResponseEntity.status(500).body("Error al obtener estadísticas");
 		}
 	}
-	
+
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-	    // Buscamos al usuario en la BD
-	    Usuario usuario = usuarioService.autenticar(loginRequest.getIdentificador(), loginRequest.getPassword());
+		// Buscamos al usuario en la BD
+		Usuario usuario = usuarioService.autenticar(loginRequest.getIdentificador(), loginRequest.getPassword());
 
-	    if (usuario != null) {
-	        s3Service.procesarAvatar(usuario);
-	        // Generamos un token
-	    	String jwtToken = JwtUtil.generateToken(usuario.getEmail());
+		if (usuario != null) {
+			s3Service.procesarAvatar(usuario);
+			// Generamos un token
+			String jwtToken = JwtUtil.generateToken(usuario.getEmail());
 
-	        // Enviamos el objeto combinado
-	        return ResponseEntity.ok(new LoginResponse(jwtToken, usuario));
-	    } else {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
-	    }
+			// Enviamos el objeto combinado
+			return ResponseEntity.ok(new LoginResponse(jwtToken, usuario));
+		} else {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+		}
 	}
 }

@@ -46,6 +46,10 @@ export class ForoTema implements OnInit {
   mostrandoFormulario: boolean = false;
   archivosSeleccionados: File[] = [];
 
+  // Configuración de validación de archivos (50MB)
+  private readonly MAX_FILE_SIZE = 50 * 1024 * 1024;
+  private readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'txt', 'zip', 'rar', '7z'];
+
   // Lightbox para visualizar imágenes
   lightboxUrl: string | null = null;
   lightboxNombre: string = '';
@@ -484,7 +488,8 @@ export class ForoTema implements OnInit {
             },
             error: (err) => {
               console.error("Error al subir archivos", err);
-              this.toastService.error("Mensaje publicado, pero hubo un error al subir los archivos");
+              const errorMsg = err.error?.error || "Error desconocido al subir archivos";
+              this.toastService.error(`Mensaje publicado, pero: ${errorMsg}`);
               this.archivosSeleccionados = [];
               this.finalizarComentario(res);
             }
@@ -532,13 +537,45 @@ export class ForoTema implements OnInit {
 
   // --- MÉTODOS PARA ARCHIVOS ---
   onArchivosSeleccionados(event: any) {
+    console.log("Archivos seleccionados en el evento:", event.target.files);
     if (event.target.files && event.target.files.length > 0) {
-      const nuevos = Array.from(event.target.files) as File[];
-      // Acumular archivos en lugar de reemplazarlos
-      this.archivosSeleccionados = [...this.archivosSeleccionados, ...nuevos];
-      // Resetear el valor del input para permitir seleccionar el mismo archivo si se borra
+      const archivos = Array.from(event.target.files) as File[];
+      const validos: File[] = [];
+
+      archivos.forEach(file => {
+        const error = this.validarArchivo(file);
+        if (error) {
+          console.error("Error de validación para", file.name, ":", error);
+          this.toastService.error(`${file.name}: ${error}`);
+        } else {
+          console.log("Archivo válido:", file.name);
+          validos.push(file);
+        }
+      });
+
+      if (validos.length > 0) {
+        this.archivosSeleccionados = [...this.archivosSeleccionados, ...validos];
+      }
+      
       event.target.value = '';
     }
+  }
+
+  private validarArchivo(file: File): string | null {
+    if (!file || file.size === 0) {
+      return "El archivo está vacío.";
+    }
+
+    if (file.size > this.MAX_FILE_SIZE) {
+      return "Supera el límite de 50MB.";
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (!extension || !this.ALLOWED_EXTENSIONS.includes(extension)) {
+      return "Extensión no permitida.";
+    }
+
+    return null;
   }
 
   removerArchivo(index: number) {

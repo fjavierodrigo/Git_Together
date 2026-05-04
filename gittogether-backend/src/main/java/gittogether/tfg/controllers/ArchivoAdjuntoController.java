@@ -22,6 +22,10 @@ import gittogether.tfg.services.S3Service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -44,83 +48,102 @@ public class ArchivoAdjuntoController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    // Lista de tipos permitidos para archivos del foro
+    private static final List<String> ALLOWED_TYPES = Arrays.asList(
+            "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+            "application/pdf", "text/plain",
+            "application/zip", "application/x-zip-compressed", "application/x-zip", "multipart/x-zip",
+            "application/x-rar-compressed", "application/x-rar",
+            "application/x-7z-compressed", "application/octet-stream"
+    );
+
+    // Tamaño máximo (50MB)
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+    private void validarArchivo(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("El archivo está vacío o no ha sido enviado");
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new RuntimeException("El archivo es demasiado grande. El máximo permitido es 50MB");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new RuntimeException("Tipo de archivo no permitido: " + (contentType != null ? contentType : "desconocido"));
+        }
+    }
+
     @PostMapping("/tema/{temaId}/usuario/{usuarioId}")
     public ResponseEntity<?> subirArchivoTema(
             @PathVariable int temaId,
             @PathVariable int usuarioId,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
-        try {
-            Optional<Tema> temaOpt = temaRepository.findById(temaId);
-            if (temaOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Tema no encontrado");
-            }
-
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
-            if (usuarioOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Usuario no encontrado");
-            }
-
-            Tema tema = temaOpt.get();
-            Usuario usuario = usuarioOpt.get();
-            
-            // Los archivos del tema principal se guardan directamente en la carpeta del slug (comportamiento original)
-            String ruta = "temas/" + tema.getSlug();
-            
-            String s3Key = s3Service.subirArchivoConRuta(file, ruta);
-
-            ArchivoAdjunto archivo = new ArchivoAdjunto();
-            archivo.setNombreOriginal(file.getOriginalFilename());
-            archivo.setS3Key(s3Key);
-            archivo.setTema(tema);
-
-            ArchivoAdjunto guardado = archivoAdjuntoRepository.save(archivo);
-            guardado.setUrl(s3Service.generarUrlPresignada(s3Key));
-
-            return ResponseEntity.ok(guardado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error al subir archivo: " + e.getMessage());
+        validarArchivo(file);
+        Optional<Tema> temaOpt = temaRepository.findById(temaId);
+        if (temaOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Tema no encontrado"));
         }
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Usuario no encontrado"));
+        }
+
+        Tema tema = temaOpt.get();
+        Usuario usuario = usuarioOpt.get();
+        
+        // Los archivos del tema principal se guardan directamente en la carpeta del slug (comportamiento original)
+        String ruta = "temas/" + tema.getSlug();
+        
+        String s3Key = s3Service.subirArchivoConRuta(file, ruta);
+
+        ArchivoAdjunto archivo = new ArchivoAdjunto();
+        archivo.setNombreOriginal(file.getOriginalFilename());
+        archivo.setS3Key(s3Key);
+        archivo.setTema(tema);
+
+        ArchivoAdjunto guardado = archivoAdjuntoRepository.save(archivo);
+        guardado.setUrl(s3Service.generarUrlPresignada(s3Key));
+
+        return ResponseEntity.ok(guardado);
     }
 
     @PostMapping("/mensaje/{mensajeId}/usuario/{usuarioId}")
     public ResponseEntity<?> subirArchivoMensaje(
             @PathVariable int mensajeId,
             @PathVariable int usuarioId,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
-        try {
-            Optional<Mensaje> mensajeOpt = mensajeRepository.findById(mensajeId);
-            if (mensajeOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Mensaje no encontrado");
-            }
-
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
-            if (usuarioOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Usuario no encontrado");
-            }
-
-            Mensaje mensaje = mensajeOpt.get();
-            Usuario usuario = usuarioOpt.get();
-            
-            // Para los mensajes, sí creamos una subcarpeta con el nombre del usuario dentro de la carpeta del tema
-            String nombreUsuarioLimpio = usuario.getNombre().trim().replace(" ", "_").replaceAll("[^a-zA-Z0-9_-]", "");
-            String ruta = "temas/" + mensaje.getTema().getSlug() + "/" + nombreUsuarioLimpio;
-            
-            String s3Key = s3Service.subirArchivoConRuta(file, ruta);
-
-            ArchivoAdjunto archivo = new ArchivoAdjunto();
-            archivo.setNombreOriginal(file.getOriginalFilename());
-            archivo.setS3Key(s3Key);
-            archivo.setMensaje(mensaje);
-
-            ArchivoAdjunto guardado = archivoAdjuntoRepository.save(archivo);
-            guardado.setUrl(s3Service.generarUrlPresignada(s3Key));
-
-            return ResponseEntity.ok(guardado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error al subir archivo: " + e.getMessage());
+        validarArchivo(file);
+        Optional<Mensaje> mensajeOpt = mensajeRepository.findById(mensajeId);
+        if (mensajeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Mensaje no encontrado"));
         }
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Usuario no encontrado"));
+        }
+
+        Mensaje mensaje = mensajeOpt.get();
+        Usuario usuario = usuarioOpt.get();
+        
+        // Para los mensajes, sí creamos una subcarpeta con el nombre del usuario dentro de la carpeta del tema
+        String nombreUsuarioLimpio = usuario.getNombre().trim().replace(" ", "_").replaceAll("[^a-zA-Z0-9_-]", "");
+        String ruta = "temas/" + mensaje.getTema().getSlug() + "/" + nombreUsuarioLimpio;
+        
+        String s3Key = s3Service.subirArchivoConRuta(file, ruta);
+
+        ArchivoAdjunto archivo = new ArchivoAdjunto();
+        archivo.setNombreOriginal(file.getOriginalFilename());
+        archivo.setS3Key(s3Key);
+        archivo.setMensaje(mensaje);
+
+        ArchivoAdjunto guardado = archivoAdjuntoRepository.save(archivo);
+        guardado.setUrl(s3Service.generarUrlPresignada(s3Key));
+
+        return ResponseEntity.ok(guardado);
     }
 
     @GetMapping("/{id}")
