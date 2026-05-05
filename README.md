@@ -15,7 +15,7 @@
 
 | Área | Funcionalidades |
 |:---|:---|
-| **Gestión de colecciones** | CRUD completo de recursos, categorías, etiquetas, autores y tipos |
+| **Gestión de colecciones** | CRUD completo de temas, categorías, mensajes, comentarios y usuarios |
 | **Autenticación** | Registro/login con JWT, contraseñas encriptadas con BCrypt |
 | **Búsqueda avanzada** | Filtros combinados (tags, categorías, temas) |
 | **Almacenamiento de archivos** | Subida y descarga de archivos a AWS S3 con URLs prefirmadas |
