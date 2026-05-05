@@ -1,5 +1,12 @@
 package gittogether.tfg.config;
 
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import gittogether.tfg.entities.Usuario;
 import gittogether.tfg.entities.UsuarioBaneado;
 import gittogether.tfg.services.UsuarioBaneadoService;
@@ -9,19 +16,16 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 @Component
 public class JwtBaneoFilter extends OncePerRequestFilter {
 
     @Autowired
+    @Lazy
     private UsuarioService usuarioService;
 
     @Autowired
+    @Lazy
     private UsuarioBaneadoService baneadoService;
 
     @Override
@@ -31,8 +35,10 @@ public class JwtBaneoFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String path = request.getRequestURI();
 
+        // Solo bloqueamos acciones de escritura (POST, PUT, DELETE)
         if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "DELETE".equalsIgnoreCase(method)) {
             
+            // Excluimos las rutas de autenticación
             boolean esAuth = path.equals("/api/usuarios/login") || path.equals("/api/usuarios/registrar") || path.equals("/api/usuarios/register");
             
             if (!esAuth) {
@@ -53,10 +59,10 @@ public class JwtBaneoFilter extends OncePerRequestFilter {
                                 String msg = "Tu cuenta está restringida. Razón: " + baneo.getRazon();
                                 if (baneo.getFechaFin() != null) msg += ". Expira el: " + baneo.getFechaFin();
                                 response.getWriter().write(msg);
-                                return; 
+                                return; // Bloqueamos la petición
                             }
                         } catch (Exception e) {
-                            // Ignorar errores de usuario no encontrado
+                            // Ignorar errores de usuario no encontrado o token inválido
                         }
                     }
                 }

@@ -62,4 +62,4 @@ public class UsuarioBaneadoService {
 				.findFirst()
 				.orElse(null);
 	}
-}
+}
