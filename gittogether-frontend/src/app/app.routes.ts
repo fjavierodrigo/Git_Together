@@ -4,7 +4,8 @@ import { Register } from './components/register/register';
 import { Foro } from './components/foro/foro';
 import { ForoTema } from './components/foro-tema/foro-tema';
 import { Perfil } from './components/perfil/perfil';
-import { authGuard, wildcardGuard } from './components/services/auth.guard'; // Importamos los guardianes de rutas
+import { AdminUsuariosComponent } from './components/admin/admin-usuarios';
+import { authGuard, wildcardGuard } from './components/services/auth.guard'; 
 
 export const routes: Routes = [
   // Si no pone nada, redirigimos automáticamente a la pantalla de login
@@ -30,6 +31,11 @@ export const routes: Routes = [
   {
     path: 'perfil',
     component: Perfil,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'admin/usuarios',
+    component: AdminUsuariosComponent,
     canActivate: [authGuard]
   },
   // Ruta comodín: captura cualquier URL no definida

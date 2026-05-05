@@ -60,6 +60,14 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/perfil']);
   }
 
+  goToAdmin() {
+    this.router.navigate(['/admin/usuarios']);
+  }
+
+  esAdmin(): boolean {
+    return this.apiUsuario.esAdmin();
+  }
+
   onLogout() {
     this.apiUsuario.logout();
     this.router.navigate(['/login']);

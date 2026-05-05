@@ -41,6 +41,10 @@ export class Usuario {
     );
   }
 
+  obtenerTodos(): Observable<any[]> {
+    return this.http.get<any[]>(this.API_URL);
+  }
+
   getStats(id: number): Observable<any> {
     return this.http.get<any>(`${this.API_URL}/${id}/stats`);
   }

@@ -13,4 +13,17 @@ public class JwtUtil {
 				.setExpiration(new Date(System.currentTimeMillis() + 3600000))
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
+
+	public static String getEmailFromToken(String token) {
+		return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
+	}
+
+	public static boolean validateToken(String token) {
+		try {
+			Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }

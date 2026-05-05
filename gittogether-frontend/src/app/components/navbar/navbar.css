@@ -209,6 +209,34 @@ input:checked + .slider:before {
     height: 18px;
 }
 
+/* Admin Access Button */
+.btn-admin-access {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 75, 43, 0.1);
+    border: 1px solid rgba(255, 75, 43, 0.2);
+    color: #ff4b2b;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-admin-access:hover {
+    background: #ff4b2b;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 75, 43, 0.3);
+}
+
+.admin-icon {
+    width: 18px;
+    height: 18px;
+}
+
 @media (max-width: 768px) {
     .navbar-container { padding: 0 24px; }
     .user-name { display: none; }

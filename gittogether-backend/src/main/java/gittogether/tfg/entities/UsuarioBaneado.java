@@ -40,6 +40,15 @@ public class UsuarioBaneado {
 	@JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "FK_USUARIO_BANEADO_USUARIO"), nullable = false)
 	private Usuario usuario;
 
+		@Column(name = "baneado_por", length = 255)
+	private String baneadoPor;
+
+	@Column(name = "evidencia", columnDefinition = "TEXT")
+	private String evidencia;
+
+	@Column(name = "revisado")
+	private boolean revisado = false;
+
 	public int getIdentificador() {
 		return identificador;
 	}
@@ -80,10 +89,35 @@ public class UsuarioBaneado {
 		this.usuario = usuario;
 	}
 
+	public String getBaneadoPor() {
+		return baneadoPor;
+	}
+
+	public void setBaneadoPor(String baneadoPor) {
+		this.baneadoPor = baneadoPor;
+	}
+
+	public String getEvidencia() {
+		return evidencia;
+	}
+
+	public void setEvidencia(String evidencia) {
+		this.evidencia = evidencia;
+	}
+
+	public boolean isRevisado() {
+		return revisado;
+	}
+
+	public void setRevisado(boolean revisado) {
+		this.revisado = revisado;
+	}
+
 	@Override
 	public String toString() {
 		return "UsuarioBaneado [identificador=" + identificador + ", razon=" + razon + ", fechaInicio=" + fechaInicio
-				+ ", fechaFin=" + fechaFin + ", usuario=" + usuario + "]";
+				+ ", fechaFin=" + fechaFin + ", usuario=" + usuario + ", baneadoPor=" + baneadoPor + ", evidencia="
+				+ evidencia + ", revisado=" + revisado + "]";
 	}
 
 }

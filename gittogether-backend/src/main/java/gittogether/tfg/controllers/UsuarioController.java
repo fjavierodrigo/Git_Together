@@ -1,6 +1,5 @@
 package gittogether.tfg.controllers;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -155,6 +155,7 @@ public class UsuarioController {
 		}
 	}
 
+
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 		// Buscamos al usuario en la BD
@@ -168,7 +169,7 @@ public class UsuarioController {
 			// Enviamos el objeto combinado
 			return ResponseEntity.ok(new LoginResponse(jwtToken, usuario));
 		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado o contraseña incorrecta");
 		}
 	}
 }

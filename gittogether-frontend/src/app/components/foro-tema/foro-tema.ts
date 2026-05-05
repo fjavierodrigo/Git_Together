@@ -309,7 +309,7 @@ export class ForoTema implements OnInit {
       { name: 'titulo', label: 'Título del Tema', type: 'text', value: this.tema.titulo },
       { name: 'descripcion', label: 'Descripción', type: 'textarea', value: this.tema.descripcion || '' },
       { name: 'tags', label: 'Etiquetas', type: 'tags', value: this.tema.tags?.map((tt: any) => tt.tag?.nombre) || [] },
-      { name: 'archivos', label: 'Archivos Adjuntos (Nuevos y Existentes)', type: 'files', value: [...oldFiles] }
+      { name: 'archivos', label: 'Archivos Adjuntos', type: 'files', value: [...oldFiles] }
     ]);
 
     if (data && data.titulo?.trim()) {
@@ -500,7 +500,11 @@ export class ForoTema implements OnInit {
       },
       error: (err) => {
         console.error("Error al publicar el comentario", err);
-        this.toastService.error("Error al enviar el comentario");
+        // El interceptor ya maneja el error 403 de baneo, solo mostramos toast para otros errores
+        if (err.status !== 403) {
+          const errorMsg = typeof err.error === 'string' ? err.error : "Error al enviar el comentario";
+          this.toastService.error(errorMsg);
+        }
       }
     });
   }

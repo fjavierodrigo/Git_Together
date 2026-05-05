@@ -26,12 +26,13 @@ public class UsuarioBaneadoService {
 		Usuario usuario = usuarioRepository.findById(baneo.getUsuario().getIdentificador())
 				.orElseThrow(() -> new RuntimeException("El usuario que intentas banear no existe"));
 
-		if (baneadoRepository.existsByUsuarioIdentificador(usuario.getIdentificador())) {
-			throw new RuntimeException("El usuario ya esta baneado");
+		// 2. Comprobar si YA tiene un baneo activo actualmente
+		if (obtenerBaneoActivo(usuario.getIdentificador()) != null) {
+			throw new RuntimeException("El usuario ya tiene un baneo activo");
 		}
 
-		// 2. Comprobar que no estemos baneando a un ADMIN
-		if (usuario.getRol().name().equals("ADMIN")) {
+		// 3. Comprobar que no estemos baneando a un ADMIN (Insensible a mayúsculas)
+		if (usuario.getRol().name().equalsIgnoreCase("Admin")) {
 			throw new RuntimeException("No puedes banear a un administrador");
 		}
 
@@ -41,6 +42,24 @@ public class UsuarioBaneadoService {
 	}
 
 	public List<UsuarioBaneado> obtenerTodosLosBaneos() {
-	    return baneadoRepository.findAll();
+		return baneadoRepository.findAll();
+	}
+
+	public UsuarioBaneado obtenerBaneoActivo(int usuarioId) {
+		List<UsuarioBaneado> baneos = baneadoRepository.encontrarPorUsuarioId(usuarioId);
+		System.out.println("[BaneoService] Buscando baneos para ID " + usuarioId + ". Encontrados: " + baneos.size());
+		
+		return baneos.stream()
+				.filter(baneo -> {
+					boolean activo = baneo.getFechaFin() == null || 
+						   baneo.getFechaFin().isAfter(LocalDate.now()) || 
+						   baneo.getFechaFin().isEqual(LocalDate.now());
+					
+					System.out.println("[BaneoService] Comprobando baneo ID " + baneo.getIdentificador() + 
+									   ": Fin=" + baneo.getFechaFin() + " | Activo=" + activo);
+					return activo;
+				})
+				.findFirst()
+				.orElse(null);
 	}
 }

@@ -124,6 +124,68 @@ export class ModalComponent implements OnInit, OnDestroy {
     input.value = input.value.filter((t: string) => t !== tagName);
   }
 
+  // --- Lógica de Markdown ---
+  cursorPos: number = 0;
+
+  updateCursorPosition(event: any) {
+    this.cursorPos = event.target.selectionStart;
+  }
+
+  insertMarkdown(input: any, type: string) {
+    const text = input.value || '';
+    let start = this.cursorPos;
+    let end = this.cursorPos;
+    
+    // Intentar obtener la selección real si es posible
+    const textarea = document.getElementById(input.name) as HTMLTextAreaElement;
+    if (textarea) {
+      start = textarea.selectionStart;
+      end = textarea.selectionEnd;
+    }
+
+    const selectedText = text.substring(start, end);
+    let newText = '';
+    let cursorOffset = 0;
+
+    switch (type) {
+      case 'bold':
+        newText = `**${selectedText || 'texto'}**`;
+        cursorOffset = selectedText ? newText.length : 2;
+        break;
+      case 'italic':
+        newText = `*${selectedText || 'texto'}*`;
+        cursorOffset = selectedText ? newText.length : 1;
+        break;
+      case 'h1':
+        newText = `\n# ${selectedText || 'Título'}\n`;
+        cursorOffset = newText.length;
+        break;
+      case 'list':
+        newText = `\n- ${selectedText || 'elemento'}`;
+        cursorOffset = newText.length;
+        break;
+      case 'code':
+        newText = `\`${selectedText || 'código'}\``;
+        cursorOffset = selectedText ? newText.length : 1;
+        break;
+      case 'link':
+        newText = `[${selectedText || 'enlace'}](url)`;
+        cursorOffset = selectedText ? newText.length : 1;
+        break;
+    }
+
+    input.value = text.substring(0, start) + newText + text.substring(end);
+    
+    // Devolver el foco y posicionar el cursor
+    setTimeout(() => {
+      if (textarea) {
+        textarea.focus();
+        const newPos = start + cursorOffset;
+        textarea.setSelectionRange(newPos, newPos);
+      }
+    }, 0);
+  }
+
   // File management
   onFilesSelected(input: ModalInput, event: any) {
     if (event.target.files && event.target.files.length > 0) {

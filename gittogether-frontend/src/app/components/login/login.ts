@@ -41,9 +41,14 @@ export class Login {
       },
       error: (err) => {
         console.error("Error en el login:", err);
-        this.errorMessage = "Usuario o contraseña incorrectos";
-        this.loginData.password = ''; // Vaciar el campo de la contraseña al fallar
-        this.cdr.detectChanges(); // Forzar la actualización visual automática
+        if (err.status === 403) {
+          this.errorMessage = err.error || "Tu cuenta ha sido baneada.";
+          this.toastService.error(this.errorMessage); // Notificación visual
+        } else {
+          this.errorMessage = "Usuario o contraseña incorrectos";
+        }
+        this.loginData.password = ''; 
+        this.cdr.detectChanges(); 
       }
     });
   }

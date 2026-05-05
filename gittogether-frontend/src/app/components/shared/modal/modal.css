@@ -20,13 +20,59 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 800px;
   padding: 32px;
   box-shadow: var(--shadow-dropdown);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--text-primary);
   font-family: 'Outfit', 'Inter', sans-serif;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Markdown Editor Styles */
+.markdown-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-dark);
+}
+
+.markdown-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.markdown-toolbar button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  min-width: 32px;
+}
+
+.markdown-toolbar button:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.markdown-editor-wrapper textarea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: 250px !important;
 }
 
 /* Header */
@@ -91,6 +137,23 @@
 .input-group textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+/* Files Editor Styles - Compact */
+.files-editor.compact .custom-file-upload.mini {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    background: var(--bg-surface-elevated);
+}
+
+.selected-files-preview.mini {
+    margin-top: 4px;
+}
+
+.selected-files-preview.mini .selected-file-chip {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    border-radius: 8px;
 }
 
 /* Footer Buttons */

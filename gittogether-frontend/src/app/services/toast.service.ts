@@ -17,7 +17,7 @@ export class ToastService {
 
   toasts$ = this.toastsSubject.asObservable();
 
-  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 300) {
+  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 3000) {
     const id = this.counter++;
     const toast: Toast = { message, type, id };
 

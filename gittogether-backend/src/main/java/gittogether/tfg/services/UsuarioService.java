@@ -67,6 +67,11 @@ public class UsuarioService {
 				.orElseThrow(() -> new RuntimeException("El usuario con ID " + id + " no existe"));
 	}
 
+	public Usuario obtenerPorEmail(String email) {
+		return usuarioRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+	}
+
 	public Usuario actualizarPerfil(int id, String descripcion, String avatarUrl) {
 		Usuario usuario = obtenerPorId(id);
 

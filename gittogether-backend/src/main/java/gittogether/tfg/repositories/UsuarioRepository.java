@@ -12,6 +12,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
 	// Spring deduce la consulta: SELECT * FROM T_USUARIO WHERE email = ? or nombre = ?
 	Optional<Usuario> findByNombreOrEmail(String nombre, String email);
+	Optional<Usuario> findByEmail(String email);
 
 	boolean existsByNombre(String nombre);
 	

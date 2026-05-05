@@ -273,7 +273,8 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al editar el tema", err);
-          this.toastService.error("Error al editar el tema.");
+          const errorMsg = typeof err.error === 'string' ? err.error : "Error al editar el tema.";
+          this.toastService.error(errorMsg);
         }
       });
     }
@@ -342,7 +343,11 @@ export class Foro implements OnInit {
         },
         error: (err) => {
           console.error("Error al crear el tema", err);
-          this.toastService.error("Error al crear el tema.");
+          // El interceptor ya maneja el error 403 de baneo
+          if (err.status !== 403) {
+            const errorMsg = typeof err.error === 'string' ? err.error : "Error al crear el tema.";
+            this.toastService.error(errorMsg);
+          }
         }
       });
     }

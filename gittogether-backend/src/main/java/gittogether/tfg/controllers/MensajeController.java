@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import gittogether.tfg.entities.Mensaje;
 import gittogether.tfg.services.MensajeService;
 import gittogether.tfg.services.S3Service;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/mensajes-foro")
