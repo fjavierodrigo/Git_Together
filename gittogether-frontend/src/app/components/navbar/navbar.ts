@@ -1,23 +1,32 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Usuario } from '../services/usuario';
 import { ThemeService } from '../../services/theme.service';
+import { BaneoService } from '../services/baneo.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
 export class NavbarComponent implements OnInit {
   private themeService = inject(ThemeService);
+  private baneoService = inject(BaneoService);
+  private toastService: ToastService = inject(ToastService);
   isDarkTheme$ = this.themeService.isDarkTheme$;
   
   usuarioLogueado: any = null;
   imageError: boolean = false;
+  estaBaneado: boolean = false;
+  razonBaneo: string = '';
+  mostrarModalReclamacion: boolean = false;
+  mensajeReclamacion: string = '';
 
   constructor(
     private apiUsuario: Usuario, 
@@ -35,6 +44,40 @@ export class NavbarComponent implements OnInit {
     this.apiUsuario.currentUser$.subscribe(user => {
       this.usuarioLogueado = user;
       this.imageError = false; // Reseteamos el error si cambia el usuario
+      if (user) {
+        this.verificarEstadoBaneo();
+      }
+    });
+  }
+
+  verificarEstadoBaneo() {
+    this.baneoService.obtenerBaneos().subscribe(baneos => {
+      const miBaneo = baneos.find(b => b.usuario.identificador === this.usuarioLogueado.identificador);
+      if (miBaneo) {
+        this.estaBaneado = true;
+        this.razonBaneo = miBaneo.razon;
+      } else {
+        this.estaBaneado = false;
+      }
+    });
+  }
+
+  abrirModalReclamacion() {
+    this.mostrarModalReclamacion = true;
+    this.mensajeReclamacion = '';
+  }
+
+  enviarReclamacion() {
+    if (!this.mensajeReclamacion.trim()) return;
+    
+    this.baneoService.reclamar(this.usuarioLogueado.identificador, this.mensajeReclamacion).subscribe({
+      next: () => {
+        this.toastService.success('Reclamación enviada correctamente. La revisaremos pronto.');
+        this.mostrarModalReclamacion = false;
+      },
+      error: () => {
+        this.toastService.error('Error al enviar la reclamación.');
+      }
     });
   }
 

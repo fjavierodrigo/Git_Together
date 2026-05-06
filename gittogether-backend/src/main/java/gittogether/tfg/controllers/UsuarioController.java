@@ -172,4 +172,11 @@ public class UsuarioController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado o contraseña incorrecta");
 		}
 	}
+
+	@GetMapping("/buscar/{nombre}")
+	public ResponseEntity<List<Usuario>> buscarUsuarios(@PathVariable String nombre) {
+		List<Usuario> usuarios = usuarioService.buscarPorNombre(nombre);
+		s3Service.procesarAvatares(usuarios);
+		return ResponseEntity.ok(usuarios);
+	}
 }

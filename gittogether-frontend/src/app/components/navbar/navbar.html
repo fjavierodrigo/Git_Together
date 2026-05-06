@@ -44,6 +44,14 @@
         </button>
 
         <div class="header-user" *ngIf="usuarioLogueado">
+            <!-- BOTÓN DE RECLAMACIÓN SI ESTÁ BANEADO -->
+            <button class="btn-danger-nav" (click)="abrirModalReclamacion()" *ngIf="estaBaneado" title="Reclamar baneo" style="margin-right: 15px; background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid #ff4757; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                </svg>
+                <span>Reclamar</span>
+            </button>
+
             <div class="user-info-section" (click)="goToProfile()" style="cursor: pointer;" title="Ver Perfil">
                 <div class="avatar-container">
                     <img *ngIf="usuarioLogueado?.avatar && !imageError" 
@@ -68,6 +76,32 @@
                     <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
             </button>
+
+            <!-- MODAL RECLAMACIÓN -->
+            <div class="modal-overlay" *ngIf="mostrarModalReclamacion">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Reclamar Sanción</h3>
+                    <button class="btn-close-modal" (click)="mostrarModalReclamacion = false" title="Cerrar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px;">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                    <div class="modal-body">
+                        <p class="ban-info"><strong>Motivo:</strong> {{razonBaneo}}</p>
+                        <div class="form-group">
+                            <label>Mensaje de defensa</label>
+                            <textarea [(ngModel)]="mensajeReclamacion" placeholder="Explica por qué crees que tu cuenta debería ser desbloqueada..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" (click)="mostrarModalReclamacion = false">Cancelar</button>
+                        <button class="btn-primary" (click)="enviarReclamacion()" [disabled]="!mensajeReclamacion?.trim()">Enviar Reclamación</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</nav>
+</nav>

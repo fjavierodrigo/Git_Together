@@ -58,6 +58,10 @@ public class UsuarioService {
 		return usuarioRepository.findAll();
 	}
 
+	public List<Usuario> buscarPorNombre(String nombre) {
+		return usuarioRepository.findByNombreContainingIgnoreCase(nombre);
+	}
+
 	// Obtener UN usuario por su ID (Ideal para ver su perfil)
 	public Usuario obtenerPorId(int id) {
 		return usuarioRepository.findById(id)

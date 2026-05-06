@@ -49,6 +49,9 @@ public class UsuarioBaneado {
 	@Column(name = "revisado")
 	private boolean revisado = false;
 
+	@Column(name = "reclamacion", columnDefinition = "TEXT")
+	private String reclamacion;
+
 	public int getIdentificador() {
 		return identificador;
 	}
@@ -111,6 +114,14 @@ public class UsuarioBaneado {
 
 	public void setRevisado(boolean revisado) {
 		this.revisado = revisado;
+	}
+
+	public String getReclamacion() {
+		return reclamacion;
+	}
+
+	public void setReclamacion(String reclamacion) {
+		this.reclamacion = reclamacion;
 	}
 
 	@Override

@@ -46,20 +46,42 @@ public class UsuarioBaneadoService {
 	}
 
 	public UsuarioBaneado obtenerBaneoActivo(int usuarioId) {
-		List<UsuarioBaneado> baneos = baneadoRepository.encontrarPorUsuarioId(usuarioId);
-		System.out.println("[BaneoService] Buscando baneos para ID " + usuarioId + ". Encontrados: " + baneos.size());
+		return baneadoRepository.encontrarBaneoActivo(usuarioId).orElse(null);
+	}
+
+	public void eliminarBaneo(int baneoId) {
+		baneadoRepository.deleteById(baneoId);
+	}
+
+	public UsuarioBaneado actualizarBaneo(int baneoId, UsuarioBaneado nuevosDatos) {
+		UsuarioBaneado baneoExistente = baneadoRepository.findById(baneoId)
+				.orElseThrow(() -> new RuntimeException("El baneo no existe"));
 		
-		return baneos.stream()
-				.filter(baneo -> {
-					boolean activo = baneo.getFechaFin() == null || 
-						   baneo.getFechaFin().isAfter(LocalDate.now()) || 
-						   baneo.getFechaFin().isEqual(LocalDate.now());
-					
-					System.out.println("[BaneoService] Comprobando baneo ID " + baneo.getIdentificador() + 
-									   ": Fin=" + baneo.getFechaFin() + " | Activo=" + activo);
-					return activo;
-				})
-				.findFirst()
-				.orElse(null);
+		baneoExistente.setRazon(nuevosDatos.getRazon());
+		baneoExistente.setFechaFin(nuevosDatos.getFechaFin());
+		baneoExistente.setEvidencia(nuevosDatos.getEvidencia());
+		
+		return baneadoRepository.save(baneoExistente);
+	}
+
+	public void reclamarBaneo(int usuarioId, String mensaje) {
+		UsuarioBaneado baneoActivo = obtenerBaneoActivo(usuarioId);
+		if (baneoActivo == null) {
+			throw new RuntimeException("No tienes un baneo activo sobre el cual reclamar");
+		}
+		baneoActivo.setReclamacion(mensaje);
+		baneoActivo.setRevisado(false);
+		baneadoRepository.save(baneoActivo);
+	}
+
+	public List<UsuarioBaneado> obtenerReclamacionesPendientes() {
+		return baneadoRepository.encontrarReclamacionesPendientes();
+	}
+
+	public void marcarReclamacionComoRevisada(int baneoId) {
+		UsuarioBaneado baneo = baneadoRepository.findById(baneoId)
+				.orElseThrow(() -> new RuntimeException("Baneo no encontrado"));
+		baneo.setRevisado(true);
+		baneadoRepository.save(baneo);
 	}
 }

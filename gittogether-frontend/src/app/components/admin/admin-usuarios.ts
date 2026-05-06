@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Usuario } from '../services/usuario';
 import { BaneoService } from '../services/baneo.service';
 import { NavbarComponent } from '../navbar/navbar';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -16,13 +17,29 @@ import { NavbarComponent } from '../navbar/navbar';
 })
 export class AdminUsuariosComponent implements OnInit {
   private http = inject(HttpClient);
-  public usuarioService = inject(Usuario);
+  private router = inject(Router); // Inyectamos Router
+  public usuarioService: Usuario = inject(Usuario);
   private baneoService = inject(BaneoService);
+  private toastService: ToastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   usuarios: any[] = [];
+  usuariosFiltrados: any[] = [];
+  baneos: any[] = [];
+  reclamaciones: any[] = [];
+  
   usuarioSeleccionado: any = null;
+  baneoSeleccionado: any = null; // Para editar baneos
+  usuarioLogueado: any = null; // Propiedad añadida para corregir el error
+  
   mostrarModal: boolean = false;
+  mostrarModalEditarBaneo: boolean = false;
+  mostrarModalConfirmarDesbanear: boolean = false;
+  baneoParaDesbanearId: number | null = null;
+
+  activeTab: 'ACTIVOS' | 'BANEADOS' | 'RECLAMACIONES' = 'ACTIVOS';
+  searchQuery: string = '';
+  menuAbiertoId: number | null = null;
 
   // Datos para el baneo
   razon: string = '';
@@ -31,7 +48,7 @@ export class AdminUsuariosComponent implements OnInit {
   minFecha: string = '';
   archivosEvidencia: File[] = [];
 
-  constructor(private router: Router) {}
+  constructor() {}
 
   onArchivosEvidencia(event: any) {
     const input = event.target as HTMLInputElement;
@@ -47,7 +64,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   ngOnInit() {
     console.log('AdminUsuariosComponent cargado correctamente');
-    this.cargarUsuarios();
+    this.cargarDatos();
     this.calcularMinFecha();
   }
 
@@ -61,22 +78,123 @@ export class AdminUsuariosComponent implements OnInit {
     this.router.navigate(['/foro']);
   }
 
+  cargarDatos() {
+    // Cargamos usuarios, baneos y reclamaciones en paralelo
+    this.cargarUsuarios();
+    this.cargarBaneos();
+    this.cargarReclamaciones();
+  }
+
   cargarUsuarios() {
     this.usuarioService.obtenerTodos().subscribe({
       next: (data) => {
-        console.log('Datos brutos recibidos:', data);
         if (data && Array.isArray(data)) {
-          console.log('Admin: Cargados ' + data.length + ' usuarios');
           this.usuarios = data.map(u => ({ ...u, avatarError: false }));
-          this.cdr.detectChanges();
-          if (data.length === 0) console.warn('Atención: La lista de usuarios ha llegado VACÍA desde el servidor');
-        } else {
-          console.error('Admin: La respuesta no es un array válido', data);
+          this.aplicarFiltros();
         }
+      }
+    });
+  }
+
+  cargarBaneos() {
+    this.baneoService.obtenerBaneos().subscribe({
+      next: (data: any[]) => {
+        this.baneos = data;
+        this.aplicarFiltros();
+      }
+    });
+  }
+
+  cargarReclamaciones() {
+    this.http.get<any[]>('http://localhost:8080/api/baneos/reclamaciones').subscribe({
+      next: (data) => {
+        this.reclamaciones = data;
+      }
+    });
+  }
+
+  setTab(tab: 'ACTIVOS' | 'BANEADOS' | 'RECLAMACIONES') {
+    this.activeTab = tab;
+    localStorage.setItem('adminActiveTab', tab); // Guardar pestaña seleccionada
+    this.searchQuery = '';
+    this.menuAbiertoId = null;
+    this.aplicarFiltros();
+  }
+
+  toggleMenu(id: number) {
+    this.menuAbiertoId = this.menuAbiertoId === id ? null : id;
+  }
+
+  onSearch() {
+    this.aplicarFiltros();
+  }
+
+  aplicarFiltros() {
+    const query = this.searchQuery.toLowerCase().trim();
+    
+    if (this.activeTab === 'ACTIVOS') {
+      // Filtrar usuarios que NO están en la lista de baneos activos
+      const idsBaneados = this.baneos.map(b => b.usuario.identificador);
+      this.usuariosFiltrados = this.usuarios.filter(u => 
+        !idsBaneados.includes(u.identificador) && 
+        (u.nombre.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))
+      );
+    } else if (this.activeTab === 'BANEADOS') {
+      this.usuariosFiltrados = this.baneos.filter(b => 
+        b.usuario.nombre.toLowerCase().includes(query) || b.usuario.email.toLowerCase().includes(query)
+      );
+    }
+  }
+
+  desbanear(id: number) {
+    this.baneoParaDesbanearId = id;
+    this.mostrarModalConfirmarDesbanear = true;
+    this.menuAbiertoId = null;
+  }
+
+  confirmarDesbanear() {
+    if (this.baneoParaDesbanearId) {
+      this.mostrarModalConfirmarDesbanear = false;
+      this.http.delete(`http://localhost:8080/api/baneos/${this.baneoParaDesbanearId}`).subscribe({
+        next: () => {
+          this.toastService.success('Usuario desbaneado correctamente');
+          this.baneoParaDesbanearId = null;
+          this.cargarDatos();
+        },
+        error: () => {
+          this.toastService.error('Error al desbanear usuario');
+          this.cargarDatos(); // Refrescar igual por si acaso
+        }
+      });
+    }
+  }
+
+  abrirEditarBaneo(baneo: any) {
+    this.baneoSeleccionado = { ...baneo };
+    this.mostrarModalEditarBaneo = true;
+  }
+
+  guardarEdicionBaneo() {
+    this.mostrarModalEditarBaneo = false; // Cierre inmediato
+    this.http.put(`http://localhost:8080/api/baneos/${this.baneoSeleccionado.identificador}`, this.baneoSeleccionado).subscribe({
+      next: () => {
+        this.toastService.success('Baneo actualizado correctamente');
+        this.cargarDatos(); // Actualización reactiva
       },
-      error: (err) => {
-        console.error('Admin: Error crítico cargando usuarios', err);
-        if (err.status === 403) console.error('Error 403: No tienes permisos de Admin para esta petición');
+      error: () => {
+        this.toastService.error('Error al actualizar el baneo');
+      }
+    });
+  }
+
+  revisarReclamacion(reclamacion: any) {
+    this.http.post(`http://localhost:8080/api/baneos/revisar/${reclamacion.identificador}`, {}).subscribe({
+      next: () => {
+        this.toastService.success('Reclamación marcada como revisada');
+        this.cargarReclamaciones();
+      },
+      error: () => {
+        this.toastService.error('Error al marcar como revisada');
       }
     });
   }
@@ -106,39 +224,32 @@ export class AdminUsuariosComponent implements OnInit {
   }
 
   confirmarBaneo() {
-    if (!this.razon || !this.razon.trim()) {
-      return;
-    }
-
-    const adminLogueado = this.usuarioService.getUsuarioLogueado();
-
+    if (!this.razon || !this.razon.trim()) return;
+    const adminLogueado = this.usuarioLogueado;
     const baneo = {
       razon: this.razon,
       evidencia: this.evidencia,
       fechaFin: this.fechaFin || null,
       baneadoPor: adminLogueado ? adminLogueado.nombre : 'ADMIN',
-      usuario: {
-        identificador: this.usuarioSeleccionado.identificador
-      }
+      usuario: { identificador: this.usuarioSeleccionado.identificador }
     };
 
     const formData = new FormData();
     formData.append('baneo', new Blob([JSON.stringify(baneo)], { type: 'application/json' }));
-    
-    if (this.archivosEvidencia && this.archivosEvidencia.length > 0) {
-      this.archivosEvidencia.forEach(file => {
-        formData.append('archivos', file);
-      });
-    }
+    this.archivosEvidencia.forEach(file => formData.append('archivos', file));
+
+    const nombreUsuario = this.usuarioSeleccionado?.nombre || 'Usuario';
+    this.cerrarModal(); 
 
     this.baneoService.aplicarBaneo(formData).subscribe({
       next: () => {
-        alert('Usuario baneado correctamente');
-        this.cerrarModal();
-        this.cargarUsuarios();
+        this.toastService.success(`Usuario ${nombreUsuario} baneado correctamente`);
+        this.cargarDatos();
       },
       error: (err) => {
-        alert('Error al banear: ' + (err.error || err.message));
+        console.error('Error al banear:', err);
+        this.toastService.error('Error al aplicar el baneo');
+        this.cargarDatos();
       }
     });
   }

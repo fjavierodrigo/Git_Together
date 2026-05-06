@@ -13,7 +13,27 @@ export class BaneoService {
     return this.http.post<any>(`${this.API_URL}/aplicar`, baneoData);
   }
 
-  listarBaneos(): Observable<any[]> {
+  obtenerBaneos(): Observable<any[]> {
     return this.http.get<any[]>(this.API_URL);
+  }
+
+  eliminarBaneo(id: number): Observable<any> {
+    return this.http.delete(`${this.API_URL}/${id}`);
+  }
+
+  actualizarBaneo(id: number, baneo: any): Observable<any> {
+    return this.http.put(`${this.API_URL}/${id}`, baneo);
+  }
+
+  reclamar(usuarioId: number, mensaje: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/reclamar`, { usuarioId, mensaje });
+  }
+
+  obtenerReclamaciones(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/reclamaciones`);
+  }
+
+  revisarReclamacion(id: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/revisar/${id}`, {});
   }
 }

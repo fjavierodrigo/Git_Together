@@ -74,4 +74,50 @@ public class UsuarioBaneadoController {
 	public ResponseEntity<List<UsuarioBaneado>> listarBaneos() {
 		return ResponseEntity.ok(baneadoService.obtenerTodosLosBaneos());
 	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> actualizarBaneo(@PathVariable int id, @RequestBody UsuarioBaneado baneo) {
+		try {
+			return ResponseEntity.ok(baneadoService.actualizarBaneo(id, baneo));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> eliminarBaneo(@PathVariable int id) {
+		try {
+			baneadoService.eliminarBaneo(id);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	@PostMapping("/reclamar")
+	public ResponseEntity<?> reclamarBaneo(@RequestBody java.util.Map<String, Object> payload) {
+		try {
+			int usuarioId = (int) payload.get("usuarioId");
+			String mensaje = (String) payload.get("mensaje");
+			baneadoService.reclamarBaneo(usuarioId, mensaje);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	@GetMapping("/reclamaciones")
+	public ResponseEntity<List<UsuarioBaneado>> listarReclamaciones() {
+		return ResponseEntity.ok(baneadoService.obtenerReclamacionesPendientes());
+	}
+
+	@PostMapping("/revisar/{id}")
+	public ResponseEntity<?> marcarComoRevisada(@PathVariable int id) {
+		try {
+			baneadoService.marcarReclamacionComoRevisada(id);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 }
