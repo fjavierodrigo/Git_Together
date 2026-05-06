@@ -76,7 +76,9 @@ public class UsuarioController {
 
 			// 2. Subir imagen a S3 si existe
 			if (archivo != null && !archivo.isEmpty()) {
-				String urlImagen = s3Service.subirArchivo(archivo);
+				String nombreUser = usuario.getNombre() != null ? usuario.getNombre() : "nuevo_usuario";
+				String rutaAvatar = "avatares/" + nombreUser.replace(" ", "_");
+				String urlImagen = s3Service.subirArchivoConRuta(archivo, rutaAvatar);
 				usuario.setAvatar(urlImagen);
 			}
 
@@ -129,7 +131,10 @@ public class UsuarioController {
 
 			String urlImagen = null;
 			if (archivo != null && !archivo.isEmpty()) {
-				urlImagen = s3Service.subirArchivo(archivo);
+				Usuario usuarioReal = usuarioService.obtenerPorId(id);
+				String nombreUser = usuarioReal.getNombre() != null ? usuarioReal.getNombre() : "usuario_" + id;
+				String rutaAvatar = "avatares/" + nombreUser.replace(" ", "_");
+				urlImagen = s3Service.subirArchivoConRuta(archivo, rutaAvatar);
 			} else if (usuarioDatos.getAvatar() != null && usuarioDatos.getAvatar().equalsIgnoreCase("null")) {
 				// Si no hay archivo pero el JSON dice "null", es que queremos borrar la foto
 				urlImagen = "null";

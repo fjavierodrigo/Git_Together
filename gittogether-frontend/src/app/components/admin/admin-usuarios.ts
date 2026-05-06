@@ -122,7 +122,16 @@ export class AdminUsuariosComponent implements OnInit {
       }
     };
 
-    this.baneoService.aplicarBaneo(baneo).subscribe({
+    const formData = new FormData();
+    formData.append('baneo', new Blob([JSON.stringify(baneo)], { type: 'application/json' }));
+    
+    if (this.archivosEvidencia && this.archivosEvidencia.length > 0) {
+      this.archivosEvidencia.forEach(file => {
+        formData.append('archivos', file);
+      });
+    }
+
+    this.baneoService.aplicarBaneo(formData).subscribe({
       next: () => {
         alert('Usuario baneado correctamente');
         this.cerrarModal();

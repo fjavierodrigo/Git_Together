@@ -9,8 +9,8 @@ export class BaneoService {
   private API_URL = 'http://localhost:8080/api/baneos';
   private http = inject(HttpClient);
 
-  aplicarBaneo(baneo: any): Observable<any> {
-    return this.http.post<any>(`${this.API_URL}/aplicar`, baneo);
+  aplicarBaneo(baneoData: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/aplicar`, baneoData);
   }
 
   listarBaneos(): Observable<any[]> {

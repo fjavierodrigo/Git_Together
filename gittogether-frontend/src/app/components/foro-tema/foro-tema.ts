@@ -33,6 +33,8 @@ export class ForoTema implements OnInit {
   categorias: any[] = [];
   tags: any[] = [];
   temasRelacionados: any[] = [];
+  likesUsuario: Set<number> = new Set();
+  likesCount: Map<number, number> = new Map();
   cargando: boolean = true;
   skeletonMensajes = Array(3).fill(0);
 
@@ -127,6 +129,8 @@ export class ForoTema implements OnInit {
 
         this.cargando = false;
         this.cargarTemasRelacionados();
+        this.cargarLikesUsuario();
+        this.cargarContadoresLikes();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -560,7 +564,7 @@ export class ForoTema implements OnInit {
       if (validos.length > 0) {
         this.archivosSeleccionados = [...this.archivosSeleccionados, ...validos];
       }
-      
+
       event.target.value = '';
     }
   }
@@ -684,5 +688,60 @@ export class ForoTema implements OnInit {
   actualizarPosicionCursor(event: any) {
     // Este método puede estar vacío; su propósito principal es disparar
     // la detección de cambios de Angular cuando el usuario interactúa con el textarea.
+  }
+
+  // --- LIKES LOGIC ---
+  cargarLikesUsuario(): void {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    if (!usuarioActual || !this.tema || !this.mensajes.length) return;
+
+    const idUsuario = usuarioActual.identificador || usuarioActual.id;
+    const idTema = this.tema.identificador || this.tema.id;
+    
+    this.foroService.getLikesUsuarioEnTema(idUsuario, idTema).subscribe({
+      next: (ids) => {
+        this.likesUsuario = new Set(ids);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cargarContadoresLikes(): void {
+    if (!this.mensajes.length) return;
+    this.mensajes.forEach(m => {
+      const idMensaje = m.identificador || m.id;
+      this.foroService.getCantidadLikesMensaje(idMensaje).subscribe(count => {
+        this.likesCount.set(idMensaje, count);
+        this.cdr.detectChanges();
+      });
+    });
+  }
+
+  toggleLike(mensaje: any): void {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    if (!usuarioActual) return;
+
+    const idUsuario = usuarioActual.identificador || usuarioActual.id;
+    const idMensaje = mensaje.identificador || mensaje.id;
+    const yaTieneLike = this.likesUsuario.has(idMensaje);
+
+    // Actualización optimista de la UI
+    if (yaTieneLike) {
+      this.likesUsuario.delete(idMensaje);
+      const currentCount = this.likesCount.get(idMensaje) || 0;
+      this.likesCount.set(idMensaje, Math.max(0, currentCount - 1));
+      
+      this.foroService.quitarLike(idUsuario, idMensaje).subscribe();
+    } else {
+      this.likesUsuario.add(idMensaje);
+      const currentCount = this.likesCount.get(idMensaje) || 0;
+      this.likesCount.set(idMensaje, currentCount + 1);
+
+      this.foroService.darLike({
+        usuario: { identificador: idUsuario },
+        mensaje: { identificador: idMensaje }
+      }).subscribe();
+    }
+    this.cdr.detectChanges();
   }
 }
