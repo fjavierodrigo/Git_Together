@@ -101,25 +101,7 @@
                             </div>
                         </div>
 
-                        <!-- Información del Autor (Ahora arriba) -->
-                        <div class="tema-author-info-top" *ngIf="tema.usuario">
-                            <div class="author-avatar-container mini">
-                                <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
-                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
-                                    (error)="tema.avatarError = true" class="author-avatar-img">
-                                <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
-                                    {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
-                                </div>
-                            </div>
-                            <div class="author-details-row">
-                                <span class="author-name-small">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                <span class="author-sep">•</span>
-                                <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
-                                    }}</span>
-                            </div>
-                        </div>
 
-                        <hr class="tema-divider-light">
 
                         <!-- Descripción del Tema e Imágenes Integradas -->
                         <div class="tema-body-content"
@@ -145,7 +127,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Otros Archivos Adjuntos (Documentos) -->
                         <div class="attachments-section" *ngIf="getDocumentos(tema.archivos).length > 0">
                             <div class="attachments-section-header">
@@ -183,6 +164,35 @@
                                         </svg>
                                     </div>
                                 </a>
+                            </div>
+                        </div>
+
+                        <hr class="tema-divider-light">
+
+                        <!-- Información del Autor (Ahora abajo de todo) -->
+                        <div class="tema-author-info-bottom" *ngIf="tema.usuario">
+                            <div class="author-avatar-container mini">
+                                <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
+                                    [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
+                                    (error)="tema.avatarError = true" class="author-avatar-img">
+                                <div *ngIf="!tema.usuario?.avatar || tema.avatarError" class="author-avatar-fallback">
+                                    {{ (tema.usuario?.nombre || 'U')[0].toUpperCase() }}
+                                </div>
+                            </div>
+                            <div class="author-details-row-main">
+                                <div class="author-details-left">
+                                    <span class="author-name-small">{{ tema.usuario?.nombre || 'Usuario' }}</span>
+                                    <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                                </div>
+                                
+                                <div class="tema-actions-right" *ngIf="tema">
+                                    <button class="btn-like theme-like" (click)="toggleLikeTema(tema)" [class.liked]="likesUsuarioTema.has(tema.identificador || tema.id)">
+                                        <svg class="heart-icon" viewBox="0 0 24 24" [attr.fill]="likesUsuarioTema.has(tema.identificador || tema.id) ? 'var(--accent-color)' : 'none'" stroke="currentColor" stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                        </svg>
+                                        <span class="like-count">{{ likesCountTema.get(tema.identificador || tema.id) || 0 }}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -326,7 +336,8 @@
 
                                 <!-- Fecha y Likes abajo -->
                                 <div class="comment-footer">
-                                    <div class="comment-actions-left">
+                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                                    <div class="comment-actions-right">
                                         <button class="btn-like" (click)="toggleLike(mensaje)" [class.liked]="likesUsuario.has(mensaje.identificador || mensaje.id)">
                                             <svg class="heart-icon" viewBox="0 0 24 24" [attr.fill]="likesUsuario.has(mensaje.identificador || mensaje.id) ? 'var(--accent-color)' : 'none'" stroke="currentColor" stroke-width="2">
                                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -334,9 +345,7 @@
                                             <span class="like-count">{{ likesCount.get(mensaje.identificador || mensaje.id) || 0 }}</span>
                                         </button>
                                     </div>
-                                    <span class="comment-date">{{ mensaje.fechaCreacion | date:'dd/MM/yyyy' }}</span>
                                 </div>
-
                             </div>
                         </div>
 

@@ -30,7 +30,7 @@ public class Tema {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "identificador")
-	private int identificador;
+	private Integer identificador;
 
 	@Column(name = "titulo", length = 255, nullable = false)
 	private String titulo;
@@ -68,11 +68,11 @@ public class Tema {
 	@OneToMany(mappedBy = "tema", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
 	private java.util.List<ArchivoAdjunto> archivos = new java.util.ArrayList<>();
 
-	public int getIdentificador() {
+	public Integer getIdentificador() {
 		return identificador;
 	}
 
-	public void setIdentificador(int identificador) {
+	public void setIdentificador(Integer identificador) {
 		this.identificador = identificador;
 	}
 

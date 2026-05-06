@@ -338,6 +338,26 @@
     color: var(--accent-color);
 }
 
+.like-stat {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.like-stat:hover {
+    background: var(--bg-hover);
+    transform: scale(1.05);
+}
+
+.like-stat.liked {
+    border-color: var(--accent-color);
+    background: var(--accent-glow);
+}
+
+.author-sep {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
 .options-menu-container {
     position: relative;
     display: flex;

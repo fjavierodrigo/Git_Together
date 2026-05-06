@@ -231,12 +231,12 @@
     font-weight: 500;
 }
 
-/* Author Top Row */
-.tema-author-info-top {
+/* Author Bottom Row */
+.tema-author-info-bottom {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 4px;
+    margin-top: 12px;
     padding: 4px 0;
 }
 
@@ -273,6 +273,31 @@
     color: var(--text-secondary);
     font-size: 0.95rem;
     font-weight: 500;
+}
+
+.author-details-row-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.author-details-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tema-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.theme-like {
+    border: 1px solid var(--border-color) !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
 }
 
 .tema-body-content {
@@ -1141,7 +1166,7 @@
     margin-top: 16px;
 }
 
-.comment-actions-left {
+.comment-actions-right {
     display: flex;
     align-items: center;
     gap: 16px;

@@ -31,7 +31,7 @@ public class Usuario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "identificador")
-	private int identificador;
+	private Integer identificador;
 
 	@Column(name = "nombre", length = 255, nullable = false, unique = true)
 	private String nombre;
@@ -58,11 +58,11 @@ public class Usuario {
 	@Column(name = "descripcion", columnDefinition = "TEXT")
 	private String descripcion;
 
-	public int getIdentificador() {
+	public Integer getIdentificador() {
 		return identificador;
 	}
 
-	public void setIdentificador(int identificador) {
+	public void setIdentificador(Integer identificador) {
 		this.identificador = identificador;
 	}
 

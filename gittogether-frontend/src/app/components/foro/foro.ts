@@ -41,6 +41,9 @@ export class Foro implements OnInit {
   // Para controlar qué menú de opciones (3 puntos) está abierto
   activeMenuId: string | number | null = null;
 
+  likesUsuarioTema: Set<number> = new Set();
+  likesCountTema: Map<number, number> = new Map();
+
   // Inyección de Dependencias: Inicializamos los servicios necesarios para el funcionamiento del componente
   constructor(private foroService: ForoService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public usuarioService: Usuario, private toastService: ToastService, private modalService: ModalService) { 
     // Verificamos instantáneamente si tenemos datos en el servicio para evitar el estado de carga (skeletons)
@@ -83,6 +86,65 @@ export class Foro implements OnInit {
 
     // 3. Disparar carga/refresco inicial
     this.foroService.cargarTodo();
+    this.cargarLikesTemas();
+  }
+
+  cargarLikesTemas(): void {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    
+    this.foroService.temas$.subscribe(temas => {
+      temas.forEach(tema => {
+        const idTema = tema.identificador || tema.id;
+        
+        // Cargar contador
+        this.foroService.getCantidadLikesTema(idTema).subscribe(count => {
+          this.likesCountTema.set(idTema, count);
+          this.cdr.detectChanges();
+        });
+
+        // Comprobar si el usuario dio like
+        if (usuarioActual) {
+          const idUsuario = usuarioActual.identificador || usuarioActual.id;
+          this.foroService.comprobarLikeTema(idTema, idUsuario).subscribe(yaTieneLike => {
+            if (yaTieneLike) this.likesUsuarioTema.add(idTema);
+            this.cdr.detectChanges();
+          });
+        }
+      });
+    });
+  }
+
+  toggleLikeTema(tema: any): void {
+    const usuarioActual = this.usuarioService.getUsuarioLogueado();
+    if (!usuarioActual) {
+      this.toastService.warning("Inicia sesión para dar like");
+      return;
+    }
+
+    const idUsuario = usuarioActual.identificador || usuarioActual.id;
+    const idTema = tema.identificador || tema.id;
+    const yaTieneLike = this.likesUsuarioTema.has(idTema);
+
+    if (yaTieneLike) {
+      console.log("Foro List: Quitando like al tema:", idTema);
+      this.likesUsuarioTema.delete(idTema);
+      const currentCount = this.likesCountTema.get(idTema) || 0;
+      this.likesCountTema.set(idTema, Math.max(0, currentCount - 1));
+      this.foroService.quitarLikeTema(idUsuario, idTema).subscribe();
+    } else {
+      console.log("Foro List: Dando like al tema:", idTema);
+      this.likesUsuarioTema.add(idTema);
+      const currentCount = this.likesCountTema.get(idTema) || 0;
+      this.likesCountTema.set(idTema, currentCount + 1);
+      this.foroService.darLike({
+        usuario: { identificador: idUsuario },
+        tema: { identificador: idTema }
+      }).subscribe({
+        next: (res) => console.log("Foro List: Respuesta OK:", res),
+        error: (err) => console.error("Foro List: ERROR:", err)
+      });
+    }
+    this.cdr.detectChanges();
   }
 
   private actualizarFiltrosDesdeUrl() {

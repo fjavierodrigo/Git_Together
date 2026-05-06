@@ -33,6 +33,13 @@ public class JwtBaneoFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         
         String method = request.getMethod();
+        
+        // Si es una petición OPTIONS (Preflight de CORS), la dejamos pasar inmediatamente
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String path = request.getRequestURI();
 
         // Solo bloqueamos acciones de escritura (POST, PUT, DELETE)

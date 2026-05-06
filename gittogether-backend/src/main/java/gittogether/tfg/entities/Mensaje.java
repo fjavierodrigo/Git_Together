@@ -26,7 +26,7 @@ public class Mensaje {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "identificador")
-	private int identificador;
+	private Integer identificador;
 
 	@Column(name = "contenido", length = 255, nullable = false)
 	private String contenido;
@@ -52,11 +52,11 @@ public class Mensaje {
 	@jakarta.persistence.OneToMany(mappedBy = "mensaje", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
 	private java.util.List<ArchivoAdjunto> archivos = new java.util.ArrayList<>();
 
-	public int getIdentificador() {
+	public Integer getIdentificador() {
 		return identificador;
 	}
 
-	public void setIdentificador(int identificador) {
+	public void setIdentificador(Integer identificador) {
 		this.identificador = identificador;
 	}
 

@@ -36,9 +36,14 @@ public class Likes {
 	private Usuario usuario;
 
 	@ManyToOne
-	@JoinColumn(name = "mensaje_id", foreignKey = @ForeignKey(name = "FK_LIKES_MENSAJE"), nullable = false)
+	@JoinColumn(name = "mensaje_id", foreignKey = @ForeignKey(name = "FK_LIKES_MENSAJE"), nullable = true)
 	@org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
 	private Mensaje mensaje;
+
+	@ManyToOne
+	@JoinColumn(name = "tema_id", foreignKey = @ForeignKey(name = "FK_LIKES_TEMA"), nullable = true)
+	@org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+	private Tema tema;
 
 	public int getIdentificador() {
 		return identificador;
@@ -72,10 +77,18 @@ public class Likes {
 		this.mensaje = mensaje;
 	}
 
+	public Tema getTema() {
+		return tema;
+	}
+
+	public void setTema(Tema tema) {
+		this.tema = tema;
+	}
+
 	@Override
 	public String toString() {
-		return "Likes [identificador=" + identificador + ", fecha=" + fecha + ", usuario=" + usuario + ", Mensaje="
-				+ mensaje + "]";
+		return "Likes [identificador=" + identificador + ", fecha=" + fecha + ", usuario=" + usuario + ", mensaje="
+				+ mensaje + ", tema=" + tema + "]";
 	}
 
 }

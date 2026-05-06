@@ -157,19 +157,32 @@ export class ForoService {
 
     // --- LIKES ---
     darLike(like: any): Observable<any> {
-        return this.http.post(`${this.API_LIKES}/dar`, like);
+        console.log("Enviando POST a:", this.API_LIKES, "con datos:", like);
+        return this.http.post(this.API_LIKES, like);
     }
 
     quitarLike(usuarioId: number, mensajeId: number): Observable<any> {
         return this.http.delete(`${this.API_LIKES}/quitar/usuario/${usuarioId}/mensaje/${mensajeId}`);
     }
 
+    quitarLikeTema(usuarioId: number, temaId: number): Observable<any> {
+        return this.http.delete(`${this.API_LIKES}/quitar/usuario/${usuarioId}/tema/${temaId}`);
+    }
+
     getCantidadLikesMensaje(mensajeId: number): Observable<number> {
         return this.http.get<number>(`${this.API_LIKES}/mensaje/${mensajeId}/cantidad`);
     }
 
+    getCantidadLikesTema(temaId: number): Observable<number> {
+        return this.http.get<number>(`${this.API_LIKES}/tema/${temaId}/cantidad`);
+    }
+
     comprobarLike(mensajeId: number, usuarioId: number): Observable<boolean> {
         return this.http.get<boolean>(`${this.API_LIKES}/mensaje/${mensajeId}/usuario/${usuarioId}`);
+    }
+
+    comprobarLikeTema(temaId: number, usuarioId: number): Observable<boolean> {
+        return this.http.get<boolean>(`${this.API_LIKES}/tema/${temaId}/usuario/${usuarioId}`);
     }
 
     getLikesUsuarioEnTema(usuarioId: number, temaId: number): Observable<number[]> {
