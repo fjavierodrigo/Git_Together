@@ -16,11 +16,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleMaxSizeException(MaxUploadSizeExceededException exc) {
         Map<String, String> body = new HashMap<>();
         body.put("error", "El archivo es demasiado grande. El límite es de 50MB.");
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleGeneralException(Exception exc) {
+        System.err.println("Error no controlado: " + exc.getMessage());
+        Map<String, String> body = new HashMap<>();
+        body.put("error", exc.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException exc) {
+        // Solo logueamos el mensaje, no toda la pila de error para mantener la consola limpia
+        System.err.println("Error de validación: " + exc.getMessage());
+        
         Map<String, String> body = new HashMap<>();
         body.put("error", exc.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);

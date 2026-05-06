@@ -79,7 +79,9 @@ export class Register {
         console.error("Error en el registro:", err);
 
         // Manejo detallado de errores del backend
-        if (err.error && typeof err.error === 'string') {
+        if (err.error && err.error.error) {
+          this.errorMessage = err.error.error;
+        } else if (err.error && typeof err.error === 'string') {
           this.errorMessage = err.error;
         } else if (err.error && err.error.message) {
           this.errorMessage = err.error.message;

@@ -66,36 +66,31 @@ public class UsuarioController {
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> registrar(
 			@RequestPart("usuario") String usuarioJson,
-			@RequestPart(value = "avatar", required = false) MultipartFile archivo) {
-		try {
-			validarAvatar(archivo);
-			// 1. Convertir el String JSON manualmente a objeto Usuario
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
-			Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
+			@RequestPart(value = "avatar", required = false) MultipartFile archivo) throws Exception {
+		
+		validarAvatar(archivo);
+		// 1. Convertir el String JSON manualmente a objeto Usuario
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
+		Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
 
-			// 2. Subir imagen a S3 si existe
-			if (archivo != null && !archivo.isEmpty()) {
-				String nombreUser = usuario.getNombre() != null ? usuario.getNombre() : "nuevo_usuario";
-				String rutaAvatar = "avatares/" + nombreUser.replace(" ", "_");
-				String urlImagen = s3Service.subirArchivoConRuta(archivo, rutaAvatar);
-				usuario.setAvatar(urlImagen);
-			}
-
-			// 3. Asignar fecha si no viene
-			if (usuario.getFechaRegistro() == null) {
-				usuario.setFechaRegistro(LocalDate.now());
-			}
-
-			// 4. Guardar en BD
-			Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-			s3Service.procesarAvatar(nuevoUsuario);
-			return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.internalServerError().body("Error en el servidor: " + e.getMessage());
+		// 2. Subir imagen a S3 si existe
+		if (archivo != null && !archivo.isEmpty()) {
+			String nombreUser = usuario.getNombre() != null ? usuario.getNombre() : "nuevo_usuario";
+			String rutaAvatar = "avatares/" + nombreUser.replace(" ", "_");
+			String urlImagen = s3Service.subirArchivoConRuta(archivo, rutaAvatar);
+			usuario.setAvatar(urlImagen);
 		}
+
+		// 3. Asignar fecha si no viene
+		if (usuario.getFechaRegistro() == null) {
+			usuario.setFechaRegistro(LocalDate.now());
+		}
+
+		// 4. Guardar en BD
+		Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
+		s3Service.procesarAvatar(nuevoUsuario);
+		return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
 	}
 
 	// GET: http://localhost:8080/api/usuarios

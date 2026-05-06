@@ -41,11 +41,8 @@ public class UsuarioService {
 	}
 
 	public Usuario registrarUsuario(Usuario usuario) {
-		if (usuarioRepository.existsByNombre(usuario.getNombre())) {
-			throw new RuntimeException("El nombre de usuario ya existe");
-		}
-		if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-			throw new RuntimeException("El email ya está registrado");
+		if (usuarioRepository.existsByNombre(usuario.getNombre()) || usuarioRepository.existsByEmail(usuario.getEmail())) {
+			throw new RuntimeException("El nombre de usuario o el email ya existen");
 		}
 
 		// Encriptamos la contraseña antes de guardar
