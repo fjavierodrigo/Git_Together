@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -41,6 +42,15 @@ export class AdminUsuariosComponent implements OnInit {
   searchQuery: string = '';
   menuAbiertoId: number | null = null;
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // Si el clic no es dentro de un botón de acciones ni dentro del menú, cerramos
+    if (!target.closest('.btn-actions') && !target.closest('.action-menu')) {
+      this.menuAbiertoId = null;
+    }
+  }
+
   // Datos para el baneo
   razon: string = '';
   evidencia: string = '';
@@ -64,6 +74,14 @@ export class AdminUsuariosComponent implements OnInit {
 
   ngOnInit() {
     console.log('AdminUsuariosComponent cargado correctamente');
+    this.usuarioLogueado = this.usuarioService.getUsuarioLogueado();
+    
+    // Restaurar pestaña desde localStorage si existe
+    const savedTab = localStorage.getItem('adminActiveTab') as any;
+    if (savedTab && ['ACTIVOS', 'BANEADOS', 'RECLAMACIONES'].includes(savedTab)) {
+      this.activeTab = savedTab;
+    }
+
     this.cargarDatos();
     this.calcularMinFecha();
   }
@@ -79,9 +97,25 @@ export class AdminUsuariosComponent implements OnInit {
   }
 
   cargarDatos() {
-    // Cargamos usuarios, baneos y reclamaciones en paralelo
-    this.cargarUsuarios();
-    this.cargarBaneos();
+    // Cargamos usuarios y baneos juntos para la primera carga y asegurar filtros correctos
+    forkJoin({
+      usuarios: this.usuarioService.obtenerTodos(),
+      baneos: this.baneoService.obtenerBaneos()
+    }).subscribe({
+      next: (res) => {
+        this.usuarios = (res.usuarios || []).map((u: any) => ({ ...u, avatarError: false }));
+        this.baneos = (res.baneos || []).map((b: any) => ({
+          ...b,
+          usuario: { ...b.usuario, avatarError: false }
+        }));
+        this.aplicarFiltros();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error("Error cargando datos de administración", err);
+      }
+    });
+
     this.cargarReclamaciones();
   }
 
@@ -91,6 +125,7 @@ export class AdminUsuariosComponent implements OnInit {
         if (data && Array.isArray(data)) {
           this.usuarios = data.map(u => ({ ...u, avatarError: false }));
           this.aplicarFiltros();
+          this.cdr.detectChanges();
         }
       }
     });
@@ -99,8 +134,12 @@ export class AdminUsuariosComponent implements OnInit {
   cargarBaneos() {
     this.baneoService.obtenerBaneos().subscribe({
       next: (data: any[]) => {
-        this.baneos = data;
+        this.baneos = (data || []).map((b: any) => ({
+          ...b,
+          usuario: { ...b.usuario, avatarError: false }
+        }));
         this.aplicarFiltros();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -109,16 +148,18 @@ export class AdminUsuariosComponent implements OnInit {
     this.http.get<any[]>('http://localhost:8080/api/baneos/reclamaciones').subscribe({
       next: (data) => {
         this.reclamaciones = data;
+        this.cdr.detectChanges();
       }
     });
   }
 
   setTab(tab: 'ACTIVOS' | 'BANEADOS' | 'RECLAMACIONES') {
     this.activeTab = tab;
-    localStorage.setItem('adminActiveTab', tab); // Guardar pestaña seleccionada
+    localStorage.setItem('adminActiveTab', tab);
     this.searchQuery = '';
     this.menuAbiertoId = null;
     this.aplicarFiltros();
+    this.cdr.detectChanges();
   }
 
   toggleMenu(id: number) {
@@ -127,6 +168,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   onSearch() {
     this.aplicarFiltros();
+    this.cdr.detectChanges();
   }
 
   aplicarFiltros() {
@@ -172,6 +214,7 @@ export class AdminUsuariosComponent implements OnInit {
   abrirEditarBaneo(baneo: any) {
     this.baneoSeleccionado = { ...baneo };
     this.mostrarModalEditarBaneo = true;
+    this.menuAbiertoId = null; // Cerrar el menú al abrir el modal
   }
 
   guardarEdicionBaneo() {

@@ -81,6 +81,7 @@
       <table class="admin-table">
         <thead>
           <tr>
+            <th>Avatar</th>
             <th>Usuario</th>
             <th>Razón</th>
             <th>Expira</th>
@@ -90,6 +91,17 @@
         </thead>
         <tbody>
           <tr *ngFor="let b of usuariosFiltrados">
+            <td>
+              <div class="avatar-container-admin">
+                <img *ngIf="b.usuario?.avatar && !b.usuario?.avatarError" 
+                     [src]="usuarioService.getAvatarUrl(b.usuario.avatar)" 
+                     (error)="handleImageError(b.usuario)"
+                     class="user-avatar-admin" alt="Avatar">
+                <div *ngIf="!b.usuario?.avatar || b.usuario?.avatarError" class="initials-avatar-admin">
+                  {{ getInitials(b.usuario.nombre) }}
+                </div>
+              </div>
+            </td>
             <td><strong>{{b.usuario.nombre}}</strong></td>
             <td><span class="reason-text">{{b.razon}}</span></td>
             <td>{{b.fechaFin || 'Permanente'}}</td>

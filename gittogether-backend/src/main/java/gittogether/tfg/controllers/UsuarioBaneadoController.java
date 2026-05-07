@@ -72,7 +72,9 @@ public class UsuarioBaneadoController {
 
 	@GetMapping
 	public ResponseEntity<List<UsuarioBaneado>> listarBaneos() {
-		return ResponseEntity.ok(baneadoService.obtenerTodosLosBaneos());
+		List<UsuarioBaneado> baneos = baneadoService.obtenerTodosLosBaneos();
+		baneos.forEach(b -> s3Service.procesarAvatar(b.getUsuario()));
+		return ResponseEntity.ok(baneos);
 	}
 
 	@PutMapping("/{id}")
@@ -108,7 +110,9 @@ public class UsuarioBaneadoController {
 
 	@GetMapping("/reclamaciones")
 	public ResponseEntity<List<UsuarioBaneado>> listarReclamaciones() {
-		return ResponseEntity.ok(baneadoService.obtenerReclamacionesPendientes());
+		List<UsuarioBaneado> reclamaciones = baneadoService.obtenerReclamacionesPendientes();
+		reclamaciones.forEach(r -> s3Service.procesarAvatar(r.getUsuario()));
+		return ResponseEntity.ok(reclamaciones);
 	}
 
 	@PostMapping("/revisar/{id}")
