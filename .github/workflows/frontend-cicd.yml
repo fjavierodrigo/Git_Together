@@ -22,6 +22,12 @@ jobs:
         run: npm install
         working-directory: gittogether-frontend
 
+      - name: Replace API URL with EC2 IP
+        run: |
+          # Buscamos todos los archivos .ts y sustituimos localhost por la IP del Secret
+          grep -rl "http://localhost:8080" src/app | xargs sed -i "s|http://localhost:8080|http://${{ secrets.EC2_HOST }}:8080|g"
+        working-directory: gittogether-frontend
+
       - name: Build Angular
         run: npm run build -- --base-href /front/
         working-directory: gittogether-frontend
