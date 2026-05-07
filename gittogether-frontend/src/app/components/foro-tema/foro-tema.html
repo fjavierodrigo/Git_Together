@@ -182,15 +182,22 @@
                             <div class="author-details-row-main">
                                 <div class="author-details-left">
                                     <span class="author-name-small">{{ tema.usuario?.nombre || 'Usuario' }}</span>
-                                    <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                                    <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
+                                        }}</span>
                                 </div>
-                                
+
                                 <div class="tema-actions-right" *ngIf="tema">
-                                    <button class="btn-like theme-like" (click)="toggleLikeTema(tema)" [class.liked]="likesUsuarioTema.has(tema.identificador || tema.id)">
-                                        <svg class="heart-icon" viewBox="0 0 24 24" [attr.fill]="likesUsuarioTema.has(tema.identificador || tema.id) ? 'var(--accent-color)' : 'none'" stroke="currentColor" stroke-width="2">
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    <button class="btn-like theme-like" (click)="toggleLikeTema(tema)"
+                                        [class.liked]="likesUsuarioTema.has(tema.identificador || tema.id)">
+                                        <svg class="heart-icon" viewBox="0 0 24 24"
+                                            [attr.fill]="likesUsuarioTema.has(tema.identificador || tema.id) ? 'var(--accent-color)' : 'none'"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                            </path>
                                         </svg>
-                                        <span class="like-count">{{ likesCountTema.get(tema.identificador || tema.id) || 0 }}</span>
+                                        <span class="like-count">{{ likesCountTema.get(tema.identificador || tema.id) ||
+                                            0 }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -338,11 +345,17 @@
                                 <div class="comment-footer">
                                     <span class="comment-date">{{ mensaje.fechaCreacion | date:'dd/MM/yyyy' }}</span>
                                     <div class="comment-actions-right">
-                                        <button class="btn-like" (click)="toggleLike(mensaje)" [class.liked]="likesUsuario.has(mensaje.identificador || mensaje.id)">
-                                            <svg class="heart-icon" viewBox="0 0 24 24" [attr.fill]="likesUsuario.has(mensaje.identificador || mensaje.id) ? 'var(--accent-color)' : 'none'" stroke="currentColor" stroke-width="2">
-                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                        <button class="btn-like" (click)="toggleLike(mensaje)"
+                                            [class.liked]="likesUsuario.has(mensaje.identificador || mensaje.id)">
+                                            <svg class="heart-icon" viewBox="0 0 24 24"
+                                                [attr.fill]="likesUsuario.has(mensaje.identificador || mensaje.id) ? 'var(--accent-color)' : 'none'"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path
+                                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                </path>
                                             </svg>
-                                            <span class="like-count">{{ likesCount.get(mensaje.identificador || mensaje.id) || 0 }}</span>
+                                            <span class="like-count">{{ likesCount.get(mensaje.identificador ||
+                                                mensaje.id) || 0 }}</span>
                                         </button>
                                     </div>
                                 </div>

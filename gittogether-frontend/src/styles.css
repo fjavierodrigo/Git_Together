@@ -31,11 +31,11 @@
 
 body.light-theme {
     /* Light Theme Variables */
-    --bg-dark: #f0f2f5;
-    --bg-surface: #ffffff;
-    --bg-surface-elevated: #f8f9fa;
-    --bg-hover: #f3f4f6;
-    --border-color: #d1d5db;
+    --bg-dark: #d1d5db;
+    --bg-surface: #e5e7eb;
+    --bg-surface-elevated: #f3f4f6;
+    --bg-hover: #d1d5db;
+    --border-color: #9ca3af;
     --border-hover: #3b82f6;
     --text-primary: #1f2937;
     --text-secondary: #4b5563;

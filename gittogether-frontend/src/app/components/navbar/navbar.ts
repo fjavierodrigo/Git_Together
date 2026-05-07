@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Usuario } from '../services/usuario';
 import { ThemeService } from '../../services/theme.service';
@@ -11,7 +11,7 @@ import { ToastService } from '../../services/toast.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
