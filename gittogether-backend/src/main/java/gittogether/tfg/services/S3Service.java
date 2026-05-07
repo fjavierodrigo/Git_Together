@@ -112,12 +112,15 @@ public class S3Service {
         // Si por algun motivo ya viene con http (datos viejos o ya prefirmados),
         // intentamos extraer la llave limpia
         if (key.startsWith("http")) {
-            // Quitamos los query parameters si los hay (?X-Amz-...)
-            if (key.contains("?")) {
-                key = key.substring(0, key.indexOf("?"));
+            // Buscamos el inicio de la llave después del dominio (el primer slash después de https://)
+            int slashIndex = key.indexOf("/", 8);
+            if (slashIndex != -1) {
+                key = key.substring(slashIndex + 1);
+                // Quitamos los query parameters si los hay (?X-Amz-...)
+                if (key.contains("?")) {
+                    key = key.substring(0, key.indexOf("?"));
+                }
             }
-            // Nos quedamos con lo que hay después de la última barra
-            key = key.substring(key.lastIndexOf("/") + 1);
         }
 
         try {

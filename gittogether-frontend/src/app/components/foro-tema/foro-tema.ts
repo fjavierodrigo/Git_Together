@@ -116,6 +116,8 @@ export class ForoTema implements OnInit {
     ).subscribe({
       next: (mensajesRes) => {
         this.mensajes = mensajesRes;
+        this.mensajes.forEach(m => m.avatarError = false);
+        if (this.tema) this.tema.avatarError = false;
 
         // Ordenar tags alfabéticamente para evitar saltos visuales
         if (this.tema.tags) {
