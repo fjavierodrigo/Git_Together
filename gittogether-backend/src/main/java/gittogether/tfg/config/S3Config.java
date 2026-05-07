@@ -26,21 +26,26 @@ public class S3Config {
 
     @Bean
     public S3Client s3Client() {
-        AwsSessionCredentials credentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
-
         return S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
     @Bean
     public S3Presigner s3Presigner() {
-        AwsSessionCredentials credentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
-
         return S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .credentialsProvider(getCredentialsProvider())
                 .build();
+    }
+
+    private software.amazon.awssdk.auth.credentials.AwsCredentialsProvider getCredentialsProvider() {
+        if (accessKey != null && !accessKey.isEmpty() && secretKey != null && !secretKey.isEmpty()) {
+            return software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create(
+                software.amazon.awssdk.auth.credentials.AwsSessionCredentials.create(accessKey, secretKey, sessionToken)
+            );
+        }
+        return software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create();
     }
 }

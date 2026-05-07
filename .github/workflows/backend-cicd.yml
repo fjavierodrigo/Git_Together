@@ -1,0 +1,49 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+        working-directory: gittogether-backend
+
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "gittogether-backend/target/*.jar,gittogether-backend/Dockerfile"
+          target: "~/app"
+          strip_components: 1
+
+      - name: Build and Run Docker Container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/app
+            # Detener y borrar el contenedor viejo si existe
+            docker stop gittogether-backend || true
+            docker rm gittogether-backend || true
+            # Construir la nueva imagen
+            docker build -t gittogether-backend .
+            # Arrancar el contenedor
+            docker run -d --name gittogether-backend -p 8080:8080 gittogether-backend

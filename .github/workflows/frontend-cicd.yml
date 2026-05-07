@@ -1,0 +1,37 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: gittogether-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: gittogether-frontend
+
+      - name: Build Angular
+        run: npm run build -- --base-href /front/
+        working-directory: gittogether-frontend
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/gittogether-frontend/browser s3://${{ secrets.AWS_S3_BUCKET }}/front/ --delete
+        working-directory: gittogether-frontend
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
