@@ -11,7 +11,6 @@ import gittogether.tfg.repositories.TagRepository;
 
 @RestController
 @RequestMapping("/api/tags")
-@CrossOrigin(origins = "*")
 public class TagController {
 
     @Autowired

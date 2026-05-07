@@ -17,7 +17,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RestController
 @RequestMapping("/api/baneos")
-@CrossOrigin(origins = "*")
 public class UsuarioBaneadoController {
 
 	@org.springframework.beans.factory.annotation.Autowired

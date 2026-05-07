@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/mensajes-foro")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class MensajeController {
 
     @Autowired

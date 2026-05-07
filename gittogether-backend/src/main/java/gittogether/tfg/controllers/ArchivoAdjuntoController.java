@@ -30,7 +30,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/archivos")
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE })
 public class ArchivoAdjuntoController {
 
     @Autowired

@@ -34,7 +34,6 @@ import gittogether.tfg.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:4200") // lo utilizamos para realizar testeos en angular
 public class UsuarioController {
 
 	@Autowired

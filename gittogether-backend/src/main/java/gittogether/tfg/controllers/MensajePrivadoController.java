@@ -10,8 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/mensajes")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/mensajes-privados")
 public class MensajePrivadoController {
 
 	@Autowired
