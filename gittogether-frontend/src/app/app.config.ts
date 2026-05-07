@@ -1,5 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './components/services/auth.interceptor'; // Importa tu interceptor
@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation()),
     // Configuramos el cliente HTTP con nuestro interceptor de JWT
     provideHttpClient(
       withInterceptors([authInterceptor])
