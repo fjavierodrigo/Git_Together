@@ -1,112 +1,119 @@
-# 📚 Git Together - Foro para desarrolladores
+# 📚 GitTogether - Foro para desarrolladores
 
-![Java](https://img.shields.io/badge/Java-17+-007396?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.4-6DB33F?logo=springboot)
-![Angular](https://img.shields.io/badge/Angular-20+-DD0031?logo=angular)
-![MySQL](https://img.shields.io/badge/MongoDB-7+-47A248?logo=mongodb)
-![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20S3-FF9900?logo=amazonaws)
-![Docker](https://img.shields.io/badge/Docker-24+-2496ED?logo=docker)
+![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.14-6DB33F?logo=springboot&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-21.2-DD0031?logo=angular&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-S3-FF9900?logo=amazonaws&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-24.0-2496ED?logo=docker&logoColor=white)
 
-## 📖 Descripción
+**GitTogether** es una plataforma colaborativa diseñada para desarrolladores, donde pueden compartir conocimientos, resolver dudas técnicas y colaborar en proyectos. El sistema ofrece una experiencia fluida con soporte para Markdown, gestión avanzada de usuarios y almacenamiento seguro en la nube.
 
-**Git Together** es un foro colaborativo orientado al desarrollo de aplicaciones multiplataforma. Permite a los usuarios publicar dudas o consultas técnicas y responder a otros miembros de la comunidad, fomentando el intercambio de conocimiento, la resolución de problemas y el aprendizaje colaborativo..
+---
 
-## ✨ Características principales
+## 🛠️ Tecnologías y Guía Técnica
 
-| Área | Funcionalidades |
-|:---|:---|
-| **Gestión de colecciones** | CRUD completo de temas, categorías, mensajes, comentarios y usuarios |
-| **Autenticación** | Registro/login con JWT, contraseñas encriptadas con BCrypt |
-| **Búsqueda avanzada** | Filtros combinados (tags, categorías, temas) |
-| **Almacenamiento de archivos** | Subida y descarga de archivos a AWS S3 con URLs prefirmadas |
-| **Documentación API** | Swagger/OpenAPI disponible en `/swagger-ui/index.html` |
-| **CI/CD** | Pipeline automatizado con GitHub Actions (tests, build, Docker, GHCR) |
-| **Markdown** | Edición de texto con librerías de markdown |
+Este proyecto está dividido en dos grandes bloques: un backend robusto basado en microservicios (Spring Boot) y un frontend dinámico y reactivo (Angular).
 
-## 🛠️ Tecnologías
+### 🖥️ Backend (Core API)
+Ubicado en la carpeta `gittogether-backend/`.
 
-### Backend
-- Java 17+
-- Spring Boot 3.4.4
-- Spring Data MySQL
-- Spring Security (JWT)
-- MySQL
-- Maven
+- **Lenguaje:** Java 17
+- **Framework:** Spring Boot 3.5.14
+- **Seguridad:** Spring Security con **JWT (JSON Web Tokens)** para autenticación Stateless.
+- **Persistencia:** Spring Data JPA con **MySQL**.
+- **Almacenamiento:** Integración con **AWS S3** para el manejo de archivos multimedia.
+- **Documentación:** Swagger / OpenAPI UI.
+- **Otras dependencias:** Lombok (Productividad), Jackson (Serialización JSON).
 
-### Frontend
-- TypeScript
-- Angular 20+
+### 🌐 Frontend (Interfaz de Usuario)
+Ubicado en la carpeta `gittogether-frontend/`.
 
-### Infraestructura
-- AWS EC2
-- AWS S3
-- Docker
-- GitHub Actions
+- **Framework:** Angular 21.2.0
+- **Lenguaje:** TypeScript 5.9
+- **Estilos:** Vanilla CSS (Diseño Custom y Responsive).
+- **Markdown:** `ngx-markdown` para renderizado de posts y comentarios.
+- **Resaltado de Código:** `prismjs`.
+- **Pruebas:** Vitest y JSDOM.
 
-## 🚀 Instalación y ejecución
+### 🏗️ Infraestructura y DevOps
+- **Contenedores:** Docker para despliegue consistente.
+- **CI/CD:** Pipelines automatizados mediante **GitHub Actions** (`backend-cicd.yml` y `frontend-cicd.yml`).
+- **Cloud:** Despliegue en AWS (EC2/S3).
 
-### Clonar el repositorio
+---
 
-```bash
-git clone https://github.com/fjavierodrigo/Git_Together.git
-mirar comando de cd
-```
+## ✨ Características Principales
 
-### Backend (Spring Boot)
-```bash
-cd theca-backend
-mvn clean package
-java -jar target/theca-backend-0.0.1-SNAPSHOT.jar
-```
-La API estará disponible en http://localhost:8080
+| Módulo | Funcionalidad |
+| :--- | :--- |
+| **🛡️ Seguridad** | Control de acceso basado en roles (RBAC), Baneo de usuarios, Encriptación BCrypt. |
+| **📝 Editor** | Soporte completo para Markdown en temas y comentarios. |
+| **📁 Archivos** | Gestión de archivos con URLs prefirmadas de AWS S3. |
+| **🔍 Búsqueda** | Sistema de filtrado por etiquetas, categorías y palabras clave. |
+| **👨‍💼 Panel Admin** | Gestión total de usuarios, temas y moderación de contenido. |
 
-### Frontend (Angular)
-```bash
-cd theca-frontend
-npm install
-ng serve
-```
-La aplicación estará disponible en http://localhost:4200
+---
 
-### Markdown
-```bash
-cd gittogether-frontend
-npm install
-ng serve
-```
+## 🚀 Guía de Instalación y Ejecución
 
-Con Docker
-```bash
-docker build -t theca-backend .
-docker run -p 8080:8080 theca-backend
-```
+### 1. Requisitos Previos
+- **JDK 17** o superior.
+- **Node.js 20+** y **npm**.
+- **MySQL 8.0** en ejecución.
+- **Maven 3.x**.
 
-## 📚 Documentación de la API
-Una vez ejecutado el backend, la documentación Swagger está disponible en http://localhost:8080/swagger-ui/index.html
+### 2. Configuración del Backend
+1. Navega a la carpeta del backend:
+   ```bash
+   cd gittogether-backend
+   ```
+2. Configura tus credenciales en `src/main/resources/application.properties` (Base de datos, AWS, JWT secret).
+3. Compila y ejecuta:
+   ```bash
+   mvn clean install
+   mvn spring-boot:run
+   ```
+   *La API estará disponible en `http://localhost:8080`*
 
-## 📁 Estructura del proyecto
-```bash
-Git_Together/
-├── gittogether-backend/                     # Backend Spring Boot
-│   ├── src/main/java/gittogether/tfg        # Código fuente
-│   ├── src/main/resources/                  # Configuración
-│   └── pom.xml
-├── gittogether-frontend/                    # Frontend Angular (en desarrollo)
-├── Dockerfile
-├── .github/workflows/ci-cd.yml              # Pipeline CI/CD
-└── README.md
-```
+### 3. Configuración del Frontend
+1. Navega a la carpeta del frontend:
+   ```bash
+   cd gittogether-frontend
+   ```
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Inicia el servidor de desarrollo:
+   ```bash
+   npm start
+   ```
+   *La aplicación estará disponible en `http://localhost:4200`*
 
-## 🧪 Pruebas
-```bash
-cd theca-backend
-mvn test
-```
+---
 
-## 👤 Autor
-Francisco Javier Rodrigo Espinosa — IES Virgen de la Paloma  
-Alejandro Julián López Gamito — IES Virgen de la Paloma
-Tutor: Isidoro Nevares Martín
+## 📚 Guía de Uso de la API (Swagger)
+
+Una vez que el backend esté en funcionamiento, puedes acceder a la interfaz interactiva de Swagger para probar los endpoints:
+👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+---
+
+## 🧪 Ejecución de Pruebas
+
+- **Backend:** `mvn test`
+- **Frontend:** `npm test`
+
+---
+
+## 👤 Autores y Tutor
+
+- **Francisco Javier Rodrigo Espinosa** — *Desarrollador* (IES Virgen de la Paloma)
+- **Alejandro Julián López Gamito** — *Desarrollador* (IES Virgen de la Paloma)
+- **Isidoro Nevares Martín** — *Tutor del proyecto*
+
+---
 
 ## 📄 Licencia
-Proyecto académico sin fines comerciales.
+Proyecto académico desarrollado como Trabajo de Fin de Grado (TFG). Todos los derechos reservados para fines educativos.
