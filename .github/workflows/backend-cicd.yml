@@ -40,6 +40,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/app
+            # Limpiar imágenes y contenedores antiguos para liberar espacio (seguro para la BD)
+            docker system prune -f
             # Detener y borrar el contenedor viejo si existe
             docker stop gittogether-backend || true
             docker rm gittogether-backend || true
