@@ -1,5 +1,5 @@
 # ETAPA 1: Compilación
-FROM maven:3.8.4-openjdk-17-slim AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 # Copiamos el pom.xml primero para descargar las librerías y ahorrar tiempo
 COPY pom.xml .
@@ -10,7 +10,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ETAPA 2: Ejecución
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 # Copiamos solo el .jar generado (ajustado al nombre en pom.xml)
 COPY --from=build /app/target/GitTogether-0.0.1-SNAPSHOT.jar app.jar
