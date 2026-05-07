@@ -46,8 +46,11 @@ public class JwtBaneoFilter extends OncePerRequestFilter {
         // Solo bloqueamos acciones de escritura (POST, PUT, DELETE)
         if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "DELETE".equalsIgnoreCase(method)) {
             
-            // Excluimos las rutas de autenticación
-            boolean esAuth = path.equals("/api/usuarios/login") || path.equals("/api/usuarios/registrar") || path.equals("/api/usuarios/register");
+            // Excluimos las rutas de autenticación y la de reclamación de baneo
+            boolean esAuth = path.equals("/api/usuarios/login") || 
+                             path.equals("/api/usuarios/registrar") || 
+                             path.equals("/api/usuarios/register") ||
+                             path.equals("/api/baneos/reclamar");
             
             if (!esAuth) {
                 String authHeader = request.getHeader("Authorization");

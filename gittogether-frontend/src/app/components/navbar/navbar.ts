@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ export class NavbarComponent implements OnInit {
   private themeService = inject(ThemeService);
   private baneoService = inject(BaneoService);
   private toastService: ToastService = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
   isDarkTheme$ = this.themeService.isDarkTheme$;
   
   usuarioLogueado: any = null;
@@ -52,7 +53,10 @@ export class NavbarComponent implements OnInit {
 
   verificarEstadoBaneo() {
     this.baneoService.obtenerBaneos().subscribe(baneos => {
-      const miBaneo = baneos.find(b => b.usuario.identificador === this.usuarioLogueado.identificador);
+      // Si el usuario cierra sesión antes de que llegue la respuesta, salimos
+      if (!this.usuarioLogueado) return;
+
+      const miBaneo = baneos.find(b => b.usuario && b.usuario.identificador === this.usuarioLogueado.identificador);
       if (miBaneo) {
         this.estaBaneado = true;
         this.razonBaneo = miBaneo.razon;
@@ -73,7 +77,13 @@ export class NavbarComponent implements OnInit {
     this.baneoService.reclamar(this.usuarioLogueado.identificador, this.mensajeReclamacion).subscribe({
       next: () => {
         this.toastService.success('Reclamación enviada correctamente. La revisaremos pronto.');
-        this.mostrarModalReclamacion = false;
+        // Usamos setTimeout para mover el cambio de estado al siguiente ciclo de detección
+        // Esto evita el error NG0100 (ExpressionChangedAfterItHasBeenCheckedError)
+        setTimeout(() => {
+          this.mostrarModalReclamacion = false;
+          this.mensajeReclamacion = '';
+          this.cdr.detectChanges();
+        }, 0);
       },
       error: () => {
         this.toastService.error('Error al enviar la reclamación.');

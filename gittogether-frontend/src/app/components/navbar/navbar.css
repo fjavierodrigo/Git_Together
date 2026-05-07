@@ -241,120 +241,156 @@ input:checked + .slider:before {
     .navbar-container { padding: 0 24px; }
     .user-name { display: none; }
 }
-/* --- ESTILOS DE RECLAMACI”N Y MODAL --- */
-.btn-danger {
-    background: var(--error-bg);
-    color: var(--error-color);
-    border: 1px solid var(--error-color);
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
 
-.btn-danger:hover {
-    background: var(--error-color);
-    color: white;
-}
-
+/* --- MODAL RECLAMACION --- */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+    z-index: 10000;
 }
 
 .modal-content {
     background: var(--bg-surface);
-    width: 90%;
-    max-width: 500px;
-    border-radius: var(--radius-lg);
+    width: 95%;
+    max-width: 550px;
+    border-radius: 24px;
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    animation: modalAppear 0.3s ease;
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 2.5rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
 .modal-body {
-    padding: 1.5rem;
+    padding: 0 2.5rem;
 }
 
 .ban-info {
     background: var(--bg-dark);
-    padding: 1rem;
-    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
     color: var(--text-secondary);
+    text-align: left;
+    max-height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prohibimos scroll horizontal */
+    border: 1px solid var(--border-color);
+    line-height: 1.5;
+    word-break: break-word; /* Rompe palabras largas si es necesario */
+    white-space: pre-wrap; /* Mantiene saltos de l√≠nea y ajusta al ancho */
+}
+
+.ban-info strong {
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-    font-weight: 500;
+    margin-bottom: 0.6rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .form-group textarea {
     width: 100%;
-    min-height: 120px;
+    padding: 1rem;
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 1rem;
+    border-radius: 12px;
     color: var(--text-primary);
-    resize: vertical;
+    min-height: 120px;
+    resize: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
 }
 
 .modal-footer {
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
+    padding: 1.5rem 2.5rem 2.5rem;
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
 }
 
+/* ANIMACIONES DE BOTONES (ESTILO ADMIN) */
 .btn-primary {
     background: var(--accent-gradient);
     color: white;
     border: none;
-    padding: 0.6rem 1.5rem;
-    border-radius: var(--radius-md);
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--accent-glow);
 }
 
 .btn-secondary {
-    background: transparent;
+    background: var(--bg-surface-elevated);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    padding: 0.6rem 1.5rem;
-    border-radius: var(--radius-md);
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes modalAppear {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+.btn-secondary:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilo unificado para botones de cierre de modal */
 .btn-close-modal {
     background: transparent;
     border: none;
@@ -370,5 +406,4 @@ input:checked + .slider:before {
 
 .btn-close-modal:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: var(--error-color);
 }

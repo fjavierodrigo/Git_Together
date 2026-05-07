@@ -27,7 +27,7 @@ public class UsuarioBaneado {
 	@Column(name = "identificador")
 	private int identificador;
 
-	@Column(name = "razon", length = 255, nullable = true)
+	@Column(name = "razon", columnDefinition = "TEXT")
 	private String razon;
 
 	@Column(name = "fecha_inicio", nullable = false)

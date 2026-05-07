@@ -8,9 +8,9 @@
     </div>
     <button class="btn-back-forum" (click)="volverAlForo()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
+        stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
       <span>Volver al Foro</span>
     </button>
@@ -53,10 +53,8 @@
           <tr *ngFor="let u of usuariosFiltrados">
             <td>
               <div class="avatar-container-admin">
-                <img *ngIf="u.avatar && !u.avatarError" 
-                     [src]="usuarioService.getAvatarUrl(u.avatar)" 
-                     (error)="handleImageError(u)"
-                     class="user-avatar-admin" alt="Avatar">
+                <img *ngIf="u.avatar && !u.avatarError" [src]="usuarioService.getAvatarUrl(u.avatar)"
+                  (error)="handleImageError(u)" class="user-avatar-admin" alt="Avatar">
                 <div *ngIf="!u.avatar || u.avatarError" class="initials-avatar-admin">
                   {{ getInitials(u.nombre) }}
                 </div>
@@ -93,17 +91,17 @@
           <tr *ngFor="let b of usuariosFiltrados">
             <td>
               <div class="avatar-container-admin">
-                <img *ngIf="b.usuario?.avatar && !b.usuario?.avatarError" 
-                     [src]="usuarioService.getAvatarUrl(b.usuario.avatar)" 
-                     (error)="handleImageError(b.usuario)"
-                     class="user-avatar-admin" alt="Avatar">
+                <img *ngIf="b.usuario?.avatar && !b.usuario?.avatarError"
+                  [src]="usuarioService.getAvatarUrl(b.usuario.avatar)" (error)="handleImageError(b.usuario)"
+                  class="user-avatar-admin" alt="Avatar">
                 <div *ngIf="!b.usuario?.avatar || b.usuario?.avatarError" class="initials-avatar-admin">
                   {{ getInitials(b.usuario.nombre) }}
                 </div>
               </div>
             </td>
             <td><strong>{{b.usuario.nombre}}</strong></td>
-            <td><span class="reason-text">{{b.razon}}</span></td>
+            <td><span class="reason-text" [class.expanded]="b.expandido" (click)="b.expandido = !b.expandido"
+                title="Clic para expandir/contraer">{{b.razon}}</span></td>
             <td>{{b.fechaFin || 'Permanente'}}</td>
             <td>{{b.baneadoPor}}</td>
             <td>
@@ -126,29 +124,61 @@
       </table>
     </div>
 
-    <!-- SECCIÓN DE RECLAMACIONES -->
+    <!-- TABLA DE RECLAMACIONES -->
     <div class="table-container" *ngIf="activeTab === 'RECLAMACIONES'">
-      <div class="reclamaciones-grid">
-        <div class="reclamacion-card" *ngFor="let r of reclamaciones">
-          <div class="reclamacion-header">
-            <strong>{{r.usuario.nombre}}</strong>
-            <span class="date">{{r.fechaInicio}}</span>
-          </div>
-          <div class="reclamacion-body">
-            <p class="original-reason"><strong>Motivo original:</strong> {{r.razon}}</p>
-            <div class="claim-message">
-              <strong>Mensaje del usuario:</strong>
-              <p>{{r.reclamacion}}</p>
-            </div>
-          </div>
-          <div class="reclamacion-footer">
-            <button class="btn btn-success" (click)="desbanear(r.identificador)">Aceptar (Desbanear)</button>
-            <button class="btn btn-secondary" (click)="revisarReclamacion(r)">Rechazar (Mantener)</button>
-          </div>
-        </div>
-        <div *ngIf="reclamaciones.length === 0" class="empty-state">
-          No hay reclamaciones pendientes de revisión.
-        </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Avatar</th>
+            <th>Usuario</th>
+            <th>Razón Original</th>
+            <th>Reclamación</th>
+            <th class="text-center">Gestión</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reclamaciones">
+            <td>
+              <div class="avatar-container-admin">
+                <img *ngIf="r.usuario?.avatar && !r.usuario?.avatarError"
+                  [src]="usuarioService.getAvatarUrl(r.usuario.avatar)" (error)="handleImageError(r.usuario)"
+                  class="user-avatar-admin" alt="Avatar">
+                <div *ngIf="!r.usuario?.avatar || r.usuario?.avatarError" class="initials-avatar-admin">
+                  {{ getInitials(r.usuario.nombre) }}
+                </div>
+              </div>
+            </td>
+            <td><strong>{{r.usuario.nombre}}</strong></td>
+            <td><span class="reason-text" [class.expanded]="r.expandido" (click)="r.expandido = !r.expandido"
+                title="Clic para expandir/contraer">{{r.razon}}</span></td>
+            <td>
+              <div class="claim-text-cell" [class.expanded]="r.claimExpandido"
+                (click)="r.claimExpandido = !r.claimExpandido" title="Clic para expandir/contraer">
+                {{r.reclamacion}}
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons-reclamation">
+                <button class="btn btn-manage-success" (click)="desbanear(r.identificador)" title="Aceptar y Desbanear">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round" style="width: 18px; color: white;">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
+                <button class="btn btn-manage-danger" (click)="revisarReclamacion(r)" title="Rechazar Reclamación">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round" style="width: 18px; color: white;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="reclamaciones.length === 0" class="empty-state">
+        No hay reclamaciones pendientes de revisión.
       </div>
     </div>
   </div>
@@ -159,7 +189,8 @@
       <div class="modal-header">
         <h3>Editar Baneo de {{baneoSeleccionado?.usuario.nombre}}</h3>
         <button class="btn-close-modal" (click)="mostrarModalEditarBaneo = false" title="Cerrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -190,7 +221,8 @@
           <p class="subtitle">Moderación de cuenta</p>
         </div>
         <button class="btn-close-modal" (click)="cerrarModal()" title="Cerrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -207,7 +239,8 @@
         <!-- 2. Evidencia Texto -->
         <div class="form-group">
           <label>Evidencia Adicional</label>
-          <textarea [(ngModel)]="evidencia" placeholder="Enlaces, mensajes específicos o contexto..." style="min-height: 80px;"></textarea>
+          <textarea [(ngModel)]="evidencia" placeholder="Enlaces, mensajes específicos o contexto..."
+            style="min-height: 80px;"></textarea>
         </div>
 
         <!-- 3. Archivos / Imágenes -->
@@ -216,12 +249,16 @@
           <div class="evidence-upload-section">
             <div class="evidence-upload-wrapper">
               <label for="evidence-file" class="btn-upload-evidence">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-svg">
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" class="upload-svg">
+                  <path
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                  </path>
                 </svg>
                 <span>Adjuntar Pruebas</span>
               </label>
-              <input type="file" id="evidence-file" multiple (change)="onArchivosEvidencia($event)" style="display: none;">
+              <input type="file" id="evidence-file" multiple (change)="onArchivosEvidencia($event)"
+                style="display: none;">
             </div>
 
             <div class="evidence-preview-list" *ngIf="archivosEvidencia.length > 0">
@@ -255,14 +292,16 @@
       <div class="modal-header">
         <h3>Confirmar Desbloqueo</h3>
         <button class="btn-close-modal" (click)="mostrarModalConfirmarDesbanear = false" title="Cerrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
       <div class="modal-body">
-        <p>¿Estás seguro de que quieres levantar la sanción a este usuario? Volverá a tener acceso completo a la plataforma.</p>
+        <p>¿Estás seguro de que quieres levantar la sanción a este usuario? Volverá a tener acceso completo a la
+          plataforma.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="mostrarModalConfirmarDesbanear = false">Cancelar</button>

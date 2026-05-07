@@ -278,7 +278,9 @@ export class AdminUsuariosComponent implements OnInit {
     };
 
     const formData = new FormData();
-    formData.append('baneo', new Blob([JSON.stringify(baneo)], { type: 'application/json' }));
+    // Enviamos el objeto baneo como un Blob con tipo application/json para que Spring lo reconozca
+    const baneoBlob = new Blob([JSON.stringify(baneo)], { type: 'application/json' });
+    formData.append('baneo', baneoBlob);
     this.archivosEvidencia.forEach(file => formData.append('archivos', file));
 
     const nombreUsuario = this.usuarioSeleccionado?.nombre || 'Usuario';

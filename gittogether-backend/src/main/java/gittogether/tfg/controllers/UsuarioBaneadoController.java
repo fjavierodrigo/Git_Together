@@ -31,13 +31,9 @@ public class UsuarioBaneadoController {
 	// Endpoint: http://localhost:8080/api/baneos/aplicar
 	@PostMapping(value = "/aplicar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> aplicarBaneo(
-			@RequestPart("baneo") String baneoJson,
+			@RequestPart("baneo") UsuarioBaneado baneo,
 			@RequestPart(value = "archivos", required = false) List<MultipartFile> archivos) {
 		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.registerModule(new JavaTimeModule());
-			UsuarioBaneado baneo = objectMapper.readValue(baneoJson, UsuarioBaneado.class);
-
 			// Necesitamos el nombre real del usuario para la carpeta de S3
 			Usuario usuarioReal = usuarioRepository.findById(baneo.getUsuario().getIdentificador())
 					.orElseThrow(() -> new RuntimeException("Usuario a banear no encontrado"));
