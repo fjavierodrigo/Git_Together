@@ -38,7 +38,7 @@ public class Tema {
 	@Column(name = "descripcion", columnDefinition = "TEXT")
 	private String descripcion;
 
-	@Column(name = "slug", length = 255, nullable = false)
+	@Column(name = "slug", length = 255, nullable = false, unique = true)
 	private String slug;
 
 	@Column(name = "visitas", nullable = false)
