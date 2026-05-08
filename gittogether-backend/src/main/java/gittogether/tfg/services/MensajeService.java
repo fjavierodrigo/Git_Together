@@ -74,6 +74,10 @@ public class MensajeService {
 		return mensajeRepository.findByTemaIdentificadorOrderByFechaCreacionAsc(temaId);
 	}
 
+	public List<Mensaje> obtenerMensajesDeUnUsuario(int usuarioId) {
+		return mensajeRepository.findByUsuarioIdentificador(usuarioId);
+	}
+
 	/**
 	 * Elimina un mensaje del foro.
 	 * Antes de borrarlo, limpia sus dependencias (likes) y ajusta las estadísticas

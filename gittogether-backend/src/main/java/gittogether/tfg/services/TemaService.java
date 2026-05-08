@@ -127,6 +127,10 @@ public class TemaService {
         return temaRepository.findByCategoriaIdentificador(categoriaId);
     }
 
+    public List<Tema> obtenerTemasPorUsuario(int usuarioId) {
+        return temaRepository.findByUsuarioIdentificador(usuarioId);
+    }
+
     public Optional<Tema> obtenerTemaPorId(int id) {
         return temaRepository.findById(id);
     }

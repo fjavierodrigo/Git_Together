@@ -22,6 +22,7 @@ import gittogether.tfg.services.S3Service;
 import org.springframework.http.HttpStatus;
 
 @RestController
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping("/api/mensajes-foro")
 public class MensajeController {
 
@@ -64,6 +65,17 @@ public class MensajeController {
             s3Service.procesarArchivos(m.getArchivos());
         });
         return ResponseEntity.ok(mensajes);
+    }
+
+    @GetMapping("/por-usuario/{usuarioId}")
+    public List<Mensaje> obtenerPorUsuario(@PathVariable("usuarioId") int usuarioId) {
+        System.out.println("-> Cargando mensajes del usuario ID: " + usuarioId);
+        List<Mensaje> mensajes = mensajeService.obtenerMensajesDeUnUsuario(usuarioId);
+        mensajes.forEach(m -> {
+            if (m.getUsuario() != null) s3Service.procesarAvatar(m.getUsuario());
+            if (m.getArchivos() != null) s3Service.procesarArchivos(m.getArchivos());
+        });
+        return mensajes;
     }
     
     @DeleteMapping("/{id}")

@@ -84,7 +84,7 @@
                                 <span class="tema-date">{{ tema.fechaCreacion ? (tema.fechaCreacion |
                                     date:'dd/MM/yyyy') : 'Hace un momento' }}</span>
                                 <span class="author-sep">•</span>
-                                <span class="tema-author-wrapper" [routerLink]="['/perfil', tema.usuario?.identificador || tema.usuario?.id]" (click)="$event.stopPropagation()">
+                                <span class="tema-author-wrapper" [routerLink]="['/perfil', tema.usuario?.identificador || tema.usuario?.id]" [state]="{ user: tema.usuario }" (click)="$event.stopPropagation()">
                                     <div class="tema-author-avatar-container">
                                         <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
                                             [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"

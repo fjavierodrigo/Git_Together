@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../navbar/navbar';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Usuario } from '../services/usuario';
+import { ForoService } from '../services/foro.service';
 import { ModalService } from '../../services/modal.service';
 import { ToastService } from '../../services/toast.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -22,15 +23,23 @@ export class Perfil implements OnInit {
   avatarPreview: any = null;
   imageError: boolean = false;
 
+  // Fase 2: Pestañas y Listas
+  activeTab: 'info' | 'temas' | 'mensajes' = 'info';
+  temasUsuario: any[] = [];
+  mensajesUsuario: any[] = [];
+  cargandoTemas: boolean = false;
+  cargandoMensajes: boolean = false;
+
   constructor(
-    private usuarioService: Usuario, 
+    private usuarioService: Usuario,
     private router: Router,
     private route: ActivatedRoute,
+    private foroService: ForoService,
     private cdr: ChangeDetectorRef,
     private modalService: ModalService,
     private toastService: ToastService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) { }
 
   getInitials(): string {
     if (!this.usuarioVisualizado?.nombre) return '??';
@@ -64,15 +73,23 @@ export class Perfil implements OnInit {
   ngOnInit() {
     this.usuarioService.currentUser$.subscribe(user => {
       this.usuarioLogueado = user;
-      this.verificarYSubscribirARuta();
     });
-  }
 
-  private verificarYSubscribirARuta() {
     this.route.params.subscribe(params => {
-      const idParam = params['id'];
-      if (idParam) {
-        this.cargarUsuario(Number(idParam));
+      const idStr = params['id'];
+      
+      // Intentar pillar datos básicos del router state (pasados desde el foro)
+      const navigation = this.router.getCurrentNavigation();
+      const stateUser = history.state?.user;
+      if (stateUser && idStr && (stateUser.identificador || stateUser.id) == idStr) {
+        this.usuarioVisualizado = stateUser;
+        this.imageError = false;
+        this.cdr.detectChanges();
+      }
+
+      if (idStr) {
+        const id = parseInt(idStr, 10);
+        this.cargarUsuario(id);
       } else if (this.usuarioLogueado) {
         this.establecerPerfilPropio();
       }
@@ -86,18 +103,35 @@ export class Perfil implements OnInit {
       return;
     }
 
+    // 1. Intentar cargar desde caché para visualización instantánea
+    const cacheKey = `perfil_user_${id}`;
+    const cachedUser = sessionStorage.getItem(cacheKey);
+    if (cachedUser) {
+      this.usuarioVisualizado = JSON.parse(cachedUser);
+      this.esPropioPerfil = false;
+      this.imageError = false;
+      this.cdr.detectChanges();
+    }
+
+    // 2. Cargar de la API para asegurar datos frescos
     this.usuarioService.obtenerPorId(id).subscribe({
       next: (user) => {
         this.usuarioVisualizado = user;
         this.esPropioPerfil = false;
         this.imageError = false;
+        
+        // Guardar en caché para la próxima vez
+        sessionStorage.setItem(cacheKey, JSON.stringify(user));
+        
         this.cargarStats(id);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar perfil:', err);
-        this.toastService.error("No se pudo encontrar el usuario.");
-        this.router.navigate(['/foro']);
+        if (!this.usuarioVisualizado) {
+          this.toastService.error("No se pudo encontrar el usuario.");
+          this.router.navigate(['/foro']);
+        }
       }
     });
   }
@@ -115,11 +149,20 @@ export class Perfil implements OnInit {
 
   private statsLoaded = false;
   private cargarStats(userId: number) {
+    const cacheKey = `perfil_stats_${userId}`;
+    const cachedStats = sessionStorage.getItem(cacheKey);
+    if (cachedStats) {
+      this.stats = JSON.parse(cachedStats);
+      this.statsLoaded = true;
+      this.cdr.detectChanges();
+    }
+
     this.usuarioService.getStats(userId).subscribe({
       next: (data) => {
         if (data) {
           this.stats = data;
           this.statsLoaded = true;
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
           this.cdr.detectChanges();
         }
       },
@@ -127,13 +170,74 @@ export class Perfil implements OnInit {
     });
   }
 
+  // --- FASE 2: GESTIÓN DE PESTAÑAS ---
+
+  setTab(tab: 'info' | 'temas' | 'mensajes') {
+    this.activeTab = tab;
+    const userId = this.usuarioVisualizado?.identificador || this.usuarioVisualizado?.id;
+    
+    if (tab === 'temas' && this.temasUsuario.length === 0) {
+      this.cargarTemasUsuario(userId);
+    } else if (tab === 'mensajes' && this.mensajesUsuario.length === 0) {
+      this.cargarMensajesUsuario(userId);
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  private cargarTemasUsuario(userId: number) {
+    if (!userId) return;
+    this.cargandoTemas = true;
+    
+    // SWR: Intentar cargar de caché
+    const cacheKey = `perfil_temas_${userId}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      this.temasUsuario = JSON.parse(cached);
+      this.cargandoTemas = false;
+    }
+
+    this.foroService.getTemasPorUsuario(userId).subscribe({
+      next: (temas) => {
+        this.temasUsuario = temas;
+        sessionStorage.setItem(cacheKey, JSON.stringify(temas));
+        this.cargandoTemas = false;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cargandoTemas = false
+    });
+  }
+
+  private cargarMensajesUsuario(userId: number) {
+    if (!userId) return;
+    this.cargandoMensajes = true;
+
+    // SWR: Intentar cargar de caché
+    const cacheKey = `perfil_mensajes_${userId}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      this.mensajesUsuario = JSON.parse(cached);
+      this.cargandoMensajes = false;
+    }
+
+    this.foroService.getMensajesPorUsuario(userId).subscribe({
+      next: (mensajes) => {
+        this.mensajesUsuario = mensajes;
+        sessionStorage.setItem(cacheKey, JSON.stringify(mensajes));
+        this.cargandoMensajes = false;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cargandoMensajes = false
+    });
+  }
+
   async editarPerfil() {
     const data = await this.modalService.prompt("Editar Perfil", [
-      { 
-        name: 'descripcion', 
-        label: 'Sobre mí', 
-        type: 'textarea', 
-        value: this.usuarioLogueado?.descripcion || '' 
+      {
+        name: 'descripcion',
+        label: 'Sobre mí',
+        type: 'textarea',
+        value: this.usuarioLogueado?.descripcion || ''
       }
     ]);
 
@@ -142,6 +246,11 @@ export class Perfil implements OnInit {
       this.usuarioService.updatePerfil(userId, { descripcion: data.descripcion }).subscribe({
         next: (usuarioActualizado) => {
           this.usuarioLogueado = usuarioActualizado;
+          this.usuarioVisualizado = usuarioActualizado;
+          
+          // Actualizar caché
+          sessionStorage.setItem(`perfil_user_${userId}`, JSON.stringify(usuarioActualizado));
+          
           this.toastService.success("Perfil actualizado correctamente");
           this.cdr.detectChanges();
         },
@@ -180,7 +289,12 @@ export class Perfil implements OnInit {
     this.usuarioService.updatePerfil(userId, {}, archivo).subscribe({
       next: (usuarioActualizado) => {
         this.toastService.success("Foto de perfil actualizada");
-        this.avatarPreview = null; // Limpiamos la preview para usar la URL real
+        this.avatarPreview = null; 
+        this.usuarioVisualizado = usuarioActualizado;
+        
+        // Actualizar caché
+        sessionStorage.setItem(`perfil_user_${userId}`, JSON.stringify(usuarioActualizado));
+        
         this.cdr.detectChanges();
       },
       error: (err) => {

@@ -134,6 +134,8 @@ export class ForoService {
     getTemasPorCategoria(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/categoria/${id}`); }
     getTemasPorTag(nombre: string): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/tag/${nombre}`); }
     getTemasRelacionados(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/${id}/relacionados`); }
+    getTemasPorUsuario(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_TEMAS}/por-usuario/${id}`); }
+    getMensajesPorUsuario(id: number): Observable<any[]> { return this.http.get<any[]>(`${this.API_MENSAJES}/por-usuario/${id}`); }
 
     deleteMensaje(id: number): Observable<any> { return this.http.delete(`${this.API_MENSAJES}/${id}`); }
     editMensaje(id: number, contenido: string): Observable<any> { return this.http.put(`${this.API_MENSAJES}/${id}`, { contenido }); }

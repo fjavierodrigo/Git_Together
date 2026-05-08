@@ -19,5 +19,8 @@ public interface TemaRepository extends JpaRepository<Tema, Integer> {
     @EntityGraph(attributePaths = { "usuario", "categoria", "tags", "tags.tag" })
     Optional<Tema> findBySlug(String slug);
 
+    @EntityGraph(attributePaths = { "usuario", "categoria", "tags", "tags.tag" })
+    List<Tema> findByUsuarioIdentificador(int usuarioId);
+
     int countByUsuarioIdentificador(int usuarioId);
 }

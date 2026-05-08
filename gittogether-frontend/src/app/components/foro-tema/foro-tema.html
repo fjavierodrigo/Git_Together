@@ -170,7 +170,7 @@
                         <hr class="tema-divider-light">
 
                         <!-- Información del Autor (Ahora abajo de todo) -->
-                        <div class="tema-author-info-bottom" *ngIf="tema.usuario" [routerLink]="['/perfil', tema.usuario.identificador || tema.usuario.id]" style="cursor: pointer;">
+                        <div class="tema-author-info-bottom" *ngIf="tema.usuario" [routerLink]="['/perfil', tema.usuario.identificador || tema.usuario.id]" [state]="{ user: tema.usuario }" style="cursor: pointer;">
                             <div class="author-avatar-container mini">
                                 <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
                                     [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
@@ -234,6 +234,7 @@
                                 <div class="comment-avatar-container"
                                     [class.op-avatar]="tema && mensaje.usuario?.identificador === tema.usuario?.identificador"
                                     [routerLink]="['/perfil', mensaje.usuario?.identificador || mensaje.usuario?.id]"
+                                    [state]="{ user: mensaje.usuario }"
                                     style="cursor: pointer;">
                                     <img *ngIf="mensaje.usuario?.avatar && !mensaje.avatarError"
                                         [src]="usuarioService.getAvatarUrl(mensaje.usuario.avatar)"
@@ -279,7 +280,7 @@
 
                                 <div class="comment-meta">
                                     <div class="author-badge-group">
-                                        <span class="comment-author" [routerLink]="['/perfil', mensaje.usuario?.identificador || mensaje.usuario?.id]" style="cursor: pointer;">{{ mensaje.usuario?.nombre || 'Usuario' }}</span>
+                                        <span class="comment-author" [routerLink]="['/perfil', mensaje.usuario?.identificador || mensaje.usuario?.id]" [state]="{ user: mensaje.usuario }" style="cursor: pointer;">{{ mensaje.usuario?.nombre || 'Usuario' }}</span>
                                         <span class="badge-op"
                                             *ngIf="tema && mensaje.usuario?.identificador === tema.usuario?.identificador">AUTOR
                                             DEL TEMA</span>

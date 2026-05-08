@@ -21,6 +21,7 @@ import gittogether.tfg.services.S3Service;
 import org.springframework.http.HttpStatus;
 
 @RestController
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping("/api/temas")
 public class TemaController {
 
@@ -78,6 +79,17 @@ public class TemaController {
 		temas.forEach(t -> {
 			s3Service.procesarAvatar(t.getUsuario());
 			s3Service.procesarArchivos(t.getArchivos());
+		});
+		return temas;
+	}
+
+	@GetMapping("/por-usuario/{id}")
+	public List<Tema> listarPorUsuario(@PathVariable("id") int id) {
+		System.out.println("-> Cargando temas del usuario ID: " + id);
+		List<Tema> temas = temaService.obtenerTemasPorUsuario(id);
+		temas.forEach(t -> {
+			if (t.getUsuario() != null) s3Service.procesarAvatar(t.getUsuario());
+			if (t.getArchivos() != null) s3Service.procesarArchivos(t.getArchivos());
 		});
 		return temas;
 	}
