@@ -170,8 +170,11 @@
                         <hr class="tema-divider-light">
 
                         <!-- Información del Autor (Ahora abajo de todo) -->
-                        <div class="tema-author-info-bottom" *ngIf="tema.usuario" [routerLink]="['/perfil', tema.usuario.identificador || tema.usuario.id]" [state]="{ user: tema.usuario }" style="cursor: pointer;">
-                            <div class="author-avatar-container mini">
+                        <div class="tema-author-info-bottom" *ngIf="tema.usuario">
+                            <div class="author-avatar-container mini"
+                                [routerLink]="['/perfil', tema.usuario.identificador || tema.usuario.id]"
+                                [state]="{ user: tema.usuario }"
+                                style="cursor: pointer;">
                                 <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
                                     [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
                                     (error)="tema.avatarError = true" class="author-avatar-img">
@@ -181,7 +184,10 @@
                             </div>
                             <div class="author-details-row-main">
                                 <div class="author-details-left">
-                                    <span class="author-name-small">{{ tema.usuario?.nombre || 'Usuario' }}</span>
+                                    <span class="author-name-small"
+                                        [routerLink]="['/perfil', tema.usuario.identificador || tema.usuario.id]"
+                                        [state]="{ user: tema.usuario }"
+                                        style="cursor: pointer;">{{ tema.usuario?.nombre || 'Usuario' }}</span>
                                     <span class="tema-date-small">Publicado el {{ tema.fechaCreacion | date:'dd/MM/yyyy'
                                         }}</span>
                                 </div>
