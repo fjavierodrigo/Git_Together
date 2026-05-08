@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MensajePrivadoRepository extends JpaRepository<MensajePrivado, Integer> {
 
-	List<MensajePrivado> findByReceptorIdentificadorOrderByFechaInicioDesc(int receptorId);
+	List<MensajePrivado> findByReceptorIdentificadorOrderByFechaEnvioDesc(int receptorId);
 
 }

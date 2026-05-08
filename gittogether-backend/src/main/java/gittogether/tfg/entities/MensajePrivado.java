@@ -35,8 +35,8 @@ public class MensajePrivado {
 	@Column(name = "leido", nullable = false)
 	private boolean leido;
 
-	@Column(name = "fecha_inicio", nullable = false, columnDefinition = "DATE DEFAULT (CURRENT_DATE)")
-	private LocalDate fechaInicio;
+	@Column(name = "fecha_envio", nullable = false, columnDefinition = "DATE DEFAULT (CURRENT_DATE)")
+	private LocalDate fechaEnvio;
 
 
 	@ManyToOne
@@ -73,12 +73,12 @@ public class MensajePrivado {
 		this.leido = leido;
 	}
 
-	public LocalDate getFechaInicio() {
-		return fechaInicio;
+	public LocalDate getFechaEnvio() {
+		return fechaEnvio;
 	}
 
-	public void setFechaInicio(LocalDate fechaInicio) {
-		this.fechaInicio = fechaInicio;
+	public void setFechaEnvio(LocalDate fechaEnvio) {
+		this.fechaEnvio = fechaEnvio;
 	}
 
 	public Usuario getEmisor() {
@@ -100,7 +100,7 @@ public class MensajePrivado {
 	@Override
 	public String toString() {
 		return "MensajePrivado [identificador=" + identificador + ", contenido=" + contenido + ", leido=" + leido
-				+ ", fechaInicio=" + fechaInicio + ", Emisor=" + emisor + ", Receptor=" + receptor + "]";
+				+ ", fechaEnvio=" + fechaEnvio + ", Emisor=" + emisor + ", Receptor=" + receptor + "]";
 	}
 
 }

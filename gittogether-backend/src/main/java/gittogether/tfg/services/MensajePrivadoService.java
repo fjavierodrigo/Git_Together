@@ -21,7 +21,7 @@ public class MensajePrivadoService {
 	private UsuarioRepository usuarioRepository; // Añadimos esto para buscar usuarios
 
 	public MensajePrivado enviarMensaje(MensajePrivado mensaje) {
-		mensaje.setFechaInicio(LocalDate.now());
+		mensaje.setFechaEnvio(LocalDate.now());
 		mensaje.setLeido(false);
 
 		// 1. Buscamos el emisor completo en la base de datos
@@ -41,6 +41,6 @@ public class MensajePrivadoService {
 	}
 
 	public List<MensajePrivado> obtenerBandejaEntrada(int receptorId) {
-		return mensajeRepository.findByReceptorIdentificadorOrderByFechaInicioDesc(receptorId);
+		return mensajeRepository.findByReceptorIdentificadorOrderByFechaEnvioDesc(receptorId);
 	}
 }

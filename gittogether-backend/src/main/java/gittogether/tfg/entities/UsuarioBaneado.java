@@ -40,14 +40,14 @@ public class UsuarioBaneado {
 	@JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "FK_USUARIO_BANEADO_USUARIO"), nullable = false)
 	private Usuario usuario;
 
-		@Column(name = "baneado_por", length = 255)
+	@Column(name = "baneado_por", length = 255)
 	private String baneadoPor;
 
 	@Column(name = "evidencia", columnDefinition = "TEXT")
 	private String evidencia;
 
-	@Column(name = "revisado")
-	private boolean revisado = false;
+	@Column(name = "revisado", nullable = false)
+	private boolean revisado;
 
 	@Column(name = "reclamacion", columnDefinition = "TEXT")
 	private String reclamacion;
