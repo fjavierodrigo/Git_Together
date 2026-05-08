@@ -15,11 +15,30 @@ public class CategoriaService {
 	private CategoriaRepository categoriaRepository;
 
 	public Categoria registrarCategoria(Categoria categoria) {
+		if (categoria.getSlug() == null || categoria.getSlug().isEmpty()) {
+			categoria.setSlug(generarSlug(categoria.getNombre()));
+		}
+		
+		if (categoria.getDescripcion() == null) {
+			categoria.setDescripcion("");
+		}
+		
 		if (categoriaRepository.existsByNombre(categoria.getNombre())
 				|| categoriaRepository.existsBySlug(categoria.getSlug())) {
 			throw new RuntimeException("La categoria ya existe");
 		}
 		return categoriaRepository.save(categoria);
+	}
+
+	private String generarSlug(String nombre) {
+		if (nombre == null) return "";
+		String base = java.text.Normalizer.normalize(nombre, java.text.Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "") // Quita acentos
+				.toLowerCase()
+				.replaceAll("[^a-z0-9 ]", "")
+				.trim()
+				.replaceAll("\\s+", "-");
+		return base;
 	}
 
 	public List<Categoria> obtenerTodas() {

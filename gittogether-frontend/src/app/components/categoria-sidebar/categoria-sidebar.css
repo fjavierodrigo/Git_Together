@@ -21,6 +21,28 @@
     color: var(--text-secondary);
     font-weight: 700;
     margin-bottom: 24px;
+    margin: 0; /* Para alineación con el botón */
+}
+
+.btn-add-admin {
+    background: var(--accent-glow);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.btn-add-admin:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
 }
 
 .category-list {

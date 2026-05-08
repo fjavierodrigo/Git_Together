@@ -101,4 +101,36 @@ export class CategoriaSidebar implements OnInit {
       });
     }
   }
+
+  async crearCategoria() {
+    const data = await this.modalService.prompt("Nueva Categoría", [
+      { name: 'nombre', label: 'Nombre de la categoría', type: 'text', placeholder: 'Ej: Backend, Frontend...' }
+    ]);
+    if (data && data.nombre?.trim()) {
+      this.foroService.createCategoria(data.nombre).subscribe({
+        next: (nuevaCat) => {
+          this.categorias.push(nuevaCat);
+          this.toastService.success("Categoría creada con éxito");
+          this.foroService.clearCache();
+        },
+        error: () => this.toastService.error("No se pudo crear la categoría")
+      });
+    }
+  }
+
+  async crearTag() {
+    const data = await this.modalService.prompt("Nueva Etiqueta", [
+      { name: 'nombre', label: 'Nombre de la etiqueta (sin #)', type: 'text', placeholder: 'Ej: java, angular, spring...' }
+    ]);
+    if (data && data.nombre?.trim()) {
+      this.foroService.createTag(data.nombre).subscribe({
+        next: (nuevaTag) => {
+          this.tags.push(nuevaTag);
+          this.toastService.success("Etiqueta creada con éxito");
+          this.foroService.clearCache();
+        },
+        error: () => this.toastService.error("No se pudo crear la etiqueta")
+      });
+    }
+  }
 }

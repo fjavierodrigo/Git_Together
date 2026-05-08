@@ -35,8 +35,9 @@ public class MensajePrivado {
 	@Column(name = "leido", nullable = false)
 	private boolean leido;
 
-	@Column(name = "fecha_inicio", nullable = false)
+	@Column(name = "fecha_inicio", nullable = false, columnDefinition = "DATE DEFAULT (CURRENT_DATE)")
 	private LocalDate fechaInicio;
+
 
 	@ManyToOne
 	@JsonIgnoreProperties({ "password", "fechaRegistro", "rol" })

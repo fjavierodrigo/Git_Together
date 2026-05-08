@@ -29,6 +29,9 @@ public class Categoria {
 	@Column(name = "orden_visual", nullable = false)
 	private int ordenVisual;
 
+	@Column(name = "descripcion", nullable = true)
+	private String descripcion;
+
 	public int getIdentificador() {
 		return identificador;
 	}
@@ -61,10 +64,18 @@ public class Categoria {
 		this.ordenVisual = ordenVisual;
 	}
 
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
+	}
+
 	@Override
 	public String toString() {
 		return "Categoria [identificador=" + identificador + ", nombre=" + nombre + ", slug=" + slug + ", ordenVisual="
-				+ ordenVisual + "]";
+				+ ordenVisual + ", descripcion=" + descripcion + "]";
 	}
 
 }

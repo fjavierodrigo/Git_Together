@@ -142,6 +142,8 @@ export class ForoService {
     createMensaje(mensaje: any): Observable<any> { return this.http.post(`${this.API_MENSAJES}/registrar`, mensaje); }
     deleteCategoria(id: number): Observable<any> { return this.http.delete(`${this.API_CATEGORIAS}/${id}`); }
     editCategoria(id: number, nombre: string): Observable<any> { return this.http.put(`${this.API_CATEGORIAS}/${id}`, { nombre }); }
+    createCategoria(nombre: string): Observable<any> { return this.http.post(this.API_CATEGORIAS, { nombre }); }
+    createTag(nombre: string): Observable<any> { return this.http.post(this.API_TAGS, { nombre }); }
 
     subirArchivoTema(temaId: number, usuarioId: number, file: File): Observable<any> {
         const formData = new FormData();
