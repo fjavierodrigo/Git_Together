@@ -18,7 +18,7 @@
     <div class="foro-layout">
         <app-categoria-sidebar [categorias]="categorias" [tags]="tags" 
             [activeCategorySlug]="categoriaActiva?.slug"
-            [activeTagId]="tagActivo?.identificador"
+            [activeTagIds]="tagsActivos"
             (categorySelected)="onCategorySelected($event)"
             (tagSelected)="onTagSelected($event)">
         </app-categoria-sidebar>
@@ -84,7 +84,7 @@
                                 <span class="tema-date">{{ tema.fechaCreacion ? (tema.fechaCreacion |
                                     date:'dd/MM/yyyy') : 'Hace un momento' }}</span>
                                 <span class="author-sep">•</span>
-                                <span class="tema-author-wrapper">
+                                <span class="tema-author-wrapper" [routerLink]="['/perfil', tema.usuario?.identificador || tema.usuario?.id]" (click)="$event.stopPropagation()">
                                     <div class="tema-author-avatar-container">
                                         <img *ngIf="tema.usuario?.avatar && !tema.avatarError"
                                             [src]="usuarioService.getAvatarUrl(tema.usuario.avatar)"
@@ -158,7 +158,11 @@
                     <h3>No encontramos lo que buscas</h3>
                     <p>Parece que no hay resultados 
                         <span *ngIf="searchQuery"> para "{{ searchQuery }}"</span>
-                        <span *ngIf="tagActivo"> con la etiqueta #{{ tagActivo.nombre }}</span>
+                        <span *ngIf="tagsActivos.size > 0"> con las etiquetas 
+                            <span *ngFor="let id of tagsActivos; let last = last">
+                                #{{ getTagNameById(id) }}{{ last ? '' : ', ' }}
+                            </span>
+                        </span>
                         <span *ngIf="categoriaActiva"> en la categoría {{ categoriaActiva.nombre }}</span>. 
                         Intenta con otra palabra clave o explora otras secciones.
                     </p>

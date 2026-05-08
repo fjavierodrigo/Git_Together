@@ -34,6 +34,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'perfil/:id',
+    component: Perfil,
+    canActivate: [authGuard]
+  },
+  {
     path: 'admin/usuarios',
     component: AdminUsuariosComponent,
     canActivate: [authGuard]

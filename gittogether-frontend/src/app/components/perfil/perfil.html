@@ -20,7 +20,8 @@
             <!-- Botón Volver -->
             <div class="back-link-container">
                 <button class="btn-back" (click)="goToForo()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 16px; height: 16px;">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
@@ -34,48 +35,53 @@
                     <div class="profile-avatar-container">
                         <!-- Prioridad 1: Vista previa local -->
                         <img *ngIf="avatarPreview" [src]="avatarPreview" class="profile-avatar-img">
-                        
+
                         <!-- Prioridad 2: Foto guardada -->
-                        <img *ngIf="!avatarPreview && usuarioLogueado?.avatar && !imageError" 
-                             [src]="getAvatarUrl()" 
-                             (error)="handleImageError()"
-                             class="profile-avatar-img">
-                        
+                        <img *ngIf="!avatarPreview && usuarioVisualizado?.avatar && !imageError" [src]="getAvatarUrl()"
+                            (error)="handleImageError()" class="profile-avatar-img">
+
                         <!-- Prioridad 3: Iniciales (fallback si no hay foto o si la foto falla) -->
-                        <div *ngIf="!avatarPreview && (!usuarioLogueado?.avatar || imageError)" class="profile-initials-avatar">
+                        <div *ngIf="!avatarPreview && (!usuarioVisualizado?.avatar || imageError)"
+                            class="profile-initials-avatar">
                             {{ getInitials() }}
                         </div>
-                        <button class="edit-avatar-btn" (click)="fileInput.click()" title="Cambiar foto">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
-                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <button *ngIf="esPropioPerfil" class="edit-avatar-btn" (click)="abrirSelectorArchivo(fileInput)"
+                            title="Cambiar foto">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                                <path
+                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                </path>
                                 <circle cx="12" cy="13" r="4"></circle>
                             </svg>
                         </button>
 
                         <!-- Botón para eliminar avatar -->
-                        <button *ngIf="usuarioLogueado?.avatar && !avatarPreview" 
-                                class="delete-avatar-btn" 
-                                (click)="eliminarAvatar()" 
-                                title="Eliminar foto">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                        <button *ngIf="esPropioPerfil && usuarioVisualizado?.avatar && !avatarPreview"
+                            class="delete-avatar-btn" (click)="eliminarAvatar()" title="Eliminar foto">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
                             </svg>
                         </button>
-                        
-                        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+                        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*"
+                            style="display: none;">
                     </div>
 
                     <div class="profile-info-header">
                         <div class="profile-badges">
-                            <span class="role-badge" *ngIf="usuarioLogueado?.rol">{{ usuarioLogueado?.rol }}</span>
-                            <span class="member-badge" *ngIf="usuarioLogueado?.fechaRegistro">Miembro desde el {{
-                                usuarioLogueado.fechaRegistro | date:'dd/MM/yyyy' }}</span>
-                            <span class="member-badge" *ngIf="!usuarioLogueado?.fechaRegistro">Miembro de la
+                            <span class="role-badge" *ngIf="usuarioVisualizado?.rol">{{ usuarioVisualizado?.rol
+                                }}</span>
+                            <span class="member-badge" *ngIf="usuarioVisualizado?.fechaRegistro">Miembro desde el {{
+                                usuarioVisualizado.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+                            <span class="member-badge" *ngIf="!usuarioVisualizado?.fechaRegistro">Miembro de la
                                 Comunidad</span>
                         </div>
-                        <h1 class="profile-name">{{ usuarioLogueado?.nombre || 'Usuario Desconocido' }}</h1>
-                        <p class="profile-email">{{ usuarioLogueado?.email || 'email@oculto.com' }}</p>
+                        <h1 class="profile-name">{{ usuarioVisualizado?.nombre || 'Usuario Desconocido' }}</h1>
+                        <p class="profile-email">{{ usuarioVisualizado?.email || 'email@oculto.com' }}</p>
                     </div>
                 </div>
             </section>
@@ -113,15 +119,15 @@
                         Sobre mi
                     </h3>
                     <div class="about-content">
-                        <p *ngIf="usuarioLogueado?.descripcion"
+                        <p *ngIf="usuarioVisualizado?.descripcion"
                             style="white-space: pre-wrap; color: var(--text-secondary);">
-                            {{ usuarioLogueado.descripcion }}
+                            {{ usuarioVisualizado.descripcion }}
                         </p>
-                        <p class="empty-about" *ngIf="!usuarioLogueado?.descripcion">
+                        <p class="empty-about" *ngIf="!usuarioVisualizado?.descripcion">
                             El usuario aún no ha añadido una descripción a su perfil.
                         </p>
                     </div>
-                    <button class="btn-edit-profile" (click)="editarPerfil()">
+                    <button *ngIf="esPropioPerfil" class="btn-edit-profile" (click)="editarPerfil()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round"
                             style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;">

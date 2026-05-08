@@ -17,7 +17,7 @@ export class CategoriaSidebar implements OnInit {
   @Input() categorias: any[] = [];
   @Input() tags: any[] = [];
   @Input() activeCategorySlug: string | null = null;
-  @Input() activeTagId: number | null = null;
+  @Input() activeTagIds: Set<number> = new Set();
 
   @Output() categorySelected = new EventEmitter<any>();
   @Output() tagSelected = new EventEmitter<any>();
@@ -65,15 +65,7 @@ export class CategoriaSidebar implements OnInit {
   }
 
   onTagClick(tag: any) {
-    if (this.activeTagId === tag.identificador) {
-      this.activeTagId = null;
-      this.router.navigate(['/foro'], { queryParams: { tag: null }, queryParamsHandling: 'merge' });
-      this.tagSelected.emit(null);
-    } else {
-      this.activeTagId = tag.identificador;
-      this.router.navigate(['/foro'], { queryParams: { tag: tag.nombre }, queryParamsHandling: 'merge' });
-      this.tagSelected.emit(tag);
-    }
+    this.tagSelected.emit(tag);
   }
 
   // --- MÉTODOS ADMIN (Copiados de foro.ts para mantener funcionalidad) ---

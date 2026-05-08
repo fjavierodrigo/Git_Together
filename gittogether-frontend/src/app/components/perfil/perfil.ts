@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../navbar/navbar';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Usuario } from '../services/usuario';
 import { ModalService } from '../../services/modal.service';
 import { ToastService } from '../../services/toast.service';
@@ -10,12 +10,14 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, RouterModule],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
 export class Perfil implements OnInit {
   usuarioLogueado: any = null;
+  usuarioVisualizado: any = null;
+  esPropioPerfil: boolean = false;
   stats: any = { numComentarios: 0, numPost: 0, fechaRegistro: '' };
   avatarPreview: any = null;
   imageError: boolean = false;
@@ -23,6 +25,7 @@ export class Perfil implements OnInit {
   constructor(
     private usuarioService: Usuario, 
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private modalService: ModalService,
     private toastService: ToastService,
@@ -30,8 +33,8 @@ export class Perfil implements OnInit {
   ) {}
 
   getInitials(): string {
-    if (!this.usuarioLogueado?.nombre) return '??';
-    return this.usuarioLogueado.nombre
+    if (!this.usuarioVisualizado?.nombre) return '??';
+    return this.usuarioVisualizado.nombre
       .split(' ')
       .map((n: string) => n[0])
       .join('')
@@ -40,11 +43,11 @@ export class Perfil implements OnInit {
   }
 
   getAvatarUrl(): SafeUrl | string | null {
-    return this.usuarioService.getAvatarUrl(this.usuarioLogueado?.avatar);
+    return this.usuarioService.getAvatarUrl(this.usuarioVisualizado?.avatar);
   }
 
   handleImageError() {
-    const url = this.usuarioLogueado?.avatar;
+    const url = this.usuarioVisualizado?.avatar;
     console.error("ERROR: No se pudo cargar la imagen. Revisa si esta URL es pública y correcta:", url);
     this.imageError = true;
     this.cdr.detectChanges();
@@ -54,16 +57,60 @@ export class Perfil implements OnInit {
     this.router.navigate(['/foro']);
   }
 
+  abrirSelectorArchivo(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
   ngOnInit() {
     this.usuarioService.currentUser$.subscribe(user => {
       this.usuarioLogueado = user;
-      this.imageError = false; // Reseteamos el error al cambiar de usuario
-      
-      const userId = this.usuarioLogueado?.identificador || this.usuarioLogueado?.id;
-      if (userId && !this.statsLoaded) {
-        this.cargarStats(userId);
+      this.verificarYSubscribirARuta();
+    });
+  }
+
+  private verificarYSubscribirARuta() {
+    this.route.params.subscribe(params => {
+      const idParam = params['id'];
+      if (idParam) {
+        this.cargarUsuario(Number(idParam));
+      } else if (this.usuarioLogueado) {
+        this.establecerPerfilPropio();
       }
     });
+  }
+
+  private cargarUsuario(id: number) {
+    const loggedId = this.usuarioLogueado?.identificador || this.usuarioLogueado?.id;
+    if (loggedId === id) {
+      this.establecerPerfilPropio();
+      return;
+    }
+
+    this.usuarioService.obtenerPorId(id).subscribe({
+      next: (user) => {
+        this.usuarioVisualizado = user;
+        this.esPropioPerfil = false;
+        this.imageError = false;
+        this.cargarStats(id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al cargar perfil:', err);
+        this.toastService.error("No se pudo encontrar el usuario.");
+        this.router.navigate(['/foro']);
+      }
+    });
+  }
+
+  private establecerPerfilPropio() {
+    this.usuarioVisualizado = this.usuarioLogueado;
+    this.esPropioPerfil = true;
+    this.imageError = false;
+    const userId = this.usuarioLogueado?.identificador || this.usuarioLogueado?.id;
+    if (userId) {
+      this.cargarStats(userId);
+    }
+    this.cdr.detectChanges();
   }
 
   private statsLoaded = false;

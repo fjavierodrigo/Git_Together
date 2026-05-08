@@ -10,11 +10,12 @@ import { ModalService } from '../../services/modal.service';
 import { forkJoin } from 'rxjs';
 import { NavbarComponent } from '../navbar/navbar';
 import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-foro',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, CategoriaSidebar],
+  imports: [CommonModule, FormsModule, NavbarComponent, CategoriaSidebar, RouterModule],
   templateUrl: './foro.html',
   styleUrl: './foro.css'
 })
@@ -36,7 +37,7 @@ export class Foro implements OnInit {
 
   // Categoría Seleccionada: Almacena la categoría activa para filtrar los temas mostrados
   categoriaActiva: any = null;
-  tagActivo: any = null;
+  tagsActivos: Set<number> = new Set(); // Guardamos los IDs de los tags activos
 
   // Para controlar qué menú de opciones (3 puntos) está abierto
   activeMenuId: string | number | null = null;
@@ -96,8 +97,17 @@ export class Foro implements OnInit {
     if (params['cat'] && this.categorias.length > 0) {
       this.categoriaActiva = this.categorias.find((c: any) => c.slug === params['cat']) || null;
     }
+    
+    // Soporte para múltiples tags en la URL (separados por comas)
     if (params['tag'] && this.tags.length > 0) {
-      this.tagActivo = this.tags.find((t: any) => t.nombre === params['tag']) || null;
+      const tagNames = params['tag'].split(',');
+      this.tagsActivos.clear();
+      tagNames.forEach((name: string) => {
+        const tagFound = this.tags.find((t: any) => t.nombre === name);
+        if (tagFound) this.tagsActivos.add(tagFound.identificador || tagFound.id);
+      });
+    } else {
+      this.tagsActivos.clear();
     }
     this.cdr.detectChanges();
   }
@@ -109,7 +119,29 @@ export class Foro implements OnInit {
   }
 
   onTagSelected(tag: any) {
-    this.tagActivo = tag; // Si tag es null, se deselecciona
+    if (!tag) {
+      this.tagsActivos.clear();
+    } else {
+      const id = tag.identificador || tag.id;
+      if (this.tagsActivos.has(id)) {
+        this.tagsActivos.delete(id);
+      } else {
+        this.tagsActivos.add(id);
+      }
+    }
+    
+    // Actualizar URL para reflejar los tags (opcional pero recomendado)
+    const tagNames = this.tags
+      .filter(t => this.tagsActivos.has(t.identificador || t.id))
+      .map(t => t.nombre)
+      .join(',');
+      
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tag: tagNames || null },
+      queryParamsHandling: 'merge'
+    });
+
     this.cdr.detectChanges();
   }
 
@@ -139,11 +171,14 @@ export class Foro implements OnInit {
       filtrados = filtrados.filter(t => t.categoria?.slug === this.categoriaActiva.slug);
     }
 
-    // Filtro por Tag (usando la estructura TemaTag -> Tag -> identificador)
-    if (this.tagActivo) {
-      filtrados = filtrados.filter(t => 
-        t.tags?.some((tt: any) => tt.tag?.identificador === this.tagActivo.identificador)
-      );
+    // Filtro por Tags (Debe contener TODOS los tags seleccionados)
+    if (this.tagsActivos.size > 0) {
+      filtrados = filtrados.filter(t => {
+        // Obtenemos los IDs de los tags de este tema
+        const temaTagIds = t.tags?.map((tt: any) => tt.tag?.identificador || tt.tag?.id) || [];
+        // Comprobamos si TODOS los tags activos están en el tema
+        return Array.from(this.tagsActivos).every(id => temaTagIds.includes(id));
+      });
     }
 
     // Filtro de Texto: Si el usuario ha escrito algo, refinamos la búsqueda
@@ -156,6 +191,11 @@ export class Foro implements OnInit {
 
     // Resultado Final: Devolvemos solo los temas que superaron todos los filtros activos
     return filtrados;
+  }
+
+  getTagNameById(id: number): string {
+    const tag = this.tags.find(t => (t.identificador || t.id) === id);
+    return tag ? tag.nombre : '';
   }
 
   // Navegación: Redirige al usuario a la página de detalle del tema seleccionado

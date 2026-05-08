@@ -12,6 +12,7 @@ import { switchMap } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
 import { CategoriaSidebar } from '../categoria-sidebar/categoria-sidebar';
 import { MarkdownComponent } from 'ngx-markdown';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-foro-tema',
@@ -21,7 +22,8 @@ import { MarkdownComponent } from 'ngx-markdown';
     FormsModule,
     NavbarComponent,
     CategoriaSidebar,
-    MarkdownComponent
+    MarkdownComponent,
+    RouterModule
   ],
   templateUrl: './foro-tema.html',
   styleUrl: './foro-tema.css'
