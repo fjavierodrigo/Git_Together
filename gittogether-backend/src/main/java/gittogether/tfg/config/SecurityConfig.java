@@ -22,7 +22,7 @@ public class SecurityConfig {
     @Autowired
     @Lazy
     private JwtBaneoFilter baneoFilter;
-
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
