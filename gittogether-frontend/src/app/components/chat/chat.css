@@ -19,6 +19,22 @@
 }
 
 /* =========================================
+   UTILITIES (Consolidación)
+========================================= */
+.conversations-list,
+.messages-list,
+.chat-sidebar-right {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.conversations-list::-webkit-scrollbar,
+.messages-list::-webkit-scrollbar,
+.chat-sidebar-right::-webkit-scrollbar {
+  display: none;
+}
+
+/* =========================================
    PANEL IZQUIERDO: Conversaciones
 ========================================= */
 .chat-sidebar-left {
@@ -78,14 +94,6 @@
   flex: 1;
   overflow-y: auto;
   padding: 12px;
-
-  /* Ocultar barra de scroll */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.conversations-list::-webkit-scrollbar {
-  display: none;
 }
 
 .conversation-item {
@@ -245,12 +253,6 @@
   color: var(--text-primary);
 }
 
-.status {
-  font-size: 0.8rem;
-  color: var(--success);
-  font-weight: 600;
-}
-
 .btn-icon {
   background: transparent;
   border: none;
@@ -279,14 +281,6 @@
   flex-direction: column;
   gap: 16px;
   z-index: 1;
-
-  /* Ocultar barra de scroll */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.messages-list::-webkit-scrollbar {
-  display: none;
 }
 
 .msg-wrapper {
@@ -516,14 +510,6 @@
   flex-direction: column;
   z-index: 10;
   overflow-y: auto;
-
-  /* Ocultar barra de scroll */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.chat-sidebar-right::-webkit-scrollbar {
-  display: none;
 }
 
 .quick-profile-card {
@@ -630,11 +616,6 @@
   font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 500;
-}
-
-.status-online {
-  color: var(--success);
-  font-weight: 700;
 }
 
 .quick-actions {

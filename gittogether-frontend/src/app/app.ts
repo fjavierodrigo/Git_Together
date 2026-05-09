@@ -12,5 +12,5 @@ import { ModalComponent } from './components/shared/modal/modal';
   styleUrl: './app.css'
 })
 export class App { 
-  title = 'gittogether-frontend';
+  title = 'Git Together';
 }

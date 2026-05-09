@@ -91,7 +91,6 @@
     font-size: 2.5rem;
     font-weight: 800;
     line-height: 1.2;
-    margin-top: 0; /* Aseguramos alineación perfecta */
     margin-bottom: 12px;
     color: var(--text-primary);
 }
@@ -796,7 +795,6 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-top: 0; /* Aseguramos alineación perfecta */
     margin-bottom: 20px;
     font-family: 'Outfit', sans-serif;
 }
