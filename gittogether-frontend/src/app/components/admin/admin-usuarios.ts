@@ -8,6 +8,7 @@ import { Usuario } from '../services/usuario';
 import { BaneoService } from '../services/baneo.service';
 import { NavbarComponent } from '../navbar/navbar';
 import { ToastService } from '../../services/toast.service';
+import { getApiBaseUrl } from '../../config';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -145,7 +146,7 @@ export class AdminUsuariosComponent implements OnInit {
   }
 
   cargarReclamaciones() {
-    this.http.get<any[]>('http://localhost:8080/api/baneos/reclamaciones').subscribe({
+    this.http.get<any[]>(`${getApiBaseUrl()}/api/baneos/reclamaciones`).subscribe({
       next: (data) => {
         this.reclamaciones = data;
         this.cdr.detectChanges();
@@ -197,7 +198,7 @@ export class AdminUsuariosComponent implements OnInit {
   confirmarDesbanear() {
     if (this.baneoParaDesbanearId) {
       this.mostrarModalConfirmarDesbanear = false;
-      this.http.delete(`http://localhost:8080/api/baneos/${this.baneoParaDesbanearId}`).subscribe({
+      this.http.delete(`${getApiBaseUrl()}/api/baneos/${this.baneoParaDesbanearId}`).subscribe({
         next: () => {
           this.toastService.success('Usuario desbaneado correctamente');
           this.baneoParaDesbanearId = null;
@@ -219,7 +220,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   guardarEdicionBaneo() {
     this.mostrarModalEditarBaneo = false; // Cierre inmediato
-    this.http.put(`http://localhost:8080/api/baneos/${this.baneoSeleccionado.identificador}`, this.baneoSeleccionado).subscribe({
+    this.http.put(`${getApiBaseUrl()}/api/baneos/${this.baneoSeleccionado.identificador}`, this.baneoSeleccionado).subscribe({
       next: () => {
         this.toastService.success('Baneo actualizado correctamente');
         this.cargarDatos(); // Actualización reactiva
@@ -231,7 +232,7 @@ export class AdminUsuariosComponent implements OnInit {
   }
 
   revisarReclamacion(reclamacion: any) {
-    this.http.post(`http://localhost:8080/api/baneos/revisar/${reclamacion.identificador}`, {}).subscribe({
+    this.http.post(`${getApiBaseUrl()}/api/baneos/revisar/${reclamacion.identificador}`, {}).subscribe({
       next: () => {
         this.toastService.success('Reclamación marcada como revisada');
         this.cargarReclamaciones();

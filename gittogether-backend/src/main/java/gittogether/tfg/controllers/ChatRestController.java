@@ -15,6 +15,9 @@ public class ChatRestController {
     @Autowired
     private MensajePrivadoRepository mensajeRepository;
 
+    @Autowired
+    private gittogether.tfg.services.S3Service s3Service;
+
     // Cambiamos a una ruta de nivel raíz para máxima visibilidad
     @GetMapping("/api/chat-completo/historial")
     public ResponseEntity<List<MensajePrivado>> obtenerHistorial(
@@ -22,6 +25,10 @@ public class ChatRestController {
             @RequestParam("usuarioDos") Integer u2) {
         
         List<MensajePrivado> historial = mensajeRepository.findChatHistory(u1, u2);
+        historial.forEach(m -> {
+            s3Service.procesarAvatar(m.getEmisor());
+            s3Service.procesarAvatar(m.getReceptor());
+        });
         return ResponseEntity.ok(historial);
     }
 
@@ -43,6 +50,11 @@ public class ChatRestController {
             }
         }
         
+        conversaciones.values().forEach(m -> {
+            s3Service.procesarAvatar(m.getEmisor());
+            s3Service.procesarAvatar(m.getReceptor());
+        });
+
         return ResponseEntity.ok(new java.util.ArrayList<>(conversaciones.values()));
     }
 }

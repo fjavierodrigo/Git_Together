@@ -30,7 +30,8 @@
                     <div class="notification-item" *ngFor="let notif of notifications$ | async"
                         (click)="irAlChat(notif.emisor.identificador)">
                         <div class="notif-avatar">
-                            {{ notif.emisor.nombre.substring(0,1).toUpperCase() }}
+                            <img *ngIf="notif.emisor.avatar" [src]="apiUsuario.getAvatarUrl(notif.emisor.avatar)" alt="Avatar">
+                            <span *ngIf="!notif.emisor.avatar">{{ notif.emisor.nombre.substring(0,1).toUpperCase() }}</span>
                         </div>
                         <div class="notif-content">
                             <strong>{{ notif.emisor.nombre }}</strong>

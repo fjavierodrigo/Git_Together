@@ -19,8 +19,11 @@
            (click)="seleccionarChat(conv.usuario.identificador)">
         
         <div class="conv-avatar">
-          <img *ngIf="conv.usuario.avatar" [src]="conv.usuario.avatar" alt="Avatar">
-          <div *ngIf="!conv.usuario.avatar" class="conv-initials">
+          <img *ngIf="conv.usuario.avatar && !conv.usuario.avatarError" 
+               [src]="usuarioService.getAvatarUrl(conv.usuario.avatar)" 
+               (error)="conv.usuario.avatarError = true" 
+               alt="Avatar">
+          <div *ngIf="!conv.usuario.avatar || conv.usuario.avatarError" class="conv-initials">
             {{ conv.usuario.nombre.substring(0, 1).toUpperCase() }}
           </div>
           <!-- TODO: Puedes añadir un punto verde aquí si está online -->
@@ -48,8 +51,11 @@
       <div class="chat-header">
         <div class="user-info">
           <div class="avatar-placeholder">
-            <img *ngIf="receptor.avatar" [src]="receptor.avatar" alt="Avatar">
-            <span *ngIf="!receptor.avatar">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</span>
+            <img *ngIf="receptor.avatar && !receptor.avatarError" 
+                 [src]="usuarioService.getAvatarUrl(receptor.avatar)" 
+                 (error)="receptor.avatarError = true"
+                 alt="Avatar">
+            <span *ngIf="!receptor.avatar || receptor.avatarError">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</span>
           </div>
           <div class="details">
             <h2>{{ receptor.nombre }}</h2>
@@ -117,8 +123,11 @@
     <div class="quick-profile-card">
       <div class="quick-profile-header">
         <div class="quick-avatar">
-           <img *ngIf="receptor.avatar" [src]="receptor.avatar" alt="Avatar">
-           <div *ngIf="!receptor.avatar" class="initials-lg">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</div>
+           <img *ngIf="receptor.avatar && !receptor.avatarError" 
+                [src]="usuarioService.getAvatarUrl(receptor.avatar)" 
+                (error)="receptor.avatarError = true"
+                alt="Avatar">
+           <div *ngIf="!receptor.avatar || receptor.avatarError" class="initials-lg">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</div>
         </div>
         <h3 class="quick-name">{{ receptor.nombre }}</h3>
         <p class="quick-email">{{ receptor.email }}</p>

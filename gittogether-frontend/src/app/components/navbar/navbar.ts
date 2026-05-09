@@ -36,7 +36,7 @@ export class NavbarComponent implements OnInit {
   mostrarDropdownPerfil: boolean = false; 
 
   constructor(
-    private apiUsuario: Usuario,
+    public apiUsuario: Usuario,
     private router: Router,
     private sanitizer: DomSanitizer
   ) { }

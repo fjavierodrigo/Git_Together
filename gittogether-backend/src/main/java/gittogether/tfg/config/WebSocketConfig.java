@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Registramos el punto de entrada al que se conectará el cliente (Angular)
         registry.addEndpoint("/ws-chat")
-                .setAllowedOrigins("http://localhost:4200") // Permitimos conexión desde el frontend
+                .setAllowedOriginPatterns("*") // Permitimos conexión desde cualquier origen (necesario para AWS)
                 .withSockJS(); // Soporte para navegadores que no soportan WebSockets
     }
 }

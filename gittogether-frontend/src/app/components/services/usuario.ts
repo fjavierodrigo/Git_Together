@@ -2,12 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { getApiBaseUrl } from '../../config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Usuario {
-  private API_URL = 'http://localhost:8080/api/usuarios';
+  private API_URL = `${getApiBaseUrl()}/api/usuarios`;
   private sanitizer = inject(DomSanitizer);
   
   // Subject reactivo para que toda la app sepa cuando cambia el usuario

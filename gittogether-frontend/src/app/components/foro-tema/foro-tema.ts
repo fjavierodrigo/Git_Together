@@ -7,6 +7,7 @@ import { Usuario } from '../services/usuario';
 import { NavbarComponent } from '../navbar/navbar';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
+import { getApiBaseUrl } from '../../config';
 
 import { switchMap } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
@@ -635,7 +636,7 @@ export class ForoTema implements OnInit {
     // Usamos el endpoint proxy del backend.
     // Al ser del mismo dominio que la API, el navegador respeta el "Content-Disposition: attachment"
     // y abre directamente el explorador de archivos para guardar.
-    const backendUrl = `http://localhost:8080/api/archivos/${id}/descargar`;
+    const backendUrl = `${getApiBaseUrl()}/api/archivos/${id}/descargar`;
     const a = document.createElement('a');
     a.href = backendUrl;
     a.download = archivo.nombreOriginal || 'descarga';

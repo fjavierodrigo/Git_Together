@@ -3,6 +3,7 @@ import { Client, Message } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Usuario } from '../components/services/usuario';
+import { getApiBaseUrl } from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -40,9 +41,11 @@ export class ChatWebSocketService {
     const usuario = this.usuarioService.getUsuarioLogueado();
     if (!usuario) return;
 
+    const baseUrl = getApiBaseUrl();
+
     // Configuramos el cliente STOMP
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
+      webSocketFactory: () => new SockJS(`${baseUrl}/ws-chat`),
       debug: (str) => { console.log(str); },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,

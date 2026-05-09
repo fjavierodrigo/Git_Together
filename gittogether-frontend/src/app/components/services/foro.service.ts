@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { getApiBaseUrl } from '../../config';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ForoService {
-    private API_TEMAS = 'http://localhost:8080/api/temas';
-    private API_CATEGORIAS = 'http://localhost:8080/api/categorias';
-    private API_MENSAJES = 'http://localhost:8080/api/mensajes-foro';
-    private API_TAGS = 'http://localhost:8080/api/tags';
-    private API_ARCHIVOS = 'http://localhost:8080/api/archivos';
-    private API_LIKES = 'http://localhost:8080/api/likes';
+    private API_TEMAS = `${getApiBaseUrl()}/api/temas`;
+    private API_CATEGORIAS = `${getApiBaseUrl()}/api/categorias`;
+    private API_MENSAJES = `${getApiBaseUrl()}/api/mensajes-foro`;
+    private API_TAGS = `${getApiBaseUrl()}/api/tags`;
+    private API_ARCHIVOS = `${getApiBaseUrl()}/api/archivos`;
+    private API_LIKES = `${getApiBaseUrl()}/api/likes`;
 
     // BehaviorSubjects para un estado global reactivo e instantáneo
     private temasSubject = new BehaviorSubject<any[]>([]);

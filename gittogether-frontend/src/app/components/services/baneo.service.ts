@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { getApiBaseUrl } from '../../config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BaneoService {
-  private API_URL = 'http://localhost:8080/api/baneos';
+  private API_URL = `${getApiBaseUrl()}/api/baneos`;
   private http = inject(HttpClient);
 
   aplicarBaneo(baneoData: any): Observable<any> {

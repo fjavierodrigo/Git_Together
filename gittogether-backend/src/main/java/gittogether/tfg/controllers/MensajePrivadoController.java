@@ -16,11 +16,16 @@ public class MensajePrivadoController {
 	@Autowired
 	private MensajePrivadoService mensajeService;
 
+	@Autowired
+	private gittogether.tfg.services.S3Service s3Service;
+
 	// Endpoint: http://localhost:8080/api/mensajes/enviar
 	@PostMapping("/registrar")
 	public ResponseEntity<?> enviar(@RequestBody MensajePrivado mensaje) {
 		try {
 			MensajePrivado nuevoMensaje = mensajeService.enviarMensaje(mensaje);
+			s3Service.procesarAvatar(nuevoMensaje.getEmisor());
+			s3Service.procesarAvatar(nuevoMensaje.getReceptor());
 			return ResponseEntity.ok(nuevoMensaje);
 		} catch (Exception e) {
 			// Si falla algo (ej. el usuario no existe), devolvemos el error
@@ -31,8 +36,11 @@ public class MensajePrivadoController {
 	// Endpoint: GET http://localhost:8080/api/mensajes-privados/recibidos/2
 	@GetMapping("/recibidos/{usuarioId}")
 	public ResponseEntity<List<MensajePrivado>> verBandejaEntrada(@PathVariable int usuarioId) {
-		return ResponseEntity.ok(mensajeService.obtenerBandejaEntrada(usuarioId));
+		List<MensajePrivado> mensajes = mensajeService.obtenerBandejaEntrada(usuarioId);
+		mensajes.forEach(m -> {
+			s3Service.procesarAvatar(m.getEmisor());
+			s3Service.procesarAvatar(m.getReceptor());
+		});
+		return ResponseEntity.ok(mensajes);
 	}
-
-
 }

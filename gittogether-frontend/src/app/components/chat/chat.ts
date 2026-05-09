@@ -7,6 +7,7 @@ import { Usuario } from '../services/usuario';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { getApiBaseUrl } from '../../config';
 
 @Component({
   selector: 'app-chat',
@@ -20,7 +21,7 @@ export class Chat implements OnInit, OnDestroy {
   @ViewChild('scrollAnchor') private scrollAnchor!: ElementRef;
 
   private chatService = inject(ChatWebSocketService);
-  private usuarioService = inject(Usuario);
+  public usuarioService = inject(Usuario);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -109,7 +110,7 @@ export class Chat implements OnInit, OnDestroy {
 
   cargarHistorial(receptorId: number) {
     // Usamos el NUEVO controlador aislado para evitar conflictos
-    const url = `http://localhost:8080/api/chat-completo/historial?usuarioUno=${this.usuarioLogueado.identificador}&usuarioDos=${receptorId}`;
+    const url = `${getApiBaseUrl()}/api/chat-completo/historial?usuarioUno=${this.usuarioLogueado.identificador}&usuarioDos=${receptorId}`;
     this.http.get<any[]>(url)
       .subscribe({
         next: (msgs) => {
@@ -127,7 +128,7 @@ export class Chat implements OnInit, OnDestroy {
   }
 
   cargarConversaciones() {
-    const url = `http://localhost:8080/api/chat-completo/conversaciones?userId=${this.usuarioLogueado.identificador}`;
+    const url = `${getApiBaseUrl()}/api/chat-completo/conversaciones?userId=${this.usuarioLogueado.identificador}`;
     this.http.get<any[]>(url).subscribe({
       next: (msgs) => {
         this.conversaciones = msgs.map(msg => {
