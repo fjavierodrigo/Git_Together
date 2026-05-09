@@ -21,6 +21,8 @@ export class ChatWebSocketService {
   private usuarioService = inject(Usuario);
   private connected = new BehaviorSubject<boolean>(false);
   public connected$ = this.connected.asObservable();
+  
+  public chatActivoId: number | null = null;
 
   constructor() {
     // Escuchamos al usuario para conectar/desconectar automáticamente
@@ -59,7 +61,8 @@ export class ChatWebSocketService {
           this.messageSubject.next(msg);
           
           // Solo incrementamos si el mensaje no es nuestro (aunque ya se filtra por destino)
-          if (msg.emisor.identificador !== usuario.identificador) {
+          // Y además, evitamos notificar si estamos hablando JUSTO AHORA con el emisor.
+          if (msg.emisor.identificador !== usuario.identificador && msg.emisor.identificador !== this.chatActivoId) {
             this.unreadCount.next(this.unreadCount.value + 1);
             
             // Guardamos la notificación (máximo 5 para no saturar)
@@ -86,8 +89,7 @@ export class ChatWebSocketService {
     const mensaje = {
       contenido: contenido,
       emisor: { identificador: emisor.identificador },
-      receptor: { identificador: receptorId },
-      leido: false
+      receptor: { identificador: receptorId }
     };
 
     this.stompClient.publish({

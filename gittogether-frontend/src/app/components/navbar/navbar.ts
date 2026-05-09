@@ -51,6 +51,12 @@ export class NavbarComponent implements OnInit {
     this.mostrarDropdownPerfil = false;
   }
 
+  goToForoTop() {
+    this.router.navigate(['/foro']).then(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
   esAdmin(): boolean {
     return this.apiUsuario.esAdmin();
   }
@@ -67,6 +73,11 @@ export class NavbarComponent implements OnInit {
 
   goToProfile() {
     this.router.navigate(['/perfil']);
+    this.mostrarDropdownPerfil = false;
+  }
+
+  goToConversaciones() {
+    this.router.navigate(['/chat']);
     this.mostrarDropdownPerfil = false;
   }
 

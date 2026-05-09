@@ -22,7 +22,6 @@ public class MensajePrivadoService {
 
 	public MensajePrivado enviarMensaje(MensajePrivado mensaje) {
 		mensaje.setFechaEnvio(LocalDateTime.now());
-		mensaje.setLeido(false);
 
 		// 1. Buscamos el emisor completo en la base de datos
 		Usuario emisorReal = usuarioRepository.findById(mensaje.getEmisor().getIdentificador())

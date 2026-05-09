@@ -30,11 +30,9 @@ public class MensajePrivado {
 	@Column(name = "identificador")
 	private int identificador;
 
-	@Column(name = "contenido", length = 255, nullable = false)
+	@Column(name = "contenido", columnDefinition = "TEXT", nullable = false)
 	private String contenido;
 
-	@Column(name = "leido", nullable = false)
-	private boolean leido;
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(name = "fecha_envio", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -67,13 +65,6 @@ public class MensajePrivado {
 		this.contenido = contenido;
 	}
 
-	public boolean isLeido() {
-		return leido;
-	}
-
-	public void setLeido(boolean leido) {
-		this.leido = leido;
-	}
 
 	public LocalDateTime getFechaEnvio() {
 		return fechaEnvio;
@@ -101,7 +92,7 @@ public class MensajePrivado {
 
 	@Override
 	public String toString() {
-		return "MensajePrivado [identificador=" + identificador + ", contenido=" + contenido + ", leido=" + leido
+		return "MensajePrivado [identificador=" + identificador + ", contenido=" + contenido
 				+ ", fechaEnvio=" + fechaEnvio + ", Emisor=" + emisor + ", Receptor=" + receptor + "]";
 	}
 

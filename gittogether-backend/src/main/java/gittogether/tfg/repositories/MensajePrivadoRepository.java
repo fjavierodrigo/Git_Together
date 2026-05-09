@@ -17,4 +17,7 @@ public interface MensajePrivadoRepository extends JpaRepository<MensajePrivado, 
     @Query("SELECT m FROM MensajePrivado m WHERE (m.emisor.identificador = :u1 AND m.receptor.identificador = :u2) OR (m.emisor.identificador = :u2 AND m.receptor.identificador = :u1) ORDER BY m.fechaEnvio ASC")
     List<MensajePrivado> findChatHistory(@Param("u1") int u1, @Param("u2") int u2);
 
+    @Query("SELECT m FROM MensajePrivado m WHERE m.emisor.identificador = :userId OR m.receptor.identificador = :userId ORDER BY m.fechaEnvio DESC")
+    List<MensajePrivado> findAllUserMessages(@Param("userId") int userId);
+
 }

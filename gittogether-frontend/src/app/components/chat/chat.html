@@ -1,39 +1,144 @@
 <app-navbar></app-navbar>
 
-<div class="chat-container">
-  <div class="chat-header" *ngIf="receptor">
-    <div class="user-info">
-      <div class="avatar-placeholder">
-        {{ receptor.nombre.substring(0, 1).toUpperCase() }}
+<div class="chat-dashboard-container">
+  
+  <!-- PANEL IZQUIERDO: Lista de Conversaciones -->
+  <aside class="chat-sidebar-left">
+    <div class="sidebar-header">
+      <h2>Contactos</h2>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" [(ngModel)]="filtroContactos" placeholder="Buscar usuario...">
       </div>
-      <div class="details">
-        <h2>{{ receptor.nombre }}</h2>
-        <span class="status">En línea</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="messages-list" #scrollMe>
-    <div *ngFor="let msg of mensajes" 
-         [ngClass]="{'msg-me': msg.emisor.identificador === usuarioLogueado.identificador, 'msg-other': msg.emisor.identificador !== usuarioLogueado.identificador}">
-      <div class="msg-bubble">
-        <p>{{ msg.contenido }}</p>
-        <span class="msg-time">{{ msg.fechaEnvio | date: 'dd/MM/yyyy HH:mm' }}</span>
-      </div>
-    </div>
-
-    <div class="empty-chat" *ngIf="mensajes.length === 0">
-      <p>No hay mensajes todavía. ¡Saluda!</p>
     </div>
     
-    <!-- Ancla invisible para el scroll -->
-    <div #scrollAnchor></div>
-  </div>
+    <div class="conversations-list">
+      <div class="conversation-item" 
+           *ngFor="let conv of contactosFiltrados" 
+           [class.active]="receptor?.identificador === conv.usuario.identificador"
+           (click)="seleccionarChat(conv.usuario.identificador)">
+        
+        <div class="conv-avatar">
+          <img *ngIf="conv.usuario.avatar" [src]="conv.usuario.avatar" alt="Avatar">
+          <div *ngIf="!conv.usuario.avatar" class="conv-initials">
+            {{ conv.usuario.nombre.substring(0, 1).toUpperCase() }}
+          </div>
+          <!-- TODO: Puedes añadir un punto verde aquí si está online -->
+        </div>
+        
+        <div class="conv-details">
+          <div class="conv-top-row">
+            <span class="conv-name">{{ conv.usuario.nombre }}</span>
+            <span class="conv-time">{{ conv.fecha | date: 'HH:mm' }}</span>
+          </div>
+          <p class="conv-last-msg">{{ conv.ultimoMensaje }}</p>
+        </div>
+      </div>
+      
+      <div class="empty-conversations" *ngIf="conversaciones.length === 0">
+        <p>Aún no tienes mensajes.</p>
+      </div>
+    </div>
+  </aside>
 
-  <div class="chat-input-area">
-    <input type="text" [(ngModel)]="nuevoMensaje" (keyup.enter)="enviar()" placeholder="Escribe un mensaje..." />
-    <button (click)="enviar()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-    </button>
-  </div>
+  <!-- PANEL CENTRAL: Área de Chat Activa -->
+  <main class="chat-main-area">
+    <!-- Estado: Chat Seleccionado -->
+    <ng-container *ngIf="receptor; else noChatSelected">
+      <div class="chat-header">
+        <div class="user-info">
+          <div class="avatar-placeholder">
+            <img *ngIf="receptor.avatar" [src]="receptor.avatar" alt="Avatar">
+            <span *ngIf="!receptor.avatar">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</span>
+          </div>
+          <div class="details">
+            <h2>{{ receptor.nombre }}</h2>
+          </div>
+        </div>
+        <div class="header-actions">
+           <!-- Botón opcional para ver perfil completo -->
+           <button class="btn-icon" [routerLink]="['/perfil', receptor.identificador]" title="Ver Perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+           </button>
+        </div>
+      </div>
+
+      <div class="messages-list" #scrollMe>
+        <div *ngFor="let msg of mensajes" 
+             [ngClass]="{'msg-me': msg.emisor.identificador === usuarioLogueado.identificador, 'msg-other': msg.emisor.identificador !== usuarioLogueado.identificador}"
+             class="msg-wrapper">
+          
+          <!-- Avatar del otro usuario al lado del mensaje (Opcional, estilo Telegram/Discord) -->
+          <div class="msg-avatar-small" *ngIf="msg.emisor.identificador !== usuarioLogueado.identificador">
+             {{ msg.emisor.nombre.substring(0, 1).toUpperCase() }}
+          </div>
+
+          <div class="msg-bubble-container">
+            <div class="msg-bubble">
+              <p>{{ msg.contenido }}</p>
+            </div>
+            <span class="msg-time">{{ msg.fechaEnvio | date: 'HH:mm' }}</span>
+          </div>
+        </div>
+
+        <div class="empty-chat-messages" *ngIf="mensajes.length === 0">
+          <div class="empty-chat-icon">👋</div>
+          <p>No hay mensajes todavía. ¡Anímate a saludar!</p>
+        </div>
+        
+        <!-- Ancla invisible para el scroll -->
+        <div #scrollAnchor></div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <input type="text" [(ngModel)]="nuevoMensaje" (keyup.enter)="enviar()" placeholder="Escribe un mensaje aquí..." />
+          <button class="btn-send" (click)="enviar()" [disabled]="!nuevoMensaje.trim()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Estado: Ningún chat seleccionado -->
+    <ng-template #noChatSelected>
+      <div class="no-chat-selected">
+        <div class="illustration-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <h3>Tus Mensajes</h3>
+        <p>Selecciona una conversación de la izquierda para empezar a hablar o busca a un usuario en el foro.</p>
+      </div>
+    </ng-template>
+  </main>
+
+  <!-- PANEL DERECHO: Perfil Rápido (Solo visible si hay un chat abierto) -->
+  <aside class="chat-sidebar-right" *ngIf="receptor">
+    <div class="quick-profile-card">
+      <div class="quick-profile-header">
+        <div class="quick-avatar">
+           <img *ngIf="receptor.avatar" [src]="receptor.avatar" alt="Avatar">
+           <div *ngIf="!receptor.avatar" class="initials-lg">{{ receptor.nombre.substring(0, 1).toUpperCase() }}</div>
+        </div>
+        <h3 class="quick-name">{{ receptor.nombre }}</h3>
+        <p class="quick-email">{{ receptor.email }}</p>
+        
+        <div class="quick-badges" *ngIf="receptor.rol">
+           <span class="role-badge">{{ receptor.rol }}</span>
+        </div>
+      </div>
+      
+      <div class="quick-profile-body">
+        <div class="info-row" *ngIf="receptor.fechaRegistro">
+          <span class="info-label">Miembro desde</span>
+          <span class="info-value">{{ receptor.fechaRegistro | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn-outline-primary" [routerLink]="['/perfil', receptor.identificador]">Ver Perfil Completo</button>
+      </div>
+    </div>
+  </aside>
+
 </div>
