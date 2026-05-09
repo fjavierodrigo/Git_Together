@@ -9,8 +9,7 @@ import { ToastService, Toast } from '../../../services/toast.service';
   template: `
     <div class="toast-container">
       <div *ngFor="let toast of toasts" 
-           [class]="'toast-item ' + toast.type"
-           (click)="remove(toast.id)">
+           [class]="'toast-item ' + toast.type">
         <div class="toast-icon">
           <span *ngIf="toast.type === 'success'">✓</span>
           <span *ngIf="toast.type === 'error'">✕</span>
@@ -18,9 +17,14 @@ import { ToastService, Toast } from '../../../services/toast.service';
           <span *ngIf="toast.type === 'warning'">⚠</span>
         </div>
         <div class="toast-content">
-          {{ toast.message }}
+          <div class="toast-message">{{ toast.message }}</div>
+          <button *ngIf="toast.actionLabel" 
+                  (click)="handleAction(toast, $event)" 
+                  class="toast-action-btn">
+            {{ toast.actionLabel }}
+          </button>
         </div>
-        <div class="toast-close">×</div>
+        <div class="toast-close" (click)="remove(toast.id)">×</div>
       </div>
     </div>
   `,
@@ -34,8 +38,16 @@ export class ToastsComponent implements OnInit {
   ngOnInit(): void {
     this.toastService.toasts$.subscribe(toasts => {
       this.toasts = toasts;
-      this.cdr.detectChanges(); // Fuerza a Angular a ver el cambio de inmediato
+      this.cdr.detectChanges();
     });
+  }
+
+  handleAction(toast: Toast, event: Event) {
+    event.stopPropagation(); // Evitamos que el click llegue al padre
+    if (toast.action) {
+      toast.action();
+    }
+    this.remove(toast.id);
   }
 
   remove(id: number) {

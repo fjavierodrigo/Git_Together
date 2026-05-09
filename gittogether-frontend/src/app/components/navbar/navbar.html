@@ -7,13 +7,85 @@
         <span class="logo-text">GitTogether</span>
     </div>
 
-    <div class="header-actions">
-        <!-- Theme Toggle Switch -->
-        <label class="theme-switch" title="Cambiar tema">
-            <input type="checkbox" [checked]="(isDarkTheme$ | async) === false" (change)="toggleTheme()">
-            <span class="slider">
-                <span class="icon sun">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="header-user" *ngIf="usuarioLogueado">
+        <!-- Notificaciones de Chat (Vuelve a la izquierda) -->
+        <div class="notification-wrapper" *ngIf="usuarioLogueado" title="Mensajes">
+            <button class="btn-notifications" (click)="toggleDropdownChat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="badge" *ngIf="(unreadCount$ | async) ?? 0 > 0">
+                    {{ unreadCount$ | async }}
+                </span>
+            </button>
+
+            <!-- Dropdown de Mensajes -->
+            <div class="chat-dropdown" *ngIf="mostrarDropdownChat">
+                <div class="dropdown-header">
+                    <span>Mensajes recientes</span>
+                    <button (click)="mostrarDropdownChat = false">×</button>
+                </div>
+                <div class="dropdown-list">
+                    <div class="notification-item" *ngFor="let notif of notifications$ | async"
+                        (click)="irAlChat(notif.emisor.identificador)">
+                        <div class="notif-avatar">
+                            {{ notif.emisor.nombre.substring(0,1).toUpperCase() }}
+                        </div>
+                        <div class="notif-content">
+                            <strong>{{ notif.emisor.nombre }}</strong>
+                            <p>{{ notif.contenido }}</p>
+                        </div>
+                    </div>
+                    <div class="no-notifs" *ngIf="(notifications$ | async)?.length === 0">
+                        No tienes mensajes nuevos
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separador Vertical -->
+        <div class="nav-divider-vertical"></div>
+
+        <!-- Selector de Perfil con Dropdown -->
+        <div class="user-info-section" (click)="toggleDropdownPerfil()" style="cursor: pointer;" title="Opciones de cuenta">
+            <div class="avatar-container">
+                <img *ngIf="usuarioLogueado?.avatar && !imageError" [src]="getAvatarUrl()" (error)="handleImageError()"
+                    alt="Avatar" class="user-avatar">
+                <div *ngIf="!usuarioLogueado?.avatar || imageError" class="initials-avatar">
+                    {{ getInitials() }}
+                </div>
+                <div class="online-dot"></div>
+            </div>
+            <span class="user-name">{{ usuarioLogueado.nombre }}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dropdown-arrow" [class.open]="mostrarDropdownPerfil" style="width: 14px; height: 14px; margin-left: 8px; transition: transform 0.2s;">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+
+        <!-- Dropdown de Perfil -->
+        <div class="profile-dropdown" *ngIf="mostrarDropdownPerfil">
+            <div class="dropdown-header-user">
+                <strong>{{ usuarioLogueado.nombre }}</strong>
+                <span>{{ usuarioLogueado.email }}</span>
+            </div>
+            
+            <div class="dropdown-divider"></div>
+            
+            <div class="dropdown-item" (click)="goToProfile()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Ver Perfil
+            </div>
+
+            <div class="dropdown-item theme-item" (click)="toggleTheme(); $event.stopPropagation()">
+                <div class="theme-info">
+                    <svg *ngIf="(isDarkTheme$ | async) === false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg *ngIf="isDarkTheme$ | async" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
                         <circle cx="12" cy="12" r="5"></circle>
                         <line x1="12" y1="1" x2="12" y2="3"></line>
                         <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -24,90 +96,59 @@
                         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
-                </span>
-                <span class="icon moon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </span>
-            </span>
-        </label>
-
-        <!-- Botón Admin (Solo visible para Administradores) -->
-        <button class="btn-admin-access" *ngIf="esAdmin()" (click)="goToAdmin()" title="Panel de Administración">
-            <svg class="admin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <span>Admin</span>
-        </button>
-
-        <div class="header-user" *ngIf="usuarioLogueado">
-            <!-- BOTÓN DE RECLAMACIÓN SI ESTÁ BANEADO -->
-            <button class="btn-danger-nav" (click)="abrirModalReclamacion()" *ngIf="estaBaneado" title="Reclamar baneo"
-                style="margin-right: 15px; background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid #ff4757; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" style="width: 16px;">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
-                    </path>
-                </svg>
-                <span>Reclamar</span>
-            </button>
-
-            <div class="user-info-section" (click)="goToProfile()" style="cursor: pointer;" title="Ver Perfil">
-                <div class="avatar-container">
-                    <img *ngIf="usuarioLogueado?.avatar && !imageError" [src]="getAvatarUrl()"
-                        (error)="handleImageError()" alt="Avatar" class="user-avatar">
-                    <div *ngIf="!usuarioLogueado?.avatar || imageError" class="initials-avatar">
-                        {{ getInitials() }}
-                    </div>
-                    <div class="online-dot"></div>
+                    <span>{{ (isDarkTheme$ | async) ? 'Modo Claro' : 'Modo Oscuro' }}</span>
                 </div>
-                <span class="user-name">{{ usuarioLogueado.nombre }}</span>
             </div>
 
-            <div class="header-divider"></div>
+            <div class="dropdown-item admin-item" *ngIf="esAdmin()" (click)="goToAdmin()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Panel Admin
+            </div>
 
-            <button class="btn-header-logout" (click)="onLogout()" title="Cerrar Sesión">
-                <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
+            <!-- Opción de Reclamación (Solo si está baneado) -->
+            <div class="dropdown-item claim-item" *ngIf="estaBaneado" (click)="abrirModalReclamacion()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                </svg>
+                Reclamar Sanción
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-item logout-item" (click)="onLogout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                     <polyline points="16 17 21 12 16 7"></polyline>
                     <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-            </button>
+                Sign Out
+            </div>
         </div>
     </div>
 </nav>
 
-<!-- MODAL RECLAMACIÓN (Fuera del nav para evitar conflictos de centrado) -->
+<!-- MODAL RECLAMACIÓN -->
 <div class="modal-overlay" *ngIf="mostrarModalReclamacion">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Reclamar Sanción</h3>
-            <button class="btn-close-modal" (click)="mostrarModalReclamacion = false" title="Cerrar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" style="width: 20px;">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+            <button class="btn-close-modal" (click)="mostrarModalReclamacion = false">×</button>
         </div>
         <div class="modal-body">
             <div class="ban-info">
-                <strong>Motivo del baneo</strong>
-                {{razonBaneo}}
+                <strong>Motivo del baneo registrado:</strong>
+                <p>{{razonBaneo}}</p>
             </div>
             <div class="form-group">
                 <label>Tu mensaje de defensa</label>
-                <textarea [(ngModel)]="mensajeReclamacion"
-                    placeholder="Explica por qué crees que tu cuenta debería ser desbloqueada..."></textarea>
+                <textarea [(ngModel)]="mensajeReclamacion" placeholder="Explica por qué deberíamos desbloquear tu cuenta..."></textarea>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn-secondary" (click)="mostrarModalReclamacion = false">Cancelar</button>
-            <button class="btn-primary" (click)="enviarReclamacion()" [disabled]="!mensajeReclamacion?.trim()">Enviar
-                Reclamación</button>
+            <button class="btn-primary" (click)="enviarReclamacion()" [disabled]="!mensajeReclamacion?.trim()">Enviar Reclamación</button>
         </div>
     </div>
 </div>

@@ -42,17 +42,6 @@
         </app-categoria-sidebar>
 
         <div class="tema-container-inner" #innerContainer>
-            <header class="tema-header-nav">
-                <button class="btn-back" (click)="volver()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    <span>Volver al Foro</span>
-                </button>
-            </header>
-
             <main class="tema-main-content">
                 <!-- Skeleton loader -->
                 <div class="tema-detail-card skeleton-card" *ngIf="cargando && !tema">

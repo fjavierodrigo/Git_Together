@@ -76,40 +76,6 @@
     margin-bottom: auto;
 }
 
-/* Header & Back Button */
-.tema-header-nav {
-    width: 100%;
-    max-width: 900px;
-    margin-top: auto;
-    margin-bottom: 24px;
-}
-
-.btn-back {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 8px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.btn-back:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    border-color: var(--border-hover);
-    transform: translateX(-4px);
-}
-
-.btn-back svg {
-    width: 20px;
-    height: 20px;
-}
-
 /* Topic Card Detail */
 .tema-detail-card {
     background: var(--bg-surface);
@@ -125,6 +91,7 @@
     font-size: 2.5rem;
     font-weight: 800;
     line-height: 1.2;
+    margin-top: 0; /* Aseguramos alineación perfecta */
     margin-bottom: 12px;
     color: var(--text-primary);
 }
@@ -829,6 +796,7 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
+    margin-top: 0; /* Aseguramos alineación perfecta */
     margin-bottom: 20px;
     font-family: 'Outfit', sans-serif;
 }

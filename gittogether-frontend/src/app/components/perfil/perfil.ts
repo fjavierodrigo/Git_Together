@@ -1,27 +1,33 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../navbar/navbar';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-import { Usuario } from '../services/usuario';
+import { Usuario } from "../services/usuario";
 import { ForoService } from '../services/foro.service';
 import { ModalService } from '../../services/modal.service';
 import { ToastService } from '../../services/toast.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
 export class Perfil implements OnInit {
+
+
   usuarioLogueado: any = null;
   usuarioVisualizado: any = null;
   esPropioPerfil: boolean = false;
   stats: any = { numComentarios: 0, numPost: 0, fechaRegistro: '' };
   avatarPreview: any = null;
   imageError: boolean = false;
+
+
 
   // Fase 2: Pestañas y Listas
   activeTab: 'info' | 'temas' | 'mensajes' = 'info';
@@ -40,6 +46,8 @@ export class Perfil implements OnInit {
     private toastService: ToastService,
     private sanitizer: DomSanitizer
   ) { }
+
+
 
   getInitials(): string {
     if (!this.usuarioVisualizado?.nombre) return '??';
@@ -62,9 +70,7 @@ export class Perfil implements OnInit {
     this.cdr.detectChanges();
   }
 
-  goToForo() {
-    this.router.navigate(['/foro']);
-  }
+
 
   abrirSelectorArchivo(fileInput: HTMLInputElement) {
     fileInput.click();
@@ -73,6 +79,7 @@ export class Perfil implements OnInit {
   ngOnInit() {
     this.usuarioService.currentUser$.subscribe(user => {
       this.usuarioLogueado = user;
+
     });
 
     this.route.params.subscribe(params => {

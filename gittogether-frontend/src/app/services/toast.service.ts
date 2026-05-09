@@ -5,6 +5,8 @@ export interface Toast {
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
   id: number;
+  actionLabel?: string;
+  action?: () => void;
 }
 
 @Injectable({
@@ -17,17 +19,20 @@ export class ToastService {
 
   toasts$ = this.toastsSubject.asObservable();
 
-  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 3000) {
+  show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration: number = 3000, actionLabel?: string, action?: () => void) {
     const id = this.counter++;
-    const toast: Toast = { message, type, id };
+    const toast: Toast = { message, type, id, actionLabel, action };
 
     this.toasts.push(toast);
     this.toastsSubject.next([...this.toasts]);
 
-    if (duration > 0) {
+    // Si tiene acción, le damos más tiempo para que el usuario pueda pulsar (10 segundos)
+    const finalDuration = action ? 10000 : duration;
+
+    if (finalDuration > 0) {
       setTimeout(() => {
         this.remove(id);
-      }, duration);
+      }, finalDuration);
     }
   }
 
@@ -38,6 +43,8 @@ export class ToastService {
 
   success(msg: string) { this.show(msg, 'success'); }
   error(msg: string) { this.show(msg, 'error'); }
-  info(msg: string) { this.show(msg, 'info'); }
+  info(msg: string, actionLabel?: string, action?: () => void) { 
+    this.show(msg, 'info', 3000, actionLabel, action); 
+  }
   warning(msg: string) { this.show(msg, 'warning'); }
 }

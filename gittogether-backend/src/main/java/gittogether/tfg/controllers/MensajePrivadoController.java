@@ -28,9 +28,11 @@ public class MensajePrivadoController {
 		}
 	}
 
-	// Endpoint: GET http://localhost:8080/api/mensajes/recibidos/2
+	// Endpoint: GET http://localhost:8080/api/mensajes-privados/recibidos/2
 	@GetMapping("/recibidos/{usuarioId}")
 	public ResponseEntity<List<MensajePrivado>> verBandejaEntrada(@PathVariable int usuarioId) {
 		return ResponseEntity.ok(mensajeService.obtenerBandejaEntrada(usuarioId));
 	}
+
+
 }

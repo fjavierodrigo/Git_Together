@@ -1,0 +1,39 @@
+<app-navbar></app-navbar>
+
+<div class="chat-container">
+  <div class="chat-header" *ngIf="receptor">
+    <div class="user-info">
+      <div class="avatar-placeholder">
+        {{ receptor.nombre.substring(0, 1).toUpperCase() }}
+      </div>
+      <div class="details">
+        <h2>{{ receptor.nombre }}</h2>
+        <span class="status">En línea</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="messages-list" #scrollMe>
+    <div *ngFor="let msg of mensajes" 
+         [ngClass]="{'msg-me': msg.emisor.identificador === usuarioLogueado.identificador, 'msg-other': msg.emisor.identificador !== usuarioLogueado.identificador}">
+      <div class="msg-bubble">
+        <p>{{ msg.contenido }}</p>
+        <span class="msg-time">{{ msg.fechaEnvio | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="empty-chat" *ngIf="mensajes.length === 0">
+      <p>No hay mensajes todavía. ¡Saluda!</p>
+    </div>
+    
+    <!-- Ancla invisible para el scroll -->
+    <div #scrollAnchor></div>
+  </div>
+
+  <div class="chat-input-area">
+    <input type="text" [(ngModel)]="nuevoMensaje" (keyup.enter)="enviar()" placeholder="Escribe un mensaje..." />
+    <button (click)="enviar()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>

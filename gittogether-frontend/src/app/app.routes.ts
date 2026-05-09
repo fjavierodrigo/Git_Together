@@ -5,6 +5,7 @@ import { Foro } from './components/foro/foro';
 import { ForoTema } from './components/foro-tema/foro-tema';
 import { Perfil } from './components/perfil/perfil';
 import { AdminUsuariosComponent } from './components/admin/admin-usuarios';
+import { Chat } from './components/chat/chat';
 import { authGuard, wildcardGuard } from './components/services/auth.guard'; 
 
 export const routes: Routes = [
@@ -36,6 +37,11 @@ export const routes: Routes = [
   {
     path: 'perfil/:id',
     component: Perfil,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'chat/:id',
+    component: Chat,
     canActivate: [authGuard]
   },
   {

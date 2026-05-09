@@ -1,8 +1,9 @@
 package gittogether.tfg.entities;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +36,9 @@ public class MensajePrivado {
 	@Column(name = "leido", nullable = false)
 	private boolean leido;
 
-	@Column(name = "fecha_envio", nullable = false, columnDefinition = "DATE DEFAULT (CURRENT_DATE)")
-	private LocalDate fechaEnvio;
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@Column(name = "fecha_envio", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private LocalDateTime fechaEnvio;
 
 
 	@ManyToOne
@@ -73,11 +75,11 @@ public class MensajePrivado {
 		this.leido = leido;
 	}
 
-	public LocalDate getFechaEnvio() {
+	public LocalDateTime getFechaEnvio() {
 		return fechaEnvio;
 	}
 
-	public void setFechaEnvio(LocalDate fechaEnvio) {
+	public void setFechaEnvio(LocalDateTime fechaEnvio) {
 		this.fechaEnvio = fechaEnvio;
 	}
 

@@ -8,7 +8,7 @@ import gittogether.tfg.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,7 +21,7 @@ public class MensajePrivadoService {
 	private UsuarioRepository usuarioRepository; // Añadimos esto para buscar usuarios
 
 	public MensajePrivado enviarMensaje(MensajePrivado mensaje) {
-		mensaje.setFechaEnvio(LocalDate.now());
+		mensaje.setFechaEnvio(LocalDateTime.now());
 		mensaje.setLeido(false);
 
 		// 1. Buscamos el emisor completo en la base de datos
@@ -42,5 +42,9 @@ public class MensajePrivadoService {
 
 	public List<MensajePrivado> obtenerBandejaEntrada(int receptorId) {
 		return mensajeRepository.findByReceptorIdentificadorOrderByFechaEnvioDesc(receptorId);
+	}
+
+	public List<MensajePrivado> obtenerChat(int u1, int u2) {
+		return mensajeRepository.findChatHistory(u1, u2);
 	}
 }

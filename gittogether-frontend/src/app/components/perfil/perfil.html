@@ -17,17 +17,7 @@
 
     <div class="foro-layout">
         <main class="main-content profile-main">
-            <!-- Botón Volver -->
-            <div class="back-link-container">
-                <button class="btn-back" (click)="goToForo()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round" style="width: 16px; height: 16px;">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    <span>Volver al Foro</span>
-                </button>
-            </div>
+            <!-- Botón volver eliminado -->
 
             <!-- Profile Hero Section -->
             <section class="profile-hero">
@@ -83,6 +73,15 @@
                         <h1 class="profile-name">{{ usuarioVisualizado?.nombre || 'Usuario Desconocido' }}</h1>
                         <p class="profile-email">{{ usuarioVisualizado?.email || 'email@oculto.com' }}</p>
                     </div>
+
+                    <div class="profile-main-actions" *ngIf="!esPropioPerfil">
+                        <button class="btn-chat-action" [routerLink]="['/chat', usuarioVisualizado?.identificador]">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>Enviar Mensaje</span>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -95,6 +94,7 @@
                 <button class="tab-btn" [class.active]="activeTab === 'mensajes'" (click)="setTab('mensajes')">
                     Mensajes <span class="badge-count" *ngIf="stats.mensajes > 0">{{ stats.mensajes }}</span>
                 </button>
+
             </nav>
 
             <div class="tab-content" [ngSwitch]="activeTab">
@@ -151,6 +151,8 @@
                         </button>
                     </div>
                 </section>
+
+
 
                 <!-- PESTAÑA: TEMAS -->
                 <section *ngSwitchCase="'temas'" class="tab-fade-in">

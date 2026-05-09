@@ -240,9 +240,7 @@ export class ForoTema implements OnInit {
     this.router.navigate(['/foro'], { queryParams: params });
   }
 
-  volver(): void {
-    this.router.navigate(['/foro']);
-  }
+
 
   toggleMenu(id: string | number, event: Event) {
     event.stopPropagation(); // Evitamos que el click llegue al document
@@ -303,7 +301,7 @@ export class ForoTema implements OnInit {
           this.foroService.clearCache();
           const cacheKey = `tema_slug_${this.temaSlug}_cache`;
           sessionStorage.removeItem(cacheKey); // Limpiamos la cache del tema eliminado
-          this.volver();
+          this.router.navigate(['/foro']);
         },
         error: (err) => {
           console.error("Error al borrar el tema", err);
