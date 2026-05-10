@@ -7,6 +7,7 @@ import { ForoService } from '../services/foro.service';
 import { ModalService } from '../../services/modal.service';
 import { ToastService } from '../../services/toast.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { BaneoService } from '../services/baneo.service';
 
 import { FormsModule } from '@angular/forms';
 
@@ -26,6 +27,7 @@ export class Perfil implements OnInit {
   stats: any = { numComentarios: 0, numPost: 0, fechaRegistro: '' };
   avatarPreview: any = null;
   imageError: boolean = false;
+  estaBaneado: boolean = false;
 
 
 
@@ -44,7 +46,8 @@ export class Perfil implements OnInit {
     private cdr: ChangeDetectorRef,
     private modalService: ModalService,
     private toastService: ToastService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private baneoService: BaneoService
   ) { }
 
 
@@ -79,7 +82,9 @@ export class Perfil implements OnInit {
   ngOnInit() {
     this.usuarioService.currentUser$.subscribe(user => {
       this.usuarioLogueado = user;
-
+      if (user) {
+        this.verificarEstadoBaneo();
+      }
     });
 
     this.route.params.subscribe(params => {
@@ -152,6 +157,16 @@ export class Perfil implements OnInit {
       this.cargarStats(userId);
     }
     this.cdr.detectChanges();
+  }
+
+  private verificarEstadoBaneo() {
+    this.baneoService.obtenerBaneos().subscribe(baneos => {
+      if (!this.usuarioLogueado) return;
+      const loggedId = this.usuarioLogueado.identificador || this.usuarioLogueado.id;
+      const miBaneo = baneos.find(b => b.usuario && (b.usuario.identificador === loggedId || b.usuario.id === loggedId));
+      this.estaBaneado = !!miBaneo;
+      this.cdr.detectChanges();
+    });
   }
 
   private statsLoaded = false;
