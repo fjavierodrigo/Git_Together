@@ -16,7 +16,11 @@
                [id]="input.name" 
                [(ngModel)]="input.value" 
                [placeholder]="input.placeholder || ''"
+               [maxLength]="input.maxlength || 5000"
                (keyup.enter)="onConfirm()">
+        <span class="char-counter" *ngIf="input.maxlength && (input.type === 'text' || input.type === 'textarea')">
+            {{ (input.value?.length || 0) }}/{{ input.maxlength }}
+        </span>
 
         <div *ngIf="input.type === 'textarea'" class="markdown-editor-wrapper">
           <div class="markdown-toolbar">
@@ -30,6 +34,7 @@
           <textarea [id]="input.name" 
                     [(ngModel)]="input.value" 
                     [placeholder]="input.placeholder || ''"
+                    [maxLength]="input.maxlength || 5000"
                     (selectionchange)="updateCursorPosition($event)"></textarea>
         </div>
 

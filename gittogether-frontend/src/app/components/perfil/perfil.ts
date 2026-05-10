@@ -10,11 +10,12 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { BaneoService } from '../services/baneo.service';
 
 import { FormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule, MarkdownModule],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
@@ -259,7 +260,8 @@ export class Perfil implements OnInit {
         name: 'descripcion',
         label: 'Sobre mí',
         type: 'textarea',
-        value: this.usuarioLogueado?.descripcion || ''
+        value: this.usuarioLogueado?.descripcion || '',
+        maxlength: 150
       }
     ]);
 

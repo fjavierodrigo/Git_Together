@@ -17,6 +17,7 @@ export interface ModalInput {
   placeholder?: string;
   type: 'text' | 'textarea' | 'tags' | 'files';
   value?: any;
+  maxlength?: number;
 }
 
 @Injectable({

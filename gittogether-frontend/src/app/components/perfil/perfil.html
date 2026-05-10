@@ -109,7 +109,7 @@
                             </svg>
                             Estadísticas de Actividad
                         </h3>
-                        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="stats-grid">
                             <div class="stat-box" (click)="setTab('temas')" style="cursor: pointer;">
                                 <span class="stat-value">{{ stats.temasCreados || 0 }}</span>
                                 <span class="stat-label">Temas Creados</span>
@@ -132,10 +132,9 @@
                             Sobre mí
                         </h3>
                         <div class="about-content">
-                            <p *ngIf="usuarioVisualizado?.descripcion"
-                                style="white-space: pre-wrap; color: var(--text-secondary);">
-                                {{ usuarioVisualizado.descripcion }}
-                            </p>
+                            <div *ngIf="usuarioVisualizado?.descripcion" class="markdown-body-profile">
+                                <markdown [data]="usuarioVisualizado.descripcion"></markdown>
+                            </div>
                             <p class="empty-about" *ngIf="!usuarioVisualizado?.descripcion">
                                 El usuario aún no ha añadido una descripción a su perfil.
                             </p>
