@@ -142,8 +142,29 @@ code[class*="language-"] {
     margin: 4px 0;
 }
 
-/* PrismJS margins fix */
-.markdown-content pre[class*="language-"] {
-    margin-top: 0 !important;
-    margin-bottom: 4px !important;
+/* --- Autofill Fix for Dark Mode --- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--bg-dark) inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+    caret-color: var(--text-primary);
+}
+
+/* Force dark theme for search and other inputs */
+input, textarea {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+body.light-theme input:-webkit-autofill {
+    -webkit-text-fill-color: #1f2937 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }
