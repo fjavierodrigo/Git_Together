@@ -17,6 +17,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,13 +36,18 @@ public class Usuario {
 	@Column(name = "identificador")
 	private Integer identificador;
 
+	@NotBlank(message = "El nombre no puede estar vacío")
 	@Column(name = "nombre", length = 255, nullable = false, unique = true)
 	private String nombre;
 
+	@NotBlank(message = "El email no puede estar vacío")
+	@Email(message = "El email debe ser válido")
 	@Column(name = "email", length = 255, nullable = false, unique = true)
 	private String email;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@NotBlank(message = "La contraseña no puede estar vacía")
+	@Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
 	@Column(name = "password", length = 255, nullable = false)
 	private String password;
 

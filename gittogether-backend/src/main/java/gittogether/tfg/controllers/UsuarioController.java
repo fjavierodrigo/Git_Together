@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,8 @@ import gittogether.tfg.repositories.TemaRepository;
 import gittogether.tfg.services.S3Service;
 import gittogether.tfg.services.UsuarioService;
 import gittogether.tfg.util.JwtUtil;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -47,6 +51,9 @@ public class UsuarioController {
 
 	@Autowired
 	private S3Service s3Service;
+
+	@Autowired
+	private Validator validator;
 
 	// Seguridad para Avatares: Solo imágenes y máximo 2MB
 	private static final List<String> ALLOWED_AVATAR_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
@@ -68,10 +75,18 @@ public class UsuarioController {
 			@RequestPart(value = "avatar", required = false) MultipartFile archivo) throws Exception {
 		
 		validarAvatar(archivo);
-		// 1. Convertir el String JSON manualmente a objeto Usuario
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule()); // Para manejar LocalDate
 		Usuario usuario = objectMapper.readValue(usuarioJson, Usuario.class);
+
+		// Validar el objeto usuario manualmente
+		Set<ConstraintViolation<Usuario>> violations = validator.validate(usuario);
+		if (!violations.isEmpty()) {
+			List<String> errors = violations.stream()
+					.map(ConstraintViolation::getMessage)
+					.collect(Collectors.toList());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+		}
 
 		// 2. Subir imagen a S3 si existe
 		if (archivo != null && !archivo.isEmpty()) {
