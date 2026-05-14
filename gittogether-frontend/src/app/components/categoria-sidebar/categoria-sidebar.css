@@ -8,7 +8,8 @@
     width: 280px;
     background-color: transparent;
     padding: 32px 12px 32px 24px;
-    border-right: 1px solid var(--border-color) !important; /* Línea separadora fija */
+    border-right: 1px solid var(--border-color) !important;
+    /* Línea separadora fija */
     overflow-y: auto;
     height: 100%;
     transition: all 0.3s ease;
@@ -21,7 +22,8 @@
     color: var(--text-secondary);
     font-weight: 700;
     margin-bottom: 24px;
-    margin: 0; /* Para alineación con el botón */
+    margin: 0;
+    /* Para alineación con el botón */
 }
 
 .btn-add-admin {
@@ -86,7 +88,8 @@
     background: var(--accent-glow) !important;
     color: var(--accent-color) !important;
     font-weight: 700 !important;
-    border-left: 4px solid var(--accent-color) !important; /* LA LÍNEA AZUL FIJA */
+    border-left: 4px solid var(--accent-color) !important;
+    /* LA LÍNEA AZUL FIJA */
 }
 
 .cat-icon {
@@ -217,4 +220,119 @@
     border-color: transparent;
     color: white;
     box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+}
+
+/* Mobile Toggle Styles */
+.mobile-toggle-btn {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    :host {
+        display: block;
+        width: 100%;
+        height: auto;
+        position: relative;
+        z-index: 50;
+    }
+
+    .mobile-toggle-btn {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background: var(--bg-surface-elevated);
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s ease;
+    }
+
+    .mobile-toggle-btn:active {
+        background: var(--bg-hover);
+    }
+
+    .mobile-toggle-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .filter-icon {
+        width: 20px;
+        height: 20px;
+        color: var(--accent-color);
+    }
+
+    .chevron-icon {
+        width: 20px;
+        height: 20px;
+        color: var(--text-secondary);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chevron-icon.rotated {
+        transform: rotate(180deg);
+        color: var(--accent-color);
+    }
+
+    .sidebar-container {
+        display: none;
+        width: 280px; /* Ancho original para dejar ver el resto de la app */
+        height: calc(100dvh - 130px); /* Ocupa el largo exacto disponible (pantalla menos el header y el botón) */
+        min-height: unset;
+        max-height: none;
+        overflow-y: auto; /* Solo actuará si hay muchísimas categorías */
+        border-right: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-dark);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5); /* Sombra hacia la derecha */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 100;
+        overflow-x: hidden;
+    }
+
+    .sidebar-container::before {
+        content: '';
+        position: absolute;
+        top: -5vh;
+        left: -15vh;
+        width: 65vh;
+        height: 65vh;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' stroke='%2358a6ff' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' /%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: contain;
+        opacity: 0.1;
+        filter: blur(5px);
+        transform: rotate(-15deg);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .sidebar-header, .category-list, .tag-cloud {
+        position: relative;
+        z-index: 1; /* Asegurar que el texto esté siempre por encima del ícono de fondo */
+    }
+
+    .sidebar-container.mobile-open {
+        display: block;
+        animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -157,6 +157,10 @@ export class Chat implements OnInit, OnDestroy {
     this.router.navigate(['/chat', id]);
   }
 
+  volverAContactos() {
+    this.router.navigate(['/chat']);
+  }
+
   enviar() {
     if (this.nuevoMensaje.trim() && this.receptor) {
       this.chatService.enviarMensaje(this.receptor.identificador, this.nuevoMensaje);

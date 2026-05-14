@@ -748,7 +748,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .tema-title-main {
         font-size: 1.8rem;
     }
@@ -760,6 +760,12 @@
     .tema-layout {
         flex-direction: column;
         overflow-y: auto;
+    }
+
+    app-categoria-sidebar {
+        width: 100%;
+        flex-shrink: 0;
+        z-index: 50;
     }
 
     .tema-sidebar-right {
@@ -1359,4 +1365,10 @@
 
 .chip-remove:hover {
     color: #ff4d4d;
+}
+
+@media (max-width: 1200px) {
+    .tema-sidebar-right {
+        display: none !important;
+    }
 }

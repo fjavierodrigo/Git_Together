@@ -72,11 +72,24 @@
                         </div>
                         <h1 class="profile-name">{{ usuarioVisualizado?.nombre || 'Usuario Desconocido' }}</h1>
                         <p class="profile-email">{{ usuarioVisualizado?.email || 'email@oculto.com' }}</p>
+
+                        <!-- BOTÓN SOLO PARA MÓVIL (Bajo el email) -->
+                        <div class="profile-main-actions mobile-only-btn" *ngIf="!esPropioPerfil && !estaBaneado">
+                            <button class="btn-chat-action" [routerLink]="['/chat', usuarioVisualizado?.identificador]">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span>Enviar Mensaje</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="profile-main-actions" *ngIf="!esPropioPerfil && !estaBaneado">
+                    <!-- BOTÓN SOLO PARA ESCRITORIO (En la columna de la derecha) -->
+                    <div class="profile-main-actions desktop-only-btn" *ngIf="!esPropioPerfil && !estaBaneado">
                         <button class="btn-chat-action" [routerLink]="['/chat', usuarioVisualizado?.identificador]">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                             </svg>
                             <span>Enviar Mensaje</span>
@@ -87,7 +100,8 @@
 
             <!-- Navegación por Pestañas -->
             <nav class="profile-tabs-nav">
-                <button class="tab-btn" [class.active]="activeTab === 'info'" (click)="setTab('info')">Información</button>
+                <button class="tab-btn" [class.active]="activeTab === 'info'"
+                    (click)="setTab('info')">Información</button>
                 <button class="tab-btn" [class.active]="activeTab === 'temas'" (click)="setTab('temas')">
                     Temas <span class="badge-count" *ngIf="stats.temasCreados > 0">{{ stats.temasCreados }}</span>
                 </button>
@@ -156,7 +170,8 @@
                 <!-- PESTAÑA: TEMAS -->
                 <section *ngSwitchCase="'temas'" class="tab-fade-in">
                     <div class="content-list" *ngIf="!cargandoTemas">
-                        <div class="content-item" *ngFor="let tema of temasUsuario" [routerLink]="['/foro/tema', tema.slug]">
+                        <div class="content-item" *ngFor="let tema of temasUsuario"
+                            [routerLink]="['/foro/tema', tema.slug]">
                             <div class="item-title">{{ tema.titulo }}</div>
                             <div class="item-meta">
                                 <span>{{ tema.categoria?.nombre }}</span>
@@ -167,7 +182,8 @@
                             </div>
                             <div class="item-excerpt">{{ tema.descripcion }}</div>
                         </div>
-                        <div class="empty-state-simple" *ngIf="temasUsuario.length === 0" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                        <div class="empty-state-simple" *ngIf="temasUsuario.length === 0"
+                            style="padding: 40px; text-align: center; color: var(--text-secondary);">
                             Aún no se han creado temas.
                         </div>
                     </div>
@@ -179,7 +195,8 @@
                 <!-- PESTAÑA: MENSAJES -->
                 <section *ngSwitchCase="'mensajes'" class="tab-fade-in">
                     <div class="content-list" *ngIf="!cargandoMensajes">
-                        <div class="content-item" *ngFor="let msg of mensajesUsuario" [routerLink]="['/foro/tema', msg.tema?.slug]">
+                        <div class="content-item" *ngFor="let msg of mensajesUsuario"
+                            [routerLink]="['/foro/tema', msg.tema?.slug]">
                             <div class="item-title" style="font-size: 0.9rem; color: var(--accent-color);">
                                 Respuesta en: {{ msg.tema?.titulo }}
                             </div>
@@ -188,7 +205,8 @@
                             </div>
                             <div class="item-excerpt">{{ msg.contenido }}</div>
                         </div>
-                        <div class="empty-state-simple" *ngIf="mensajesUsuario.length === 0" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                        <div class="empty-state-simple" *ngIf="mensajesUsuario.length === 0"
+                            style="padding: 40px; text-align: center; color: var(--text-secondary);">
                             Aún no se han publicado mensajes.
                         </div>
                     </div>

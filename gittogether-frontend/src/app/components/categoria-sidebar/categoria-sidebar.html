@@ -1,4 +1,16 @@
-<aside class="sidebar-container">
+<div class="mobile-toggle-btn" (click)="toggleMobile()">
+    <div class="mobile-toggle-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="filter-icon">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        <span>Filtros y Categorías</span>
+    </div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon" [class.rotated]="isMobileOpen">
+        <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+</div>
+
+<aside class="sidebar-container" [class.mobile-open]="isMobileOpen">
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h3>Categorías</h3>
         <button *ngIf="usuarioService.esAdmin()" class="btn-add-admin" (click)="crearCategoria()" title="Nueva Categoría">

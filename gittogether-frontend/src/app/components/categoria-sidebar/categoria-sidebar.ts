@@ -23,6 +23,11 @@ export class CategoriaSidebar implements OnInit {
   @Output() tagSelected = new EventEmitter<any>();
 
   activeMenuId: string | number | null = null;
+  isMobileOpen: boolean = false;
+
+  toggleMobile() {
+    this.isMobileOpen = !this.isMobileOpen;
+  }
 
   toggleMenu(id: string | number, event: Event) {
     event.stopPropagation();
