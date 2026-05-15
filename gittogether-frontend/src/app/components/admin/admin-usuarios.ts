@@ -3,7 +3,6 @@ import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { Usuario } from '../services/usuario';
 import { BaneoService } from '../services/baneo.service';
 import { NavbarComponent } from '../navbar/navbar';
@@ -19,7 +18,6 @@ import { getApiBaseUrl } from '../../config';
 })
 export class AdminUsuariosComponent implements OnInit {
   private http = inject(HttpClient);
-  private router = inject(Router); // Inyectamos Router
   public usuarioService: Usuario = inject(Usuario);
   private baneoService = inject(BaneoService);
   private toastService: ToastService = inject(ToastService);
@@ -42,6 +40,10 @@ export class AdminUsuariosComponent implements OnInit {
   activeTab: 'ACTIVOS' | 'BANEADOS' | 'RECLAMACIONES' = 'ACTIVOS';
   searchQuery: string = '';
   menuAbiertoId: number | null = null;
+
+  mostrarModalTexto: boolean = false;
+  textoModalTitulo: string = '';
+  textoModalContenido: string = '';
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
@@ -91,10 +93,6 @@ export class AdminUsuariosComponent implements OnInit {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.minFecha = tomorrow.toISOString().split('T')[0];
-  }
-
-  volverAlForo() {
-    this.router.navigate(['/foro']);
   }
 
   cargarDatos() {
@@ -241,6 +239,12 @@ export class AdminUsuariosComponent implements OnInit {
         this.toastService.error('Error al marcar como revisada');
       }
     });
+  }
+
+  verTextoCompleto(titulo: string, contenido: string) {
+    this.textoModalTitulo = titulo;
+    this.textoModalContenido = contenido;
+    this.mostrarModalTexto = true;
   }
 
   getInitials(nombre: string): string {

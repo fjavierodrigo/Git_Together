@@ -6,14 +6,6 @@
       <h1>Panel de Administración</h1>
       <p>Gestión de usuarios y moderación del sistema</p>
     </div>
-    <button class="btn-back-forum" (click)="volverAlForo()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span>Volver al Foro</span>
-    </button>
   </header>
 
   <div class="users-card">
@@ -51,7 +43,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let u of usuariosFiltrados">
-            <td>
+            <td data-label="Avatar">
               <div class="avatar-container-admin">
                 <img *ngIf="u.avatar && !u.avatarError" [src]="usuarioService.getAvatarUrl(u.avatar)"
                   (error)="handleImageError(u)" class="user-avatar-admin" alt="Avatar">
@@ -60,11 +52,11 @@
                 </div>
               </div>
             </td>
-            <td><strong>{{u.nombre}}</strong></td>
-            <td>{{u.email}}</td>
-            <td><span class="badge" [class.badge-admin]="u.rol === 'ADMIN'">{{u.rol}}</span></td>
-            <td>{{u.fechaRegistro}}</td>
-            <td>
+            <td data-label="Nombre"><strong>{{u.nombre}}</strong></td>
+            <td data-label="Email">{{u.email}}</td>
+            <td data-label="Rol"><span class="badge" [class.badge-admin]="u.rol === 'ADMIN'">{{u.rol}}</span></td>
+            <td data-label="Registro">{{u.fechaRegistro}}</td>
+            <td data-label="Acciones">
               <button class="btn btn-danger" (click)="abrirModalBaneo(u)" *ngIf="u.rol !== 'ADMIN'">
                 <i class="fas fa-ban"></i> Banear
               </button>
@@ -89,7 +81,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let b of usuariosFiltrados">
-            <td>
+            <td data-label="Avatar">
               <div class="avatar-container-admin">
                 <img *ngIf="b.usuario?.avatar && !b.usuario?.avatarError"
                   [src]="usuarioService.getAvatarUrl(b.usuario.avatar)" (error)="handleImageError(b.usuario)"
@@ -99,12 +91,12 @@
                 </div>
               </div>
             </td>
-            <td><strong>{{b.usuario.nombre}}</strong></td>
-            <td><span class="reason-text" [class.expanded]="b.expandido" (click)="b.expandido = !b.expandido"
-                title="Clic para expandir/contraer">{{b.razon}}</span></td>
-            <td>{{b.fechaFin || 'Permanente'}}</td>
-            <td>{{b.baneadoPor}}</td>
-            <td>
+            <td data-label="Usuario"><strong>{{b.usuario.nombre}}</strong></td>
+            <td data-label="Razón"><span class="reason-text modal-trigger" (click)="verTextoCompleto('Razón del Baneo', b.razon)"
+                title="Clic para ver completo">{{b.razon}}</span></td>
+            <td data-label="Expira">{{b.fechaFin || 'Permanente'}}</td>
+            <td data-label="Baneado por">{{b.baneadoPor}}</td>
+            <td data-label="Gestión">
               <div class="action-dropdown-container">
                 <button class="btn-actions" (click)="toggleMenu(b.identificador)">
                   <i class="fas fa-ellipsis-v"></i> Acciones
@@ -138,7 +130,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let r of reclamaciones">
-            <td>
+            <td data-label="Avatar">
               <div class="avatar-container-admin">
                 <img *ngIf="r.usuario?.avatar && !r.usuario?.avatarError"
                   [src]="usuarioService.getAvatarUrl(r.usuario.avatar)" (error)="handleImageError(r.usuario)"
@@ -148,16 +140,15 @@
                 </div>
               </div>
             </td>
-            <td><strong>{{r.usuario.nombre}}</strong></td>
-            <td><span class="reason-text" [class.expanded]="r.expandido" (click)="r.expandido = !r.expandido"
-                title="Clic para expandir/contraer">{{r.razon}}</span></td>
-            <td>
-              <div class="claim-text-cell" [class.expanded]="r.claimExpandido"
-                (click)="r.claimExpandido = !r.claimExpandido" title="Clic para expandir/contraer">
+            <td data-label="Usuario"><strong>{{r.usuario.nombre}}</strong></td>
+            <td data-label="Razón Original"><span class="reason-text modal-trigger" (click)="verTextoCompleto('Razón Original', r.razon)"
+                title="Clic para ver completo">{{r.razon}}</span></td>
+            <td data-label="Reclamación">
+              <div class="claim-text-cell modal-trigger" (click)="verTextoCompleto('Reclamación', r.reclamacion)" title="Clic para ver completo">
                 {{r.reclamacion}}
               </div>
             </td>
-            <td>
+            <td data-label="Gestión">
               <div class="action-buttons-reclamation">
                 <button class="btn btn-manage-success" (click)="desbanear(r.identificador)" title="Aceptar y Desbanear">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
@@ -309,4 +300,29 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL VER TEXTO COMPLETO -->
+  <div class="modal-overlay" *ngIf="mostrarModalTexto">
+    <div class="modal-content modal-text-view">
+      <div class="modal-header">
+        <h3>{{ textoModalTitulo }}</h3>
+        <button class="btn-close-modal" (click)="mostrarModalTexto = false" title="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="full-text-content">
+          {{ textoModalContenido }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="mostrarModalTexto = false">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
 </div>
