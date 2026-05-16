@@ -90,7 +90,7 @@ export class Perfil implements OnInit {
 
     this.route.params.subscribe(params => {
       const idStr = params['id'];
-      
+
       // Intentar pillar datos básicos del router state (pasados desde el foro)
       const navigation = this.router.getCurrentNavigation();
       const stateUser = history.state?.user;
@@ -132,10 +132,10 @@ export class Perfil implements OnInit {
         this.usuarioVisualizado = user;
         this.esPropioPerfil = false;
         this.imageError = false;
-        
+
         // Guardar en caché para la próxima vez
         sessionStorage.setItem(cacheKey, JSON.stringify(user));
-        
+
         this.cargarStats(id);
         this.cdr.detectChanges();
       },
@@ -160,6 +160,7 @@ export class Perfil implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // Verificar si el usuario está baneado
   private verificarEstadoBaneo() {
     this.baneoService.obtenerBaneos().subscribe(baneos => {
       if (!this.usuarioLogueado) return;
@@ -198,20 +199,20 @@ export class Perfil implements OnInit {
   setTab(tab: 'info' | 'temas' | 'mensajes') {
     this.activeTab = tab;
     const userId = this.usuarioVisualizado?.identificador || this.usuarioVisualizado?.id;
-    
+
     if (tab === 'temas' && this.temasUsuario.length === 0) {
       this.cargarTemasUsuario(userId);
     } else if (tab === 'mensajes' && this.mensajesUsuario.length === 0) {
       this.cargarMensajesUsuario(userId);
     }
-    
+
     this.cdr.detectChanges();
   }
 
   private cargarTemasUsuario(userId: number) {
     if (!userId) return;
     this.cargandoTemas = true;
-    
+
     // SWR: Intentar cargar de caché
     const cacheKey = `perfil_temas_${userId}`;
     const cached = sessionStorage.getItem(cacheKey);
@@ -271,10 +272,10 @@ export class Perfil implements OnInit {
         next: (usuarioActualizado) => {
           this.usuarioLogueado = usuarioActualizado;
           this.usuarioVisualizado = usuarioActualizado;
-          
+
           // Actualizar caché
           sessionStorage.setItem(`perfil_user_${userId}`, JSON.stringify(usuarioActualizado));
-          
+
           this.toastService.success("Perfil actualizado correctamente");
           this.cdr.detectChanges();
         },
@@ -313,12 +314,12 @@ export class Perfil implements OnInit {
     this.usuarioService.updatePerfil(userId, {}, archivo).subscribe({
       next: (usuarioActualizado) => {
         this.toastService.success("Foto de perfil actualizada");
-        this.avatarPreview = null; 
+        this.avatarPreview = null;
         this.usuarioVisualizado = usuarioActualizado;
-        
+
         // Actualizar caché
         sessionStorage.setItem(`perfil_user_${userId}`, JSON.stringify(usuarioActualizado));
-        
+
         this.cdr.detectChanges();
       },
       error: (err) => {
