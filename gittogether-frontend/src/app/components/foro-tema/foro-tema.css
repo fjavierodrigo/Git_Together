@@ -289,6 +289,8 @@
     display: flex;
     gap: 20px;
     margin-bottom: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .comment-sidebar {
@@ -331,12 +333,14 @@
 
 .comment-content {
     flex-grow: 1;
+    min-width: 0;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: 18px;
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .comment-meta {
@@ -375,6 +379,9 @@
     line-height: 1.6;
     color: var(--text-primary);
     margin-bottom: 12px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 .comment-footer {
