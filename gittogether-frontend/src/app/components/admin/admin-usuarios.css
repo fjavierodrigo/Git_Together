@@ -764,6 +764,7 @@ input[type="date"]:focus::-webkit-calendar-picker-indicator {
     display: inline-flex;
     box-sizing: border-box;
   }
+  .admin-tabs button {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;
     white-space: nowrap;
