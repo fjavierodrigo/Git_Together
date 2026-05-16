@@ -452,6 +452,37 @@
     width: 100%;
 }
 
+@media (max-width: 600px) {
+    .reply-actions-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+            "upload upload"
+            "cancel submit";
+        gap: 12px;
+    }
+    .reply-actions-row > div[style*="flex: 1"] {
+        display: none !important;
+    }
+    .file-upload-wrapper {
+        grid-area: upload;
+        margin-bottom: 0 !important;
+        width: 100%;
+    }
+    .btn-cancel-reply {
+        grid-area: cancel;
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+    }
+    .btn-submit-comment {
+        grid-area: submit;
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+    }
+}
+
 .btn-cancel-reply {
     background: transparent;
     border: 1px solid var(--border-color);
