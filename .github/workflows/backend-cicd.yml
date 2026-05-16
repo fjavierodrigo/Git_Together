@@ -47,5 +47,5 @@ jobs:
             docker rm gittogether-backend || true
             # Construir la nueva imagen
             docker build -t gittogether-backend .
-            # Arrancar el contenedor
-            docker run -d --name gittogether-backend -p 8080:8080 gittogether-backend
+            # Arrancar el contenedor con política de reinicio para que no desaparezca si se reinicia la instancia
+            docker run -d --restart unless-stopped --name gittogether-backend -p 8080:8080 gittogether-backend
