@@ -384,6 +384,16 @@
     max-width: 100%;
 }
 
+.markdown-content pre, 
+.markdown-content code,
+.markdown-content p,
+.markdown-content a {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100%;
+}
+
 .comment-footer {
     border-top: 1px solid var(--border-color);
     padding-top: 5px;
@@ -434,9 +444,12 @@
 
 .reply-actions-row {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
+    align-items: center;
     gap: 12px;
     margin-top: 16px;
+    width: 100%;
 }
 
 .btn-cancel-reply {
@@ -1303,6 +1316,8 @@
 .file-upload-wrapper {
     display: flex;
     align-items: center;
+    flex: 1 1 100%;
+    margin-bottom: 8px;
 }
 
 .btn-upload-file {
