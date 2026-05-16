@@ -37,8 +37,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "gittogether-backend/target/*.jar,gittogether-backend/Dockerfile"
-          target: "~/app"
+          source: "gittogether-backend"
+          target: "app"
           strip_components: 1
 
       - name: Build and Run Docker Container
