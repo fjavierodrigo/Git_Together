@@ -30,6 +30,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             mkdir -p ~/app
+            # Limpiar espacio ANTES de copiar archivos, por si el disco está lleno
+            docker system prune -af || true
 
       - name: Copy Files to EC2
         uses: appleboy/scp-action@master
@@ -37,8 +39,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "gittogether-backend"
-          target: "app"
+          source: "gittogether-backend/target/GitTogether-0.0.1-SNAPSHOT.jar,gittogether-backend/Dockerfile"
+          target: "/home/${{ secrets.EC2_USERNAME }}/app"
           strip_components: 1
 
       - name: Build and Run Docker Container
@@ -49,8 +51,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/app
-            # Limpiar imágenes y contenedores antiguos para liberar espacio (seguro para la BD)
-            docker system prune -f
             # Detener y borrar el contenedor viejo si existe
             docker stop gittogether-backend || true
             docker rm gittogether-backend || true
